@@ -95,7 +95,7 @@ class Project(QTreeWidgetItem):
     def isClosed(self):
         return self.closed
         
-class Tree(QTreeWidget):
+class ProjectTree(QTreeWidget):
     def __init__(self,parent = None):
         QTreeWidget.__init__(self,parent)
         self.setDragEnabled(True)
@@ -433,3 +433,41 @@ class Tree(QTreeWidget):
                 recycle(itempath)
             except:
                 QMessageBox.about(self,"Error","Could Not Delete The File")
+                
+                
+class Error(QTreeWidgetItem):
+    def __init__(self,parent,line,text):
+        QTreeWidgetItem.__init__(self,parent)
+        self.closed = False
+        if(self.closed):
+            self.setIcon(0,Icons.error)
+        else:
+            self.setIcon(0,Icons.error)
+        self.setText(0,"Line: "+line)
+        self.setText(1,text)
+        
+class ErrorTree(QTreeWidget):
+    def __init__(self,parent = None):
+        QTreeWidget.__init__(self,parent)
+        self.errorCount = 0
+        self.setColumnCount(2)
+        self.setHeaderLabels(["Line","Error"])
+        
+    def addError(self,errorlist):
+        self.errorCount+=1
+        i = Error(self,errorlist[0],errorlist[2])
+        self.addTopLevelItem(i)
+        
+    def reset(self):
+        #print self.topLevelItemCount()
+        if(self.topLevelItemCount() != 0):
+            self.clear()
+        self.errorCount = 0
+        
+class OutlineTree(QTreeWidget):
+    def __init__(self,parent = None):
+        QTreeWidget.__init__(self,parent)
+        self.setColumnCount(1)
+        self.header().close()
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+ 

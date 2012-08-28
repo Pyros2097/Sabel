@@ -1,6 +1,6 @@
 from editor import Editor
 from tab import Tab
-from tree import Tree
+from tree import ProjectTree,ErrorTree,OutlineTree
 from adb import Adb
 from parser import Parser
 from command import Command

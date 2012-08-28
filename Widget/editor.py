@@ -1,4 +1,5 @@
-from globals import fontSize,fontName,ospathjoin,os_pixmap,apiDir,threshold,config
+from globals import (fontSize,fontName,ospathjoin,os_pixmap,apiDir,threshold,config
+                     ,Auto)
 from PyQt4.QtCore import SIGNAL,QString
 from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor ,QPalette
 from PyQt4.Qsci import QsciScintilla, QsciLexerPython ,QsciAPIs ,QsciLexerCPP
@@ -13,30 +14,55 @@ class Editor(QsciScintilla):
         self.lang = lang
         self.fontSize = fontSize
         self.colorStyle = colorStyle
-        #self.init()
+        self.errorLines = []
         self.setText(text)
-        #self.addAction(QAction("gg",self))  
-        # Clickable margin 1 for showing markers
-        self.setMarginSensitivity(1, True)
-        self.connect(self,SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),self.on_margin_clicked)
-        self.markerDefine(QsciScintilla.RightArrow,self.ARROW_MARKER_NUM)
-        self.registerImage(0,os_pixmap("class_obj"))
-        self.registerImage(1,os_pixmap("method_obj"))
-        self.registerImage(2,os_pixmap("field_public_obj"))
-        # Brace matching: enable for a brace immediately before or after
-        # the current position
-        self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
-        self.setAutoCompletionThreshold(threshold)
-        self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
-        #self.setFolding(QsciScintilla.BoxedTreeFoldStyle)
-        #self.setAutoCompletionSource(QsciScintilla.AcsAll)
-        #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier')
         self.init()
         
     def init(self):
-        self.setCaretLineBackgroundColor(self.colorStyle.caret)
+        #Margin
+        #print self.marginType(self.SymbolMargin)
+        # Clickable margin 1 for showing markers
+        self.setMarginSensitivity(1, True)
         self.setMarginsBackgroundColor(self.colorStyle.margin)
+        self.connect(self,SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),self.on_margin_clicked)
+        # Margin 0 is used for line numbers
+        #self.setMarginLineNumbers(0, True)
+        #self.setMarginWidth(0, self.fontmetrics.width("0000") + 6)
+        self.setMarginLineNumbers(0, True)
+        if(self.lines()<1000):
+            self.setMarginWidth(0, QString("-------"))
+        else:
+            self.setMarginWidth(0, QString("---------"))   
+        #self.linesChanged.connect(self.changeMarginWidht())   
+                 
+        #Caret
+        self.setCaretLineBackgroundColor(self.colorStyle.caret)
+        self.setCaretLineVisible(True)
+        
+        #Indicator
+        #self.setIndicatorForegroundColor(self.colorStyle.color)
+        #self.setIndicatorOutlineColor(self.colorStyle.paper)
+        
+        #Marker
+        self.markerDefine(QsciScintilla.RightArrow,self.ARROW_MARKER_NUM)
+        self.markerDefine(Auto.auto_error,0)
         self.setMarkerBackgroundColor(self.colorStyle.marker,self.ARROW_MARKER_NUM)
+        
+        #Code-Complete
+        self.registerImage(0,Auto.auto_class2)
+        self.registerImage(1,Auto.auto_method)
+        self.registerImage(2,Auto.auto_field)
+        self.setAutoCompletionThreshold(threshold)
+        self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
+        
+        #Property
+        self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        self.setBackspaceUnindents(True)
+        self.setEolMode(self.EolWindows)
+        #self.setFolding(QsciScintilla.BoxedTreeFoldStyle)
+        #self.setAutoCompletionSource(QsciScintilla.AcsAll)
+        #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier')
+        
         self.font = QFont()
         self.font.setFamily(fontName)
         #self.font.setFixedPitch(True)
@@ -44,12 +70,7 @@ class Editor(QsciScintilla):
         self.setFont(self.font)
         self.fontmetrics = QFontMetrics(self.font)
         self.setMarginsFont(self.font)
-        # Margin 0 is used for line numbers
-        #self.setMarginLineNumbers(0, True)
-        #self.setMarginWidth(0, self.fontmetrics.width("0000") + 6)
-        self.setMarginLineNumbers(1, True)
-        self.setMarginWidth(1, QString("-------"))
-        self.setCaretLineVisible(True)
+        
         if self.lang == 0:
             self.lexer = QsciLexerPython()
         elif self.lang == 1:
@@ -78,6 +99,25 @@ class Editor(QsciScintilla):
             self.markerDelete(nline, self.ARROW_MARKER_NUM)
         else:
             self.markerAdd(nline, self.ARROW_MARKER_NUM)
+            
+    def addError(self,lineno):
+        '''First delete all present markers then add new lines or errors'''
+        if(self.errorLines != None):
+            if(lineno in self.errorLines):
+                #print "yes"
+                pass
+            else:
+                self.errorLines.append(lineno)
+                self.markerAdd(lineno, 0)
+                
+        #if self.markersAtLine() != 0:
+        #     self.markerDelete(self.errorLines.pop(i), 0)
+        #    for i in range(len(self.errorLines)):
+        #        #if self.markersAtLine(self.errorLines.pop(i)) != 0:
+        #            self.markerDelete(self.errorLines.pop(i), 0)
+                    
+        #assert self.errorLines == []
+        
     
     def zoomin(self):
         self.fontSize += 1

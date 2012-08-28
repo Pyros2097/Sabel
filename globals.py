@@ -4,7 +4,7 @@ __license__ = "GPLv3"
 __copyright__ = 'Copyright (c) 2012, pyros2097'
 __credits__ = ['pyros2097', 'eclipse']
 __email__ = 'pyros2097@gmail.com'
-__version__ = "0.52"
+__version__ = "0.53"
 
 #TODO:
 #Must learn to destroy editor completely because memory keeps increasing
@@ -67,20 +67,6 @@ class Icons:
     anchor = os_icon('anchor')
     android = os_icon('android')
     ant_view = os_icon('ant_view')
-    auto_activity = os_icon('auto_activity')
-    auto_add = os_icon('auto_add')
-    auto_bulb = os_icon('auto_bulb')
-    auto_class = os_icon('auto_class')
-    auto_class2 = os_icon('auto_class2')
-    auto_co = os_icon('auto_co')
-    auto_doc = os_icon('auto_doc')
-    auto_enum = os_icon('auto_enum')
-    auto_envvar = os_icon('auto_envvar')
-    auto_field = os_icon('auto_field')
-    auto_jmeth = os_icon('auto_jmeth')
-    auto_method = os_icon('auto_method')
-    auto_pub = os_icon('auto_pub')
-    auto_var = os_icon('auto_var')
     capture_screen = os_icon('capture_screen')
     close_view = os_icon('close_view')
     cmpC_pal = os_icon('cmpC_pal')
@@ -142,6 +128,23 @@ class Icons:
     zoomminus = os_icon('zoomminus')
     zoomplus = os_icon('zoomplus')
     
+class Auto:
+    auto_activity = os_pixmap('auto_activity')
+    auto_add = os_pixmap('auto_add')
+    auto_bulb = os_pixmap('auto_bulb')
+    auto_class = os_pixmap('auto_class')
+    auto_class2 = os_pixmap('auto_class2')
+    auto_co = os_pixmap('auto_co')
+    auto_doc = os_pixmap('auto_doc')
+    auto_enum = os_pixmap('auto_enum')
+    auto_envvar = os_pixmap('auto_envvar')
+    auto_field = os_pixmap('auto_field')
+    auto_jmeth = os_pixmap('auto_jmeth')
+    auto_method = os_pixmap('auto_method')
+    auto_pub = os_pixmap('auto_pub')
+    auto_var = os_pixmap('auto_var')    
+    auto_error = os_pixmap('error')
+
 class Pix:
     logosabel = os_pixmap('logosabel')
     logoemo = os_pixmap('logoemo')

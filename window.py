@@ -4,7 +4,7 @@ from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QMainWindow,QPalette,QColor,QSlider,QFontDialog,QLabel,
                          QFont)              
 from PyQt4.QtCore import QSize,Qt, QT_VERSION_STR,PYQT_VERSION_STR,QStringList
-from Widget import Tab,Tree,DialogAndroid
+from Widget import Tab,ProjectTree,ErrorTree,OutlineTree,DialogAndroid
 from Widget.style import Styles
 
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,
@@ -40,7 +40,7 @@ class Window(QMainWindow):
         #self.tabWidget_2.setMaximumWidth(200)
         self.tabWidget_2.setObjectName("tabWidget_2")
         self.tabWidget_3 = QTabWidget(self)
-        self.tabWidget_3.setMaximumHeight(260)
+        self.tabWidget_3.setMaximumHeight(200)#260
         self.tabWidget_3.setObjectName("tabWidget_3")
         
          
@@ -51,7 +51,7 @@ class Window(QMainWindow):
         self.VerticalLayout_2 = QVBoxLayout(self.tab_5)#QHBoxLayout(self.tab_5)
         self.VerticalLayout_2.setMargin(0)
         self.VerticalLayout_2.setObjectName("horizontalLayout_3")
-        self.treeWidget = Tree(self.tab_5)
+        self.treeWidget = ProjectTree(self.tab_5)
         self.treeWidget.setObjectName("treeWidget")
         self.treeWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.treeWidget.horizontalScrollBar().show()
@@ -76,7 +76,7 @@ class Window(QMainWindow):
         self.VerticalLayout_3 = QVBoxLayout(self.tab_2)
         self.VerticalLayout_3.setMargin(0)
         self.VerticalLayout_3.setObjectName("VerticalLayout_3")
-        self.outlineWidget = Tree(self.tab_2)
+        self.outlineWidget = OutlineTree(self.tab_2)
         self.outlineWidget.setObjectName("outlineWidget")
         self.VerticalLayout_3.addWidget(self.outlineWidget)
         
@@ -103,9 +103,9 @@ class Window(QMainWindow):
         self.horizontalLayout_4 = QHBoxLayout(self.tab_7)
         self.horizontalLayout_4.setMargin(0)
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.textEdit_2 = QTextEdit(self.tab_7)
-        self.textEdit_2.setObjectName("textEdit_2")
-        self.horizontalLayout_4.addWidget(self.textEdit_2)
+        self.errorTree = ErrorTree(self.tab_7)
+        self.errorTree.setObjectName("textEdit_2")
+        self.horizontalLayout_4.addWidget(self.errorTree)
         
         #Find
         self.tab_8 = QWidget()
@@ -161,12 +161,18 @@ class Window(QMainWindow):
         self.tab_8.hide()
         
         
+        
+        #Tab Widget Init
         self.tabWidget_2.addTab(self.tab_5,"Projects")
         self.tabWidget_2.addTab(self.tab_2,"Outline")
         self.tabWidget_3.addTab(self.tab_7,"Error")
         self.tabWidget_3.addTab(self.tab_6,"Output")
+        self.tabWidget_3.addTab(QWidget(self),"")
         self.tabWidget_3.setTabIcon(0,Icons.error)
         self.tabWidget_3.setTabIcon(1,Icons.console_view)
+        self.tabWidget_3.setTabIcon(2,Icons.close_view)
+        self.tabWidget_3.currentChanged.connect(self.closeConsole)
+        
         self.tabWidget.setTabsClosable(True)
         self.tabWidget.setTabShape(0)
         
@@ -295,7 +301,7 @@ class Window(QMainWindow):
         men.addAction(QAction("Threshold",self))
         men.addAction(self.threshSliderAction)
         
-        self.action_Options = QAction(Icons.thread_view, 'Options', self)
+        self.action_Options = QAction(Icons.cmpC_pal, 'Options', self)
         self.action_Options.setMenu(men)
         self.action_Options.triggered.connect(self.options)
         
@@ -428,6 +434,14 @@ class Window(QMainWindow):
             self.tabWidget_3.show()
         else:
             self.tabWidget_3.hide()
+            
+    def closeConsole(self,no):
+        if(no == 2):
+            if(self.tabWidget_3.isHidden()):
+                self.tabWidget_3.show()
+            else:
+                self.tabWidget_3.hide()
+        self.tabWidget_3.setCurrentIndex(1)
             
     def findCurrentText(self):
         edt = self.tabWidget.widget(self.tabWidget.currentIndex())

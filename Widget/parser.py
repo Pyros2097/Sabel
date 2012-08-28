@@ -13,8 +13,10 @@ class Parser(QWidget):
         self.isRunning = False
         self.connect(self, SIGNAL("parse"),self.update)
         
-    def update(self,line):
-        self.parent.textEdit_2.append(line)
+    def update(self,text):
+        errorlist = text.split(',')
+        self.parent.errorTree.addError(errorlist)
+        self.parent.tabWidget.currentWidget().addError(int(errorlist[0]))
         if(self.parent.tabWidget_3.isHidden()):
             self.parent.tabWidget_3.show()
         self.parent.tabWidget_3.setCurrentIndex(0)
@@ -36,7 +38,7 @@ class Parser(QWidget):
     def run(self,nfile):
         #print nfile
         if(nfile.endswith(".nut")):
-            self.parent.textEdit_2.clear()
+            self.parent.errorTree.reset()
             if self.parser_process != None and self.parser_process.poll() == None:
                 self.parser_process.kill()
             self.parser_process = Popen(sqcDir+" "+nfile, creationflags=0x08000000, shell=False, stdout=PIPE,stderr=PIPE)
