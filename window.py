@@ -2,57 +2,51 @@ from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QHBoxLayout,QVBoxLayout,QTabWidget,QToolBar,QTextEdit,
                          QLineEdit,QPushButton,QToolButton,QSplitter,QStatusBar,
                          QMainWindow,QPalette,QColor,QSlider,QFontDialog,QLabel,
-                         QFont)              
-from PyQt4.QtCore import QSize,Qt, QT_VERSION_STR,PYQT_VERSION_STR,QStringList
-from Widget import Tab,ProjectTree,ErrorTree,OutlineTree,DialogAndroid
+                         QFont,QComboBox,QFileDialog,QInputDialog)              
+from PyQt4.QtCore import QSize,Qt,QStringList
+from Widget import (Tab,ProjectTree,ErrorTree,OutlineTree,DialogAndroid,DialogAbout,
+                    DialogAnt,DialogSquirrel)
 from Widget.style import Styles
+from stylesheet import *
 
-from globals import (ospathsep,ospathjoin,ospathbasename,workDir,
-                     OS_NAME,PY_VERSION,__version__,config,workSpace,
+from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
                      iconSize,iconDir,styleIndex,adblist,Icons,os_icon,threshold,
-                     fontName,fontSize)
+                     fontName,fontSize,cmds)
 
 class Window(QMainWindow):
     def __init__(self,parent = None):
         QMainWindow.__init__(self,parent)
-        self.setObjectName("self")
+        self.setStyleSheet(mainstyl)
         self.resize(758, 673)
         self.setWindowTitle("Sabel")
         self.setWindowIcon(Icons.sabel)
         self.centralwidget = QWidget(self)
-        self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
-        self.horizontalLayout.setObjectName("horizontalLayout")
         self.horizontalLayout.setMargin(0)
         self.styleIndex = styleIndex
+        self.cmdList =cmds
         #TabWidgets
         self.tab_1 = QWidget(self)
-        self.tab_1.setObjectName("tab_1")
         self.tab_1.setMinimumWidth(800)
         self.tabWidget = Tab(self.tab_1)
-        self.tabWidget.setObjectName("tabWidget")
         self.VericalLayout = QVBoxLayout(self.tab_1)
         self.VericalLayout.setMargin(0)
-        self.VericalLayout.setObjectName("VericalLayout")
         self.VericalLayout.addWidget(self.tabWidget)
         
         self.tabWidget_2 = QTabWidget(self)
         #self.tabWidget_2.setMaximumWidth(200)
-        self.tabWidget_2.setObjectName("tabWidget_2")
         self.tabWidget_3 = QTabWidget(self)
         self.tabWidget_3.setMaximumHeight(200)#260
-        self.tabWidget_3.setObjectName("tabWidget_3")
         
+        
+        self.tabWidget.tabBar().setStyleSheet(stletabb)
          
         #Tree
         self.tab_5 = QWidget()
-        self.tab_5.setObjectName("tab_5")
         #self.tab_5.setMaximumWidth(200)
         self.VerticalLayout_2 = QVBoxLayout(self.tab_5)#QHBoxLayout(self.tab_5)
         self.VerticalLayout_2.setMargin(0)
-        self.VerticalLayout_2.setObjectName("horizontalLayout_3")
         self.treeWidget = ProjectTree(self.tab_5)
-        self.treeWidget.setObjectName("treeWidget")
         self.treeWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.treeWidget.horizontalScrollBar().show()
         self.treebar = QToolBar()
@@ -71,31 +65,39 @@ class Window(QMainWindow):
         
         #Outline
         self.tab_2 = QWidget()
-        self.tab_2.setObjectName("tab_2")
         #self.tab_2.setMaximumWidth(200)
         self.VerticalLayout_3 = QVBoxLayout(self.tab_2)
         self.VerticalLayout_3.setMargin(0)
-        self.VerticalLayout_3.setObjectName("VerticalLayout_3")
         self.outlineWidget = OutlineTree(self.tab_2)
-        self.outlineWidget.setObjectName("outlineWidget")
         self.VerticalLayout_3.addWidget(self.outlineWidget)
         
         #Output
+        #must check
         self.tab_6 = QWidget()
-        self.tab_6.setObjectName("tab_6")
-        #GGGGGGGGGGGGGGGGGGGG AWESOME
         self.horizontalLayout_2 = QVBoxLayout(self.tab_6)
         self.horizontalLayout_2.setMargin(0)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.textEdit = QTextEdit(self.tab_6)
-        self.textEdit.setObjectName("textEdit")
-        self.lineeEdit = QLineEdit(self.tab_6)
-        self.lineeEdit.setObjectName("lineeEdit")
-        self.label = QLabel(self.tab_6)
-        self.label.setText("Input:")
+        self.textEdit = QTextEdit()
+        self.inputLayout = QHBoxLayout()
+        self.inputLayout.setMargin(0)
+        self.runEdit = QLineEdit()
+        self.fileButton = QPushButton()
+        self.fileButton.setText("File")
+        self.fileButton.clicked.connect(self.getFile)
+        self.runButton = QPushButton()
+        self.runButton.setFlat(True)
+        self.runButton.setIcon(Icons.go)
+        self.combo = QComboBox()
+        self.combo.activated.connect(self.addCmd)
+        for text in self.cmdList:
+            self.combo.addItem(text)
+        self.combo.setItemIcon(0,Icons.add)
         self.horizontalLayout_2.addWidget(self.textEdit)
-        self.horizontalLayout_2.addWidget(self.label)
-        self.horizontalLayout_2.addWidget(self.lineeEdit)
+        self.inputLayout.addWidget(QLabel("Input:"))
+        self.inputLayout.addWidget(self.combo)
+        self.inputLayout.addWidget(self.runEdit)
+        self.inputLayout.addWidget(self.fileButton)
+        self.inputLayout.addWidget(self.runButton)
+        self.horizontalLayout_2.addLayout(self.inputLayout)
         
         #Error
         self.tab_7 = QWidget()
@@ -271,18 +273,20 @@ class Window(QMainWindow):
         self.action_Run = QAction(Icons.run, 'Run', self)
         self.action_Run.setShortcut('Ctrl+R')
         self.action_Run.triggered.connect(self.adb.run)
-        self.action_RunFile = QAction(Icons.go, 'File', self)
+        self.action_RunFile = QAction(Icons.go, 'Cmd', self)
         self.action_RunFile.triggered.connect(self.command.setCmd)
-        self.lineeEdit.returnPressed.connect(self.command.setCmdLine)
+        self.runEdit.returnPressed.connect(self.command.setCmdLine)
+        self.runButton.clicked.connect(self.command.setCmdLine)
         self.action_Stop = QAction(Icons.stop, 'Stop', self)
         self.action_Stop.setShortcut('Ctrl+Q')
         self.action_Stop.triggered.connect(self.adb.stop)
-        self.action_Design = QAction(Icons.task_set, 'Design', self)
+        self.action_Design = QAction(Icons.color_palette, 'Design', self)
         self.action_Todo = QAction(Icons.task_set, 'Todo', self)
         #self.action_Todo.triggered.connect(self.stop)
         #Only variation CHeck Later
         men = QMenu()
         self.threshSlider = QSlider()
+        self.threshSlider.setStyleSheet(slisty)
         self.threshSlider.setTickPosition(QSlider.TicksLeft)
         self.threshSlider.setOrientation(Qt.Horizontal)
         self.threshSlider.setValue(threshold)
@@ -380,36 +384,8 @@ class Window(QMainWindow):
         self.toolbar.addAction(self.action_Full)
         
     def about(self):
-        QMessageBox.about(self, "About Sabel IDE",
-                """
-                <b>Sabel</b> v%s
-                <p>
-                All rights reserved in accordance with
-                GPL v3 or later.
-                <p>This application can be used for Squirrel and EmoFramework Projects.
-                <p>Squirrel Shell Copyright (c) 2006-2011, Constantin Makshin
-                <p>Squirrel Copyright (c) Alberto Demichelis
-                <p>zlib Copyright (c) Jean-loup Gailly and Mark Adler
-                <p>Icons Copyright (c) Eclipse EPL
-                <p>Emo-Framework Copyright (c) 2011 Kota Iguchi
-                <p>Python %s - Qt %s - PyQt %s on %s
-                <p>Created By: pyros2097
-                <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-                 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,INCLUDING, BUT NOT
-                 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-                 FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
-                 EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-                 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
-                 OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-                 PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-                 OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-                 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-                 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
-                 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-                 POSSIBILITY OF SUCH DAMAGE.
-                """ % (
-                __version__,PY_VERSION,
-                QT_VERSION_STR, PYQT_VERSION_STR,OS_NAME))
+        form = DialogAbout(self)
+        form.show()
 
     def help(self):
         QMessageBox.about(self, "About Simple Editor","This is The Help")
@@ -439,9 +415,10 @@ class Window(QMainWindow):
         if(no == 2):
             if(self.tabWidget_3.isHidden()):
                 self.tabWidget_3.show()
+                #self.tabWidget_3.setCurrentIndex(1)
             else:
                 self.tabWidget_3.hide()
-        self.tabWidget_3.setCurrentIndex(1)
+            
             
     def findCurrentText(self):
         edt = self.tabWidget.widget(self.tabWidget.currentIndex())
@@ -514,3 +491,23 @@ class Window(QMainWindow):
             pass
             #self.tabWidget.
             #self.tabWidget.widget(i).setColorStyle(self.colorStyle)
+            
+    def getFile(self):
+        fname = str(QFileDialog.getOpenFileName(self,"Open File", '.', "Files (*.*)"))
+        if not (fname == ""):
+            self.runEdit.setText(fname)
+            
+    def addCmd(self,index):
+        if(index == 0):
+            text, ok = QInputDialog.getText(self, 'Add Command', 'Command:')
+            if(ok):
+                if(str(text) != ''):
+                    cmd = str(text)
+                    self.cmdList.append(cmd)
+                    #print self.cmdList
+                    self.combo.addItem(cmd)
+                    config.setCmd(self.cmdList)
+                
+    def delCmd(self,index):
+        pass
+        

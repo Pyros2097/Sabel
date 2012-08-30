@@ -1,54 +1,18 @@
-from globals import adblist
+from globals import adblist,device
 from PyQt4.QtGui import QWidget
-import threading
-from subprocess import PIPE,Popen,STDOUT
 from PyQt4.QtCore import pyqtSignal,SIGNAL,QThread,QProcess,QString,QTimer
 from workthread import WorkThread
-
-class AdbThread(threading.Thread,QWidget):
-    def __init__(self):
-        QWidget.__init__(self)
-        threading.Thread.__init__(self)
-        self.stdout = None
-        self.stderr = None
-        self.cmd = None
-        self.adb_process = None
-        
-        
-    def setCmd(self,val):
-        self.cmd = val
-        
-    def output(self,pipe):
-        while True:
-            try:
-                if self.adb_process.poll() != None:
-                    break
-                line = pipe.readline().strip()
-                if len(line) > 0:  
-                     #print line
-                     self.emit(SIGNAL("didSomething"),line)
-            except:
-                print "except"
-                #traceback.print_exc()
-        
-    def run(self):
-        if(self.cmd != ""):
-            self.adb_process = Popen(self.cmd, creationflags=0x08000000,shell=False,stdout=PIPE,stderr=PIPE)
-            t = threading.Thread(target=self.output, args=(self.adb_process.stdout,))
-            t.start()
-            #t.join()
 
 class Adb(QWidget):
     def __init__(self,parent):
         QWidget.__init__(self,parent)
         self.parent = parent
-        self.adb_process = None
         self.isRunning = False
         self.adb_thread = WorkThread()
         self.timer = QTimer()
+        self.device = device
         #self.adb_thread = AdbThread()
         self.connect(self.adb_thread, SIGNAL("update"),self.update)
-        #self.connect(self.adb_thread, SIGNAL("fini"),self.newstart)
         self.connect(self.adb_thread, SIGNAL("fini"),self.newstart)
         #self.connect(self.timer , SIGNAL('timeout()') , self.onTimeout)
         #self.connect(self.adb_thread , SIGNAL('started()') , self.onThreadStarted)
@@ -104,6 +68,13 @@ class Adb(QWidget):
             self.parent.textEdit.append("Finshed")
             self.adb_thread.setCmd("adb -d logcat -s "+adblist[2])
             self.adb_thread.run2()
+        '''elif(cmd == "adb -d logcat -s "+adblist[2]):
+            self.parent.textEdit.append(str(no))
+            self.parent.textEdit.append(cmd)
+            self.parent.textEdit.append("Finshed")
+            self.adb_thread.setCmd("adb")#"adb -d shell ps | grep "+adblist[3]+" | awk '{print $2}' | xargs adbshell kill")
+            self.adb_thread.run()    
+        '''    
         #self.adb_thread.kill_process()
         #self.parent.textEdit.append("Starting Activity...\n")
         #self.adb_thread.setCmd(adblist[1])
@@ -122,37 +93,27 @@ class Adb(QWidget):
         self.adb_thread.setCmd("adb -d push "+adblist[0])
         self.adb_thread.run()
         
-        """
-        self.adb_thread.setCmd(adblist[0])
-        self.adb_thread.run()
-        self.adb_thread.join()
-        self.adb_thread.adb_process.kill()
-        self.parent.textEdit.append("Starting Activity\n")
-        self.adb_thread.setCmd(adblist[1])
-        self.adb_thread.run()
-        self.adb_thread.join()
-        self.adb_thread.adb_process.kill()
-        self.parent.textEdit.append("Logging")
-        self.adb_thread.setCmd(adblist[2])
-        self.adb_thread.run()
-        self.adb_thread.join()
-        #self.adb_thread.adb_process.kill()
-        """
-        
 
     def stop(self):
         if self.isRunning == True:
             self.isRunning = False
-            self.adb_thread.setCmd(adblist[3])
-            self.adb_thread.run()
-            self.adb_thread.kill_process()
             self.parent.action_Stop.setDisabled(True)
             self.parent.textEdit.append("Stopped.")
             if not(self.parent.tabWidget_3.isHidden()):
                 self.parent.tabWidget_3.hide()
             self.parent.action_Run.setEnabled(True)
+            #print "Yes"
+            self.adb_thread.setCmd("adb")#"adb -d shell ps | grep "+adblist[3]+" | awk '{print $2}' | xargs adbshell kill")
+            self.adb_thread.run()
+            #print "Done"
+            #works in command not in process
+            #adb -d shell ps | grep com.emo_framework.examples | awk '{print $2}' | xargs adb shell kill
+            #adb -d shell pm disable com.emo_framework.examples
+            #adb -d shell pm enable com.emo_framework.examples
+            #adb -d shell kill adb shell ps | grep com.emo_framework.examples | awk '{print $2}'
+
               
     def close(self):
-        if self.adb_process != None and self.adb_process.poll() == None:
-            #self.adb_thread.kill_process()
-            self.adb_thread.quit()
+        #self.adb_thread.kill_process()
+        self.adb_thread.quit()
+        

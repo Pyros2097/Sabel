@@ -329,22 +329,22 @@ class ProjectTree(QTreeWidget):
             except:
                 QMessageBox.about(self,"Error","Could Not Create The File")
     
-    def openFile(self):
+    def openFile(self,item):
         pass
                 
-    def runFile(self):
+    def runFile(self,item):
         pass
                 
-    def copyFile(self):
+    def copyFile(self,item):
         pass
     
-    def copyDir(self):
+    def copyDir(self,item):
         pass
     
-    def pasteFile(self):
+    def pasteFile(self,item):
         pass
     
-    def pasteDir(self):
+    def pasteDir(self,item):
         pass
     
     def renameProject(self,item):

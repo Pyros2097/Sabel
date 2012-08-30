@@ -4,7 +4,7 @@ __license__ = "GPLv3"
 __copyright__ = 'Copyright (c) 2012, pyros2097'
 __credits__ = ['pyros2097', 'eclipse']
 __email__ = 'pyros2097@gmail.com'
-__version__ = "0.53"
+__version__ = "0.54"
 
 #TODO:
 #Must learn to destroy editor completely because memory keeps increasing
@@ -16,8 +16,6 @@ from PyQt4.QtGui import QIcon,QPixmap,QApplication,QSplashScreen
 from PyQt4.Qsci import QsciAPIs
 from send2trash import send2trash
 from config import Config
-
-
 
 #Python accesses local variables much more efficiently than global variables. 
 oslistdir = os.listdir
@@ -55,6 +53,7 @@ styleIndex = config.styleIndex()
 threshold = config.thresh()
 adblist = config.adb()
 device = config.device()
+cmds = config.cmd()
 
 def os_icon(name):
         return QIcon(":/{0}.png".format(ospathjoin(iconDir,name)))
@@ -63,6 +62,7 @@ def os_pixmap(name):
 
 app = QApplication([])
 class Icons:
+    add = os_icon('auto_add')
     alert_obj = os_icon('alert_obj')
     anchor = os_icon('anchor')
     android = os_icon('android')

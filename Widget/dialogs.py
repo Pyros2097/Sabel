@@ -1,6 +1,7 @@
 from PyQt4 import QtGui 
 from PyQt4 import QtCore
 from globals import adblist,config,device
+from globals import PY_VERSION,__version__,OS_NAME
 """    
 class UIProject(QDialog):
     def __init__(self, parentWindow):
@@ -29,9 +30,7 @@ class DialogAndroid(QtGui.QDialog):
         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setMargin(0)
         
-        
-        
-        
+
         self.horizontalLayout.setObjectName(("horizontalLayout"))
         self.tabWidget = QtGui.QTabWidget(self.horizontalLayoutWidget)
         self.tabWidget.setObjectName(("tabWidget"))
@@ -127,4 +126,76 @@ class DialogAnt(QtGui.QDialog):
 class DialogSquirrel(QtGui.QDialog):
     def __init__(self, parent=None):
         QtGui.QDialog.__init__(self, parent)
-        self.resize(400, 420)                
+        self.resize(400, 420)          
+        
+class DialogAbout(QtGui.QDialog):
+    def __init__(self, parent=None):
+        QtGui.QDialog.__init__(self, parent)
+        self.resize(400, 420)
+        self.horizontalLayoutWidget = QtGui.QWidget(self)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 400, 420))
+        self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout.setMargin(0)      
+        self.view = MyView(self.horizontalLayoutWidget)
+        self.horizontalLayout.addWidget(self.view)
+        
+class MyView(QtGui.QGraphicsView):
+    def __init__(self,parent):
+        QtGui.QGraphicsView.__init__(self,parent)
+        font=QtGui.QFont('White Rabbit')
+        font.setPointSize(8)
+        font.setBold(True)
+        self.scene = QtGui.QGraphicsScene(self)
+        text = """
+                <b>Credits</b>
+                <b>Sabel</b> v%s
+                <p>
+                All rights reserved in accordance with
+                GPL v3 or later.
+                <p>This application can be used for Squirrel and EmoFramework Projects.
+                <p>Squirrel Shell Copyright (c) 2006-2011, Constantin Makshin
+                <p>Squirrel Copyright (c) Alberto Demichelis
+                <p>zlib Copyright (c) Jean-loup Gailly and Mark Adler
+                <p>Icons Copyright (c) Eclipse EPL
+                <p>Emo-Framework Copyright (c) 2011 Kota Iguchi
+                <p>Python %s - Qt %s - PyQt %s on %s
+                <p>Created By: pyros2097
+                <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+                 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,INCLUDING, BUT NOT
+                 LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+                 FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+                 EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+                 FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+                 OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+                 PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+                 OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+                 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+                 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+                 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+                 POSSIBILITY OF SUCH DAMAGE.
+                """ % (__version__,PY_VERSION,QtCore.QT_VERSION_STR, QtCore.PYQT_VERSION_STR,OS_NAME)
+        self.dot1=QtGui.QGraphicsTextItem(text)
+        self.dot1.setFont(font)
+        self.dot1.setPos(0,0)
+        
+        #self.item = QtGui.QGraphicsEllipseItem(-20, -10, 40, 20)
+        #self.scene.addItem(self.item)
+        self.scene.addItem(self.dot1)
+        self.setScene(self.scene)
+
+        # Remember to hold the references to QTimeLine and QGraphicsItemAnimation instances.
+        # They are not kept anywhere, even if you invoke QTimeLine.start().
+        self.tl = QtCore.QTimeLine(1000)
+        self.tl.setFrameRange(0, 100)
+        self.a = QtGui.QGraphicsItemAnimation()
+        #self.a.setItem(self.item)
+        self.a.setItem(self.dot1)
+        self.a.setTimeLine(self.tl)
+
+        # Each method determining an animation state (e.g. setPosAt, setRotationAt etc.)
+        # takes as a first argument a step which is a value between 0 (the beginning of the
+        # animation) and 1 (the end of the animation)
+        self.a.setPosAt(1, QtCore.QPointF(0, -200))
+        #self.a.setRotationAt(1, 360)
+
+        self.tl.start()

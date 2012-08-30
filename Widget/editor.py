@@ -100,16 +100,22 @@ class Editor(QsciScintilla):
         else:
             self.markerAdd(nline, self.ARROW_MARKER_NUM)
             
+            
+        #fix this lines not showing properly
     def addError(self,lineno):
         '''First delete all present markers then add new lines or errors'''
-        if(self.errorLines != None):
-            if(lineno in self.errorLines):
-                #print "yes"
-                pass
-            else:
-                self.errorLines.append(lineno)
-                self.markerAdd(lineno, 0)
-                
+        if(len(self.errorLines) == 0):
+                self.errorLines.append(lineno-1)
+                self.markerAdd(lineno-1, 0)
+        else:
+            #print self.errorLines
+            for i in self.errorLines:
+                self.markerDelete(i, 0)
+            self.errorLines[:] = []
+            self.errorLines.append(lineno-1)
+            self.markerAdd(lineno-1, 0)
+            #print self.errorLines
+
         #if self.markersAtLine() != 0:
         #     self.markerDelete(self.errorLines.pop(i), 0)
         #    for i in range(len(self.errorLines)):

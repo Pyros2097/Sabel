@@ -65,6 +65,15 @@ class Config:
         self.data['ADB'][2] = val[2]
         self.data['ADB'][3] = val[3]
         self.write()
+        
+    def cmd(self):
+        return self.read('CMD')
+    
+    def setCmd(self,val):
+        for i in range(0,len(val)):
+            self.data['CMD'][i] = val[i]
+        self.write()
+        
     
     def colorStyle(self):
         return int(self.readSetting('colorstyle'))

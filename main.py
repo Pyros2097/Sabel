@@ -7,6 +7,7 @@ from Widget import Editor,PyInterp,Adb,Parser,Command
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,
                      OS_NAME,config,workSpace,
                      iconSize,iconDir,ospathexists,os_icon,app,Pix)
+import sys
 
 class MainWindow(Window):
     def __init__(self, parent = None):
@@ -246,6 +247,7 @@ class MainWindow(Window):
                     pass
             elif reply == QMessageBox.Yes:
                     self.fileSaveAll()
+        sys.exit()
                     
     def syntax(self,nfile):
         lang = 0
@@ -260,12 +262,16 @@ class MainWindow(Window):
     def options(self):
         pass
 
-splash_pix = Pix.logosabel
-splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
-splash.setMask(splash_pix.mask())
-splash.show()
-app.processEvents()
-frame = MainWindow()
-frame.showMaximized()
-splash.finish(frame)
-app.exec_()
+def main():
+    splash_pix = Pix.logosabel
+    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
+    splash.show()
+    app.processEvents()
+    frame = MainWindow()
+    frame.showMaximized()
+    splash.finish(frame)
+    app.exec_()
+    
+if __name__ == "__main__":
+    main()
