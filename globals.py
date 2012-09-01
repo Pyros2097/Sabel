@@ -32,6 +32,14 @@ osremove = os.remove
 osrename = os.rename
 ossep = os.sep
 OS_NAME = system()
+eol = 0
+#'posix', 'nt', 'mac', 'os2', 'ce', 'java', 'riscos'.
+if(OS_NAME == 'Windows'):
+    eol = 0
+elif(OS_NAME == 'Linux'):
+    eol = 1
+else:
+    eol = 2
 
 
 workDir = os.getcwd()
@@ -101,6 +109,7 @@ class Icons:
     newfolder = os_icon('newfolder')
     newpack = os_icon('newpack')
     newprj = os_icon('newprj')
+    nut = os_icon('nut')
     open = os_icon('open')
     package = os_icon('package')
     paste_edit = os_icon('paste_edit')
@@ -112,7 +121,6 @@ class Icons:
     save = os_icon('save')
     saveall = os_icon('saveall')
     saveas = os_icon('saveas')
-    simple_nut = os_icon('simple_nut')
     start_ccs_task = os_icon('start_ccs_task')
     stop = os_icon('stop')
     style = os_icon('style')

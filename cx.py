@@ -1,5 +1,5 @@
 from cx_Freeze import setup, Executable
-#includes = ["atexit","yaml","platform", "PyQt4.QtCore","PyQt4.QtGui","PyQt4.Qsci","PyQt4.Qsci","PyQt4.QtWebKit","PyQt4.QtNetwork"]
+from globals import __version__
 #excludes = ['curses', 'email', 'tcl','tk','Tkinter','Tkconstants','pywin.debugger']
 """
 excludes = ['_gtkagg', '_tkagg', 'bsddb', 'curses', 'email', 'pywin.debugger',
@@ -22,7 +22,7 @@ exe = Executable(
 
 setup(
     name = "Sabel",
-    version = "0.4",
+    version = __version__,
     description = "Sabel IDE",
     executables = [exe]
     )

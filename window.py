@@ -2,7 +2,7 @@ from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QHBoxLayout,QVBoxLayout,QTabWidget,QToolBar,QTextEdit,
                          QLineEdit,QPushButton,QToolButton,QSplitter,QStatusBar,
                          QMainWindow,QPalette,QColor,QSlider,QFontDialog,QLabel,
-                         QFont,QComboBox,QFileDialog,QInputDialog)              
+                         QFont,QComboBox,QFileDialog,QInputDialog)      
 from PyQt4.QtCore import QSize,Qt,QStringList
 from Widget import (Tab,ProjectTree,ErrorTree,OutlineTree,DialogAndroid,DialogAbout,
                     DialogAnt,DialogSquirrel)
@@ -56,9 +56,12 @@ class Window(QMainWindow):
         action_Android.triggered.connect(self.android)
         action_Ant = QAction(Icons.ant_view,'Ant', self)
         action_Ant.triggered.connect(self.ant)
+        action_Squirrel = QAction(Icons.nut,'Squirrel', self)
+        action_Squirrel.triggered.connect(self.squirrel)
         self.treebar.addAction(action_Folder)
         self.treebar.addAction(action_Android)
         self.treebar.addAction(action_Ant)
+        self.treebar.addAction(action_Squirrel)
         self.treebar.setIconSize(QSize(16,16))
         self.VerticalLayout_2.addWidget(self.treebar)
         self.VerticalLayout_2.addWidget(self.treeWidget)
@@ -88,12 +91,22 @@ class Window(QMainWindow):
         self.runButton.setIcon(Icons.go)
         self.combo = QComboBox()
         self.combo.activated.connect(self.addCmd)
+        self.comboAdd = QPushButton()
+        self.comboAdd.setIcon(Icons.add)
+        self.comboAdd.setFlat(True)
+        self.comboAdd.clicked.connect(self.addCmd)
+        self.comboDel = QPushButton()
+        self.comboDel.setIcon(Icons.close_view)
+        self.comboDel.setFlat(True)
+        #self.comboDel.clicked.connect(self.delCmd)
         for text in self.cmdList:
             self.combo.addItem(text)
-        self.combo.setItemIcon(0,Icons.add)
+        #self.combo.setItemIcon(0,Icons.add)
         self.horizontalLayout_2.addWidget(self.textEdit)
         self.inputLayout.addWidget(QLabel("Input:"))
         self.inputLayout.addWidget(self.combo)
+        self.inputLayout.addWidget(self.comboAdd)
+        self.inputLayout.addWidget(self.comboDel)
         self.inputLayout.addWidget(self.runEdit)
         self.inputLayout.addWidget(self.fileButton)
         self.inputLayout.addWidget(self.runButton)
@@ -127,6 +140,7 @@ class Window(QMainWindow):
         self.find.clicked.connect(self.findCurrentText)
         self.replacefind = QPushButton(self.tab_8)
         self.replacefind.setText("Replace/Find")
+        self.replacefind.clicked.connect(self.replaceFindText)
         self.replace = QPushButton(self.tab_8)
         self.replace.setText("Replace")
         self.replace.clicked.connect(self.replaceCurrentText)
@@ -134,7 +148,7 @@ class Window(QMainWindow):
         self.replaceAll.setText("Replace All")
         self.replaceAll.clicked.connect(self.replaceAllText)
         self.caseSensitive = QToolButton(self.tab_8)
-        self.caseSensitive.setText("cs")
+        self.caseSensitive.setIcon(Icons.font)
         self.caseSensitive.setCheckable(True)
         self.wholeWord = QToolButton(self.tab_8)
         self.wholeWord.setText("ww")
@@ -167,6 +181,10 @@ class Window(QMainWindow):
         #Tab Widget Init
         self.tabWidget_2.addTab(self.tab_5,"Projects")
         self.tabWidget_2.addTab(self.tab_2,"Outline")
+        self.tabWidget_2.addTab(QWidget(self),"")
+        self.tabWidget_2.setTabIcon(2,Icons.close_view)
+        self.tabWidget_2.currentChanged.connect(self.closeExplorer)
+        
         self.tabWidget_3.addTab(self.tab_7,"Error")
         self.tabWidget_3.addTab(self.tab_6,"Output")
         self.tabWidget_3.addTab(QWidget(self),"")
@@ -194,7 +212,6 @@ class Window(QMainWindow):
         
         #Status
         self.statusbar = QStatusBar(self)
-        self.statusbar.setObjectName("statusbar")
         self.aboutButton = QPushButton(self)
         self.aboutButton.setFlat(True)
         self.aboutButton.setIcon(Icons.anchor)
@@ -203,7 +220,7 @@ class Window(QMainWindow):
         self.cmdButton.setFlat(True)
         self.cmdButton.setIcon(Icons.console_view)
         self.cmdButton.clicked.connect(self.cmd)
-        self.cmdButton.setShortcut('Ctrl+O')
+        self.cmdButton.setShortcut('Ctrl+D')
         self.findButton = QPushButton(self)
         self.findButton.setFlat(True)
         self.findButton.setIcon(Icons.find)
@@ -239,12 +256,6 @@ class Window(QMainWindow):
         self.fontName = fontName
         #QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         
-    def findBarShow(self):
-        if(self.tab_8.isHidden()):
-            self.tab_8.show()
-        else:
-            self.tab_8.hide()
-
     def initToolBar(self):
         self.action_NewProject = QAction(Icons.newprj, 'Project', self)
         self.action_NewProject.setShortcut('Ctrl+P')
@@ -297,9 +308,14 @@ class Window(QMainWindow):
         self.threshSliderAction = QWidgetAction(men)
         self.threshSliderAction.setDefaultWidget(self.threshSlider)
         
-        men.addAction(QAction("Ident",self))
-        men.addAction(QAction("Edit",self))
-        men.addAction(QAction("Paste",self))
+        
+        action_explorer = QAction("Show Explorer",self)
+        action_explorer.triggered.connect(lambda x=2:self.closeExplorer(2))
+        men.addAction(action_explorer)
+        action_console = QAction("Show Console",self)
+        action_console.triggered.connect(lambda x=2:self.closeConsole(2))
+        men.addAction(action_console)
+        men.addAction(QAction("Idents",self))
         men.addAction(QAction("Tabs",self))
         men.addSeparator()
         men.addAction(QAction("Threshold",self))
@@ -383,9 +399,12 @@ class Window(QMainWindow):
         self.toolbar.addAction(self.action_Help)
         self.toolbar.addAction(self.action_Full)
         
+        
+#-----------------------------------------------------------------------------------#
+#   Menu Actions Functions                                                                #
+#-----------------------------------------------------------------------------------#   
     def about(self):
         form = DialogAbout(self)
-        form.show()
 
     def help(self):
         QMessageBox.about(self, "About Simple Editor","This is The Help")
@@ -403,48 +422,66 @@ class Window(QMainWindow):
         form.show()
     
     def ant(self):
-        pass
-            
+        form = DialogAnt(self)
+        form.show()
+        
+    def squirrel(self):
+        form = DialogSquirrel(self)
+        form.show()
+        
+    def findBarShow(self):
+        if(self.tab_8.isHidden()):
+            self.tab_8.show()
+        else:
+            self.tab_8.hide()
+    
     def cmd(self):
         if(self.tabWidget_3.isHidden()):
             self.tabWidget_3.show()
         else:
             self.tabWidget_3.hide()
             
-    def closeConsole(self,no):
+    def closeConsole(self,no = 2):
         if(no == 2):
             if(self.tabWidget_3.isHidden()):
                 self.tabWidget_3.show()
-                #self.tabWidget_3.setCurrentIndex(1)
             else:
+                self.tabWidget_3.setCurrentIndex(1)
                 self.tabWidget_3.hide()
-            
-            
+    def closeExplorer(self,no = 2):
+        if(no == 2):
+            if(self.tabWidget_2.isHidden()):
+                self.tabWidget_2.show()
+            else:
+                self.tabWidget_2.setCurrentIndex(0)
+                self.tabWidget_2.hide()
+                
+#-----------------------------------------------------------------------------------#
+#   Editor Functions                                                                #
+#-----------------------------------------------------------------------------------#   
+    '''Search and Replace Functions'''  
     def findCurrentText(self):
         edt = self.tabWidget.widget(self.tabWidget.currentIndex())
         edt.findText(self.lineEdit.text(),self.regex.isChecked(),self.caseSensitive.isChecked(),self.wholeWord.isChecked(),self.backward.isChecked())
-        
     def replaceCurrentText(self):
         edt = self.tabWidget.widget(self.tabWidget.currentIndex())
-        done = edt.findText(self.lineEdit.text(),self.regex.isChecked(),self.caseSensitive.isChecked(),self.wholeWord.isChecked(),self.backward.isChecked())
-        if(done):
-            edt.replaceText(self.lineEdit_2.text())
-        else:
-            QMessageBox.about(self, "About Sabel IDE","Could Not Find Text")
-        return done
-            
+        edt.replaceText(self.lineEdit_2.text()) 
+    def replaceFindText(self):
+        edt = self.tabWidget.widget(self.tabWidget.currentIndex())
+        edt.replaceText(self.lineEdit_2.text())
+        self.findCurrentText()      
     def replaceAllText(self):
         edt = self.tabWidget.widget(self.tabWidget.currentIndex())
         while(edt.findText(self.lineEdit.text(),self.regex.isChecked(),self.caseSensitive.isChecked(),self.wholeWord.isChecked(),self.backward.isChecked())):
             edt.replaceText(self.lineEdit_2.text())
-            
+             
+    '''Font Functions'''       
     def zoomin(self):
         for i in range(len(self.files)):
             self.tabWidget.widget(i).zoomin()
     def zoomout(self):
         for i in range(len(self.files)):
-            self.tabWidget.widget(i).zoomout()
-            
+            self.tabWidget.widget(i).zoomout()       
     def setFont(self):
         font = QFont()
         font.setFamily(self.fontName)
@@ -452,21 +489,18 @@ class Window(QMainWindow):
         fdialog.show()
         fdialog.setCurrentFont(font)
         fdialog.accepted.connect(lambda:self.setFontName(fdialog.currentFont()))
-        
-        
     def setFontName(self,font):
         #print "accepted"
         #print font.family()
         self.fontName = str(font.family())
         config.setFontName(self.fontName)
         for i in range(len(self.files)):
-            self.tabWidget.widget(i).setFontName(self.fontName)
-            
+            self.tabWidget.widget(i).setFontName(self.fontName)      
     def setThreshold(self,val):
         config.setThresh(val)
         for i in range(len(self.files)):
             self.tabWidget.widget(i).setThreshold(val)
-            
+    '''style Functions'''   
     def initColorStyle(self):
         self.colorStyle = Styles[self.styleIndex]                
         pal = QPalette(self.tabWidget_2.palette())
@@ -475,8 +509,7 @@ class Window(QMainWindow):
         pal.setColor(QPalette.Base,self.colorStyle.paper)
         pal.setColor(QPalette.Text,self.colorStyle.color)
         self.tabWidget_2.setPalette(pal)
-        self.tabWidget_3.setPalette(pal)
-            
+        self.tabWidget_3.setPalette(pal)      
     def style_clicked(self,no):
         self.styleIndex = no -1
         #print self.styleIndex
@@ -492,6 +525,7 @@ class Window(QMainWindow):
             #self.tabWidget.
             #self.tabWidget.widget(i).setColorStyle(self.colorStyle)
             
+    '''Command Functions'''
     def getFile(self):
         fname = str(QFileDialog.getOpenFileName(self,"Open File", '.', "Files (*.*)"))
         if not (fname == ""):

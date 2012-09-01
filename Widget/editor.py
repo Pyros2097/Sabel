@@ -1,7 +1,7 @@
 from globals import (fontSize,fontName,ospathjoin,os_pixmap,apiDir,threshold,config
-                     ,Auto)
-from PyQt4.QtCore import SIGNAL,QString
-from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor ,QPalette
+                     ,Auto,eol)
+from PyQt4.QtCore import SIGNAL,QString,QEvent
+from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor, QPalette,QWidget
 from PyQt4.Qsci import QsciScintilla, QsciLexerPython ,QsciAPIs ,QsciLexerCPP
 from lexersquirrel import LexerSquirrel
         
@@ -16,8 +16,22 @@ class Editor(QsciScintilla):
         self.colorStyle = colorStyle
         self.errorLines = []
         self.setText(text)
+        if(eol == 0):
+            self.setEolMode(self.EolWindows)
+        elif(eol == 1):
+            self.setEolMode(self.EolUnix)
+        else:
+            self.setEolMode(self.EolMac)
         self.init()
+        #self.installEventFilter(self)
         
+    #def eventFilter(self, widget, event):
+    #    if (event.type() == QEvent.ShortcutOverride and widget is self):
+    #        #if event.type
+    #        event.accept()
+    #        return True
+    #    return QWidget.eventFilter(self, widget, event)
+    
     def init(self):
         #Margin
         #print self.marginType(self.SymbolMargin)

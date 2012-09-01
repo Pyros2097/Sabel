@@ -63,7 +63,6 @@
 <file>Icons/Thumbs.db</file>
 <file>Icons/auto_method.png</file>
 <file>Icons/warning.png</file>
-<file>Icons/simple_nut.png</file>
 <file>Icons/fullscreen.png</file>
 <file>Icons/logosabel.png</file>
 <file>Icons/image.png</file>
@@ -80,5 +79,6 @@
 <file>Icons/capture_screen.png</file>
 <file>Icons/sabel.png</file>
 <file>Icons/anchor.png</file>
+<file>Icons/nut.png</file>
 </qresource>
 </RCC>

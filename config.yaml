@@ -1,5 +1,5 @@
 ADB:
-- C:/CODE/main.nut /sdcard/
+- C:/CODE/sabel.png /sdcard/
 - com.emo_framework.examples/com.emo_framework.EmoActivity
 - EmoFramework
 - com.emo_framework.examples
@@ -16,9 +16,7 @@ CMD:
 - Make
 - Sq
 File:
-- C:/CODE/assets/common.nut
 - C:/CODE/assets/creditscene.nut
-- C:/CODE/assets/logoscene.nut
 - C:/CODE/assets/howtoscene.nut
 Project:
 - C:/CODE/data/
