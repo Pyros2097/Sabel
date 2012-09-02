@@ -2,6 +2,7 @@ from editor import Editor
 from tab import Tab
 from tree import ProjectTree,ErrorTree,OutlineTree
 from adb import Adb
+from ant import Ant
 from parser import Parser
 from command import Command
 from ipython import PyInterp

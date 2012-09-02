@@ -5,26 +5,28 @@ from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QFont,QComboBox,QFileDialog,QInputDialog)      
 from PyQt4.QtCore import QSize,Qt,QStringList
 from Widget import (Tab,ProjectTree,ErrorTree,OutlineTree,DialogAndroid,DialogAbout,
-                    DialogAnt,DialogSquirrel)
+                    DialogAnt,DialogSquirrel,DialogTodo)
 from Widget.style import Styles
 from stylesheet import *
 
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
-                     iconSize,iconDir,styleIndex,adblist,Icons,os_icon,threshold,
+                     iconSize,iconDir,adblist,Icons,os_icon,
                      fontName,fontSize,cmds)
 
 class Window(QMainWindow):
     def __init__(self,parent = None):
         QMainWindow.__init__(self,parent)
         self.setStyleSheet(mainstyl)
-        self.resize(758, 673)
+        self.resize(1024,768)
         self.setWindowTitle("Sabel")
         self.setWindowIcon(Icons.sabel)
         self.centralwidget = QWidget(self)
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setMargin(0)
-        self.styleIndex = styleIndex
+        self.styleIndex = config.styleIndex()
         self.cmdList =cmds
+        self.mode = config.mode()
+        
         #TabWidgets
         self.tab_1 = QWidget(self)
         self.tab_1.setMinimumWidth(800)
@@ -90,7 +92,6 @@ class Window(QMainWindow):
         self.runButton.setFlat(True)
         self.runButton.setIcon(Icons.go)
         self.combo = QComboBox()
-        self.combo.activated.connect(self.addCmd)
         self.comboAdd = QPushButton()
         self.comboAdd.setIcon(Icons.add)
         self.comboAdd.setFlat(True)
@@ -101,7 +102,6 @@ class Window(QMainWindow):
         #self.comboDel.clicked.connect(self.delCmd)
         for text in self.cmdList:
             self.combo.addItem(text)
-        #self.combo.setItemIcon(0,Icons.add)
         self.horizontalLayout_2.addWidget(self.textEdit)
         self.inputLayout.addWidget(QLabel("Input:"))
         self.inputLayout.addWidget(self.combo)
@@ -114,23 +114,17 @@ class Window(QMainWindow):
         
         #Error
         self.tab_7 = QWidget()
-        self.tab_7.setObjectName("tab_7")
         self.horizontalLayout_4 = QHBoxLayout(self.tab_7)
         self.horizontalLayout_4.setMargin(0)
-        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.errorTree = ErrorTree(self.tab_7)
-        self.errorTree.setObjectName("textEdit_2")
         self.horizontalLayout_4.addWidget(self.errorTree)
         
         #Find
         self.tab_8 = QWidget()
         self.tab_8.setObjectName("tab_8")
         self.horizontalLayout_5 = QHBoxLayout(self.tab_8)
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
         self.lineEdit = QLineEdit(self.tab_8)
-        self.lineEdit.setObjectName("lineEdit")
         self.lineEdit_2 = QLineEdit(self.tab_8)
-        self.lineEdit_2.setObjectName("lineEdit_2")
         self.findClose = QPushButton(self.tab_8)
         self.findClose.setIcon(Icons.close_view)
         self.findClose.setFlat(True)
@@ -258,16 +252,13 @@ class Window(QMainWindow):
         
     def initToolBar(self):
         self.action_NewProject = QAction(Icons.newprj, 'Project', self)
-        self.action_NewProject.setShortcut('Ctrl+P')
         self.action_NewProject.triggered.connect(self.newProject)
         self.action_NewProject.setToolTip("Create a New Project")
-        self.action_NewProject.setStatusTip("Create a New Project")
 
         self.action_Open = QAction(Icons.open, 'Open', self)
         self.action_Open.setShortcut('Ctrl+O')
         self.action_Open.triggered.connect(self.fileOpen)
         self.action_Open.setToolTip("Open File")
-        self.action_Open.setStatusTip("Open File")
 
         self.action_Save = QAction(Icons.save, 'Save', self)
         self.action_Save.setShortcut('Ctrl+S')
@@ -293,20 +284,31 @@ class Window(QMainWindow):
         self.action_Stop.triggered.connect(self.adb.stop)
         self.action_Design = QAction(Icons.color_palette, 'Design', self)
         self.action_Todo = QAction(Icons.task_set, 'Todo', self)
-        #self.action_Todo.triggered.connect(self.stop)
-        #Only variation CHeck Later
+        self.action_Todo.triggered.connect(self.todo)
+        
         men = QMenu()
+        #Threshold Slider
         self.threshSlider = QSlider()
-        self.threshSlider.setStyleSheet(slisty)
         self.threshSlider.setTickPosition(QSlider.TicksLeft)
         self.threshSlider.setOrientation(Qt.Horizontal)
-        self.threshSlider.setValue(threshold)
+        self.threshSlider.setValue(config.thresh())
         self.threshSlider.setMinimum(0)
         self.threshSlider.setMaximum(5)
         self.threshSlider.valueChanged.connect(self.setThreshold)
         #self.threshSlider.setInvertedAppearance(True)
         self.threshSliderAction = QWidgetAction(men)
         self.threshSliderAction.setDefaultWidget(self.threshSlider)
+        
+        #TabsWidth Slider
+        self.tabsSlider = QSlider()
+        self.tabsSlider.setTickPosition(QSlider.TicksLeft)
+        self.tabsSlider.setOrientation(Qt.Horizontal)
+        self.tabsSlider.setValue(config.tabwidth())
+        self.tabsSlider.setMinimum(0)
+        self.tabsSlider.setMaximum(8)
+        self.tabsSlider.valueChanged.connect(self.setTabWidth)
+        self.tabsSliderAction = QWidgetAction(men)
+        self.tabsSliderAction.setDefaultWidget(self.tabsSlider)
         
         
         action_explorer = QAction("Show Explorer",self)
@@ -316,7 +318,9 @@ class Window(QMainWindow):
         action_console.triggered.connect(lambda x=2:self.closeConsole(2))
         men.addAction(action_console)
         men.addAction(QAction("Idents",self))
-        men.addAction(QAction("Tabs",self))
+        men.addSeparator()
+        men.addAction(QAction("TabWidth",self))
+        men.addAction(self.tabsSliderAction)
         men.addSeparator()
         men.addAction(QAction("Threshold",self))
         men.addAction(self.threshSliderAction)
@@ -329,6 +333,16 @@ class Window(QMainWindow):
         self.action_Full = QAction(Icons.fullscreen, 'Full', self)
         self.action_Full.setShortcut('Shift+Enter')
         self.action_Full.triggered.connect(self.full)
+        
+        self.action_Squirrel = QAction(Icons.nut, 'Squirrel', self)
+        self.action_Squirrel.setCheckable(True)
+        self.action_Squirrel.triggered.connect(self.sq)
+        self.action_Emo = QAction(Icons.emo, 'Emo', self)
+        self.action_Emo.setCheckable(True)
+        self.action_Emo.triggered.connect(self.emo)
+        self.action_Ios = QAction(Icons.ios, '', self)
+        self.action_Ios.setCheckable(True)
+        self.action_Ios.triggered.connect(self.ios)
 
         
         self.action_Style = QAction(Icons.style, 'Style', self)
@@ -398,13 +412,55 @@ class Window(QMainWindow):
         self.toolbar.addSeparator()
         self.toolbar.addAction(self.action_Help)
         self.toolbar.addAction(self.action_Full)
-        
-        
+        self.toolbar.addSeparator()
+        self.toolbar.addAction(self.action_Squirrel)
+        self.toolbar.addAction(self.action_Emo)
+        self.toolbar.addAction(self.action_Ios)
+        if(self.mode == 0):
+            self.action_Squirrel.setChecked(True)
+        else:
+            self.action_Emo.setChecked(True)
+            
+   
 #-----------------------------------------------------------------------------------#
-#   Menu Actions Functions                                                                #
-#-----------------------------------------------------------------------------------#   
+#   Menu Actions Functions                                                          #
+#-----------------------------------------------------------------------------------#
+    def run(self):
+        if(self.mode == 0):
+            self.sq.run()
+        elif(self.mode == 1):
+            self.adb.run()
+        elif(self.mode == 2):
+            self.ios.run()
+        elif(self.mode == 3):
+            self.c.run()
+        elif(self.mode == 4):
+            self.cpp.run()
+            
+    def emo(self):
+        if(self.mode == 0):
+            self.mode = 1
+            self.action_Squirrel.setChecked(False)
+        else:
+            self.action_Squirrel.setChecked(True)
+            
+    def ios(self):
+        print "Nonr"
+        
+    
+    def sq(self):
+        if(self.mode == 1):
+            self.mode = 0
+            self.action_Emo.setChecked(False)
+        else:
+            self.action_Emo.setChecked(True)
+     
     def about(self):
         form = DialogAbout(self)
+        
+    def todo(self):
+        form = DialogTodo(self)
+        form.show()
 
     def help(self):
         QMessageBox.about(self, "About Simple Editor","This is The Help")
@@ -499,7 +555,13 @@ class Window(QMainWindow):
     def setThreshold(self,val):
         config.setThresh(val)
         for i in range(len(self.files)):
+            #print i
             self.tabWidget.widget(i).setThreshold(val)
+    def setTabWidth(self,val):
+        config.setTabWidth(val)
+        for i in range(len(self.files)):
+            #print i
+            self.tabWidget.widget(i).setTabWidth(val)
     '''style Functions'''   
     def initColorStyle(self):
         self.colorStyle = Styles[self.styleIndex]                
@@ -532,15 +594,14 @@ class Window(QMainWindow):
             self.runEdit.setText(fname)
             
     def addCmd(self,index):
-        if(index == 0):
-            text, ok = QInputDialog.getText(self, 'Add Command', 'Command:')
-            if(ok):
-                if(str(text) != ''):
-                    cmd = str(text)
-                    self.cmdList.append(cmd)
-                    #print self.cmdList
-                    self.combo.addItem(cmd)
-                    config.setCmd(self.cmdList)
+        text, ok = QInputDialog.getText(self, 'Add Command', 'Command:')
+        if(ok):
+            if(str(text) != ''):
+                cmd = str(text).upper()
+                self.cmdList.append(cmd)
+                #print self.cmdList
+                self.combo.addItem(cmd)
+                config.setCmd(self.cmdList)
                 
     def delCmd(self,index):
         pass

@@ -3,7 +3,7 @@ from PyQt4.QtGui import (QTreeWidgetItem,QTreeWidget,QMessageBox,
 from PyQt4.QtCore import SIGNAL,Qt,QMimeData,QUrl,QPoint
 from globals import (oslistdir,ospathisdir,ospathsep,ospathjoin,ospathexists,
                      ospathbasename,os_icon,osremove,osrename,ospathdirname,
-                     recycle,ospathnormpath,oswalk,Icons)
+                     recycle,ospathnormpath,oswalk,Icons,config)
 
 
 class Dir(QTreeWidgetItem):
@@ -67,7 +67,7 @@ class File(QTreeWidgetItem):
         return self.pic
         
 class Project(QTreeWidgetItem):
-    Count = 0
+    Count = -1
     def __init__(self,parent,startDir,closed = False):
         QTreeWidgetItem.__init__(self,parent)
         self.path = ospathjoin(startDir)
@@ -106,7 +106,8 @@ class ProjectTree(QTreeWidget):
         self.connect(self,SIGNAL("customContextMenuRequested(const QPoint &)"), self.doMenu)
         self.connect(self, SIGNAL("dropped"), self.addItem)
         self.projects = []
-        self.closed = []
+        self.closed = config.closedProjects()
+        #print self.closed[0]
             
     def readDir(self,parent,path):
         for d in oslistdir(path):
@@ -140,18 +141,25 @@ class ProjectTree(QTreeWidget):
                 
                 
     def addProject(self,startDir):
-        self.projects.append(startDir)
-        self.closed.append(False)
-        i = Project(self,startDir)
-        self.addTopLevelItem(i)
-        self.readDir(i,startDir)
-        self.readMainFiles(i,startDir)
+        if(ospathexists(startDir)):
+            self.projects.append(startDir)
+            if(self.closed[self.projects.index(startDir)] == 0):
+                i = Project(self,startDir)
+                self.addTopLevelItem(i)
+                self.readDir(i,startDir)
+                self.readMainFiles(i,startDir)
+            else:
+                i = Project(self,startDir,True)
+                self.addTopLevelItem(i)    
+        else:
+            QMessageBox.about(self,"Can't Close Project","Project Does Not Exist %s"%startDir)
             
     def addClosedProject(self,startDir):
         if(ospathexists(startDir)):
-            self.closed[self.projects.index(startDir)] = True
+            self.closed[self.projects.index(startDir)] = 1
             i = Project(self,startDir,True) 
             self.addTopLevelItem(i)
+            config.setClosedProjects(self.closed)
         else:
             QMessageBox.about(self,"Can't Close Project","Project Does Not Exist %s"%startDir)
       
@@ -240,10 +248,25 @@ class ProjectTree(QTreeWidget):
         action_DeleteDir.triggered.connect(lambda:self.deleteDir(item))
         action_DeleteProject = QAction(Icons.trash,'Delete', self)
         action_DeleteProject.triggered.connect(lambda:self.deleteProject(item))
+        
+        
+        action_BuildProject = QAction('Build', self)
+        action_BuildProject.triggered.connect(lambda:self.build(item))
+        action_BuildRunProject = QAction('Build and Run', self)
+        action_BuildRunProject.triggered.connect(lambda:self.buildRun(item))
+        action_CleanProject = QAction('Clean', self)
+        action_CleanProject.triggered.connect(lambda:self.buildRun(item))
+        action_RunProject = QAction('Run', self)
+        action_RunProject.triggered.connect(lambda:self.run(item))
         if(item.isProject()):
             if not(item.isClosed()):
                 menu.addAction(action_Folder)
                 menu.addAction(action_File)
+                menu.addSeparator()
+                menu.addAction(action_BuildProject)
+                menu.addAction(action_BuildRunProject)
+                menu.addAction(action_RunProject)
+                menu.addAction(action_CleanProject)
                 menu.addSeparator()
                 menu.addAction(action_RenameProject)
                 menu.addAction(action_RemoveProject)
@@ -279,13 +302,17 @@ class ProjectTree(QTreeWidget):
         
     def openProject(self,item):
         itempath = item.getPath()
-        self.closed[self.projects.index(itempath)] = False
+        self.closed[self.projects.index(itempath)] = 0
+        config.setClosedProjects(self.closed)
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
         self.addProject(itempath)
         
     def closeProject(self,item):
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
         self.addClosedProject(item.getPath())
+        #print self.indexOfTopLevelItem(item)
+        #self.closed[self.indexOfTopLevelItem(item)] = 1
+        #config.addClosedProjects(self.closed)
     
     def refreshProject(self,item):
         #must check this
@@ -305,7 +332,13 @@ class ProjectTree(QTreeWidget):
                 self.addProject(pro)
         
     def removeProject(self,item):
-        pass
+        itemPath = item.getPath()
+        self.closed.pop(self.projects.index(itemPath))
+        config.setClosedProjects(self.closed)
+        self.projects.remove(itemPath)
+        config.removeProject(itemPath)
+        self.takeTopLevelItem(self.indexOfTopLevelItem(item))
+        
     
     def newFolder(self,item):
         text,ok = QInputDialog.getText(self,"QInputDialog::getText()","Name:")
@@ -347,6 +380,15 @@ class ProjectTree(QTreeWidget):
     def pasteDir(self,item):
         pass
     
+    def build(self,item):
+        print item.getPath() 
+    def buildRun(self,item):
+        print item.getPath()  
+    def clean(self,item):
+        print item.getPath()
+    def run(self,item):
+        pass
+        
     def renameProject(self,item):
         itempath = item.getPath()
         text,ok = QInputDialog.getText(self,"QInputDialog::getText()","New Name:")

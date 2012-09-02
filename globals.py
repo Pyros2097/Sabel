@@ -1,22 +1,10 @@
-#!/usr/bin/env python
-__author__ = "pyros2097"
-__license__ = "GPLv3"
-__copyright__ = 'Copyright (c) 2012, pyros2097'
-__credits__ = ['pyros2097', 'eclipse']
-__email__ = 'pyros2097@gmail.com'
-__version__ = "0.54"
-
-#TODO:
-#Must learn to destroy editor completely because memory keeps increasing
-#when close tab occurs
-
 import os
 from platform import system,python_version
 from PyQt4.QtGui import QIcon,QPixmap,QApplication,QSplashScreen
-from PyQt4.Qsci import QsciAPIs
 from send2trash import send2trash
 from config import Config
 
+__version__ = "0.55"
 #Python accesses local variables much more efficiently than global variables. 
 oslistdir = os.listdir
 ospathisdir = os.path.isdir
@@ -57,8 +45,6 @@ workSpace = config.workSpace()
 fontSize = config.fontSize()
 fontName = config.fontName()
 iconSize = config.iconSize()
-styleIndex = config.styleIndex()
-threshold = config.thresh()
 adblist = config.adb()
 device = config.device()
 cmds = config.cmd()
@@ -68,7 +54,6 @@ def os_icon(name):
 def os_pixmap(name):
         return QPixmap(":/{0}.png".format(ospathjoin(iconDir,name)))
 
-app = QApplication([])
 class Icons:
     add = os_icon('auto_add')
     alert_obj = os_icon('alert_obj')
@@ -135,6 +120,8 @@ class Icons:
     x = os_icon('x')
     zoomminus = os_icon('zoomminus')
     zoomplus = os_icon('zoomplus')
+    ios = os_icon('ioss')
+    emo = os_icon('emo')
     
 class Auto:
     auto_activity = os_pixmap('auto_activity')
@@ -157,3 +144,5 @@ class Pix:
     logosabel = os_pixmap('logosabel')
     logoemo = os_pixmap('logoemo')
     logosq = os_pixmap('logosq')
+    
+splash_pix = Pix.logosabel

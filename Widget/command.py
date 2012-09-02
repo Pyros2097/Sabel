@@ -20,13 +20,11 @@ class Command(QWidget):
             self.run()
             
     def setCmdLine(self):
-        '''This is to check whether 'ADD' Item is not Run'''
-        if(self.parent.combo.currentIndex() != 0):
-            com = self.parent.combo.itemText(self.parent.combo.currentIndex())
-            self.cmd = str(com+" "+self.parent.runEdit.text())
-            if self.cmd != "":
-                self.parent.textEdit.clear()
-                self.run()
+        com = self.parent.combo.itemText(self.parent.combo.currentIndex())
+        self.cmd = str(com+" "+self.parent.runEdit.text())
+        if self.cmd != "":
+            self.parent.textEdit.clear()
+            self.run()
         
     def finished(self,no,cmd):
         if(no == 0):

@@ -35,6 +35,7 @@ class LexerSquirrel(QsciLexerPython):
         QsciLexerPython.__init__(self, parent)
         #self.parent = parent
         #self.sci = self.parent
+        #print self.FunctionMethodName
         self.colorStyle = colorStyle
         self.plainFont = QFont()
         self.plainFont.setFamily(fontName)

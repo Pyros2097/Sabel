@@ -8,10 +8,10 @@ With this Editor you Can Easily create Games for android and iOS using squirrel 
 
 Just add you source files to the editor , edit away your code.  
 Features:  
-1.Code completion. 
-2.Instant Launch of your main.nut to SDcard in Android.
-3.Android Debug logcat is directly displayed in console.
-4.Squirrel Interactive Interpreter.
+1.Code completion.  
+2.Instant Launch of your main.nut to SDcard in Android.  
+3.Android Debug logcat is directly displayed in console.  
+4.Squirrel Interactive Interpreter.  
 4.Python Interactive Interpreter.  
 Check out Sabel at http://code.google.com/p/sabel-ide/  
 Check out Squirrel at http://www.squirrel-lang.org  

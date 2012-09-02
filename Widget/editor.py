@@ -1,4 +1,4 @@
-from globals import (fontSize,fontName,ospathjoin,os_pixmap,apiDir,threshold,config
+from globals import (fontSize,fontName,ospathjoin,os_pixmap,apiDir,config
                      ,Auto,eol)
 from PyQt4.QtCore import SIGNAL,QString,QEvent
 from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor, QPalette,QWidget
@@ -23,6 +23,7 @@ class Editor(QsciScintilla):
         else:
             self.setEolMode(self.EolMac)
         self.init()
+        self.setTabWidth(1)
         #self.installEventFilter(self)
         
     #def eventFilter(self, widget, event):
@@ -66,7 +67,7 @@ class Editor(QsciScintilla):
         self.registerImage(0,Auto.auto_class2)
         self.registerImage(1,Auto.auto_method)
         self.registerImage(2,Auto.auto_field)
-        self.setAutoCompletionThreshold(threshold)
+        self.setAutoCompletionThreshold(config.thresh())
         self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
         
         #Property
@@ -161,7 +162,6 @@ class Editor(QsciScintilla):
         
     def setThreshold(self,val):
         self.setAutoCompletionThreshold(val)
-        
             
             
     """

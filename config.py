@@ -32,6 +32,11 @@ class Config:
     def iconSize(self):
         return int(self.readSetting('iconsize'))
     
+    def mode(self):
+        return int(self.readSetting('mode'))
+    def setMode(self,value):
+        self.writeSetting("mode",value)
+    
     def device(self):
         return int(self.readSetting('device'))
     def setDevice(self,value):
@@ -41,9 +46,20 @@ class Config:
         return self.readSetting('thresh')
     def setThresh(self,val):
         self.writeSetting('thresh',val)
+        
+    def tabwidth(self):
+        return self.readSetting('tabwidth')
+    def setTabWidth(self,val):
+        self.writeSetting('tabwidth',val)
     
     def projects(self):
         return self.read('Project')
+    
+    def closedProjects(self):
+        return self.read('ClosedProject')
+    def setClosedProjects(self,val):
+        self.data['ClosedProject']= val
+        self.write()
     
     def recent(self):
         return self.read('Recent')      

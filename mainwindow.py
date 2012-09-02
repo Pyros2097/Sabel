@@ -1,12 +1,10 @@
 from PyQt4.QtGui import (QApplication,QPixmap,QSplashScreen,QMessageBox,
                          QIcon,QAction,QCheckBox,QFileDialog)
 from PyQt4.QtCore import SIGNAL,Qt,QStringList,QString
-import icons
 from window import Window
-from Widget import Editor,PyInterp,Adb,Parser,Command
-from globals import (ospathsep,ospathjoin,ospathbasename,workDir,
-                     OS_NAME,config,workSpace,
-                     iconSize,iconDir,ospathexists,os_icon,app,Pix)
+from Widget import Editor,PyInterp,Adb,Ant,Parser,Command
+from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
+                     iconSize,iconDir,ospathexists,os_icon)
 import sys
 
 class MainWindow(Window):
@@ -21,6 +19,7 @@ class MainWindow(Window):
         self.adb = Adb(self)
         self.parser = Parser(self)
         self.command = Command(self)
+        self.ant = Ant(self)
         self.init()
 
     def init(self):
@@ -153,7 +152,8 @@ class MainWindow(Window):
         if not (fname == ""):
             fname = fname+"/"
             #print fname
-            if self.projects != None:
+            #print self.projects
+            if len(self.projects) != 0:
                 for nfile in self.projects:
                     if(nfile != fname):
                         self.createProject(fname)
@@ -163,7 +163,7 @@ class MainWindow(Window):
                         QMessageBox.about(self, "Already Open","Project Already Open\n"+fname)
                         return
             else:
-                self.treeWidget.addProject(fname)
+                self.createProject(fname)
                 config.addProject(fname)     
         return
 
@@ -261,17 +261,3 @@ class MainWindow(Window):
             
     def options(self):
         pass
-
-def main():
-    splash_pix = Pix.logosabel
-    splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
-    splash.setMask(splash_pix.mask())
-    splash.show()
-    app.processEvents()
-    frame = MainWindow()
-    frame.showMaximized()
-    splash.finish(frame)
-    app.exec_()
-    
-if __name__ == "__main__":
-    main()
