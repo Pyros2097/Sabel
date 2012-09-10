@@ -1,4 +1,4 @@
-from globals import adblist,device
+from globals import adblist,device,ospathjoin
 from PyQt4.QtGui import QWidget
 from PyQt4.QtCore import pyqtSignal,SIGNAL,QThread,QProcess,QString,QTimer
 from workthread import WorkThread
@@ -53,35 +53,57 @@ class Ant(QWidget):
         self.parent.textEdit.append(line)
         
     def newstart(self,no,cmd):
-        print "finished"
+        self.parent.textEdit.append("Finished")
+        self.parent.textEdit.append(cmd)
         
+    def showOutput(self):
+        if(self.parent.tabWidget_3.isHidden()):
+            self.parent.tabWidget_3.show()
+            self.parent.tabWidget_3.setCurrentIndex(1)
         
-    def create(self):
+    def create(self,prj):
         if self.isRunning == False:
             self.isRunning = True
-        self.parent.textEdit.append("Building..")
-        self.adb_thread.setCmd("android update project -p "+prj)
+        self.showOutput()
+        self.parent.textEdit.clear()
+        self.parent.textEdit.append("Creating... "+prj.getPath())
+        self.adb_thread.setCmd("android.bat update project -p "+prj.getPath())
         self.adb_thread.run()
         
-    def build(self):
+    def build(self,prj):
         if self.isRunning == False:
             self.isRunning = True
-        self.parent.textEdit.append("Building..")
-        self.adb_thread.setCmd("ant debug "+prj)
+        self.showOutput()
+        self.parent.textEdit.clear()
+        self.parent.textEdit.append("Ant Building Debug... "+ospathjoin(prj.getPath(),"build.xml"))
+        self.adb_thread.setCmd("ant.bat debug -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
         self.adb_thread.run()
         
-    def clean(self):
+    def clean(self,prj):
         if self.isRunning == False:
             self.isRunning = True
-        self.parent.textEdit.append("Building..")
-        self.adb_thread.setCmd("ant clean "+prj)
+        self.showOutput()
+        self.parent.textEdit.clear()
+        self.parent.textEdit.append("Ant Cleaning... "+prj.getPath())
+        self.adb_thread.setCmd("ant.bat clean -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
         self.adb_thread.run()
         
-    def buildRun(self):
+    def buildRun(self,prj):
         if self.isRunning == False:
             self.isRunning = True
-        self.parent.textEdit.append("Building..")
-        self.adb_thread.setCmd("ant debug install "+prj)
+        self.showOutput()
+        self.parent.textEdit.clear()
+        self.parent.textEdit.append("Ant Building and Installing... "+ospathjoin(prj.getPath(),"build.xml"))
+        self.adb_thread.setCmd("ant.bat debug install -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
+        self.adb_thread.run()
+        
+    def run(self,prj):
+        if self.isRunning == False:
+            self.isRunning = True
+        self.showOutput()
+        self.parent.textEdit.clear()
+        self.parent.textEdit.append("Installing... "+prj.getPath())
+        self.adb_thread.setCmd("ant.bat install -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
         self.adb_thread.run()
         
     def close(self):

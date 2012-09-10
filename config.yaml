@@ -18,15 +18,18 @@ CMD:
 ClosedProject:
 - 0
 - 0
+- 0
 File:
-- C:/CODE/assets/creditscene.nut
-- C:/CODE/assets/howtoscene.nut
-- C:/CODE/data/runtime.nut
+- C:/CODE/assetsd/creditscene.nut
+- C:/CODE/assetsd/common.nut
+- C:/CODE/assetsd/common.nut
+- C:/CODE/assetsd/howtoscene.nut
+PARAM:
+- hh C:/CODE/152940-ios.jpeg
 Project:
-- C:/CODE/data/
-- C:/CODE/assets/
-Recent:
-- C:\CODE\main.nut
+- C:/CODE/datad/
+- C:/CODE/assetsd/
+Recent: []
 Setting:
   device: 1
   fontname: Courier New
@@ -39,5 +42,6 @@ Setting:
   workspace: C:/CODE/
 Style: 0
 TODO:
-- Remove Headers
-- Rewrite code
+- Fix Closed Projects Bug
+- Add Build Options
+- Add OS support

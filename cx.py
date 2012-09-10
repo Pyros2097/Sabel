@@ -1,5 +1,4 @@
 from cx_Freeze import setup, Executable
-from globals import __version__
 #excludes = ['curses', 'email', 'tcl','tk','Tkinter','Tkconstants','pywin.debugger']
 """
 excludes = ['_gtkagg', '_tkagg', 'bsddb', 'curses', 'email', 'pywin.debugger',
@@ -22,7 +21,7 @@ exe = Executable(
 
 setup(
     name = "Sabel",
-    version = __version__,
+    version ="0.56",
     description = "Sabel IDE",
     executables = [exe]
     )

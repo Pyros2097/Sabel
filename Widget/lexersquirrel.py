@@ -67,7 +67,7 @@ class LexerSquirrel(QsciLexerPython):
           QsciStyle(2, QString("number"), QColor("#008000"), self.colorStyle.paper, self.boldFont, False),
           QsciStyle(3, QString("DoubleQuotedString"), QColor("#008000"), self.colorStyle.paper, self.plainFont, True),
           QsciStyle(4, QString("SingleQuotedString"), QColor("#008000"), self.colorStyle.paper, self.plainFont, True),
-          QsciStyle(5, QString("Keyword"), QColor("#000000"), self.colorStyle.paper, self.boldFont, True),
+          QsciStyle(5, QString("Keyword"), QColor("#00003f"), self.colorStyle.paper, self.boldFont, True),
           QsciStyle(6, QString("TripleSingleQuotedString"), QColor("#ffd0d0"),self.colorStyle.paper, self.plainFont, True),
           QsciStyle(7, QString("TripleDoubleQuotedString"),QColor("#001111"),self.colorStyle.paper, self.plainFont, False),
           QsciStyle(8, QString("ClassName"), QColor("#000000"), self.colorStyle.paper, self.plainFont, False),

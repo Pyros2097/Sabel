@@ -21,10 +21,9 @@ class Command(QWidget):
             
     def setCmdLine(self):
         com = self.parent.combo.itemText(self.parent.combo.currentIndex())
-        self.cmd = str(com+" "+self.parent.runEdit.text())
-        if self.cmd != "":
-            self.parent.textEdit.clear()
-            self.run()
+        self.cmd = str(com+" "+self.parent.combo2.itemText(self.parent.combo2.currentIndex()))
+        self.parent.textEdit.clear()
+        self.run()
         
     def finished(self,no,cmd):
         if(no == 0):

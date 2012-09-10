@@ -54,6 +54,9 @@ class Config:
     
     def projects(self):
         return self.read('Project')
+    def setProject(self,pros):
+        self.data['Project'] = pros
+        self.write()
     
     def closedProjects(self):
         return self.read('ClosedProject')
@@ -66,28 +69,28 @@ class Config:
     
     def files(self):
         return self.read('File')
-    
-    def setfiles(self,files):
+    def setFile(self,files):
         self.data['File'] = files
-        
-    def setProjects(self,pros):
-        self.data['Project'] = pros
-    
+        self.write()
+          
     def adb(self):
         return self.read('ADB')
     def setAdb(self,val):
-        self.data['ADB'][0] = val[0]
-        self.data['ADB'][1] = val[1]
-        self.data['ADB'][2] = val[2]
-        self.data['ADB'][3] = val[3]
+        self.data['ADB'] = val
         self.write()
         
-    def cmd(self):
+    def cmds(self):
         return self.read('CMD')
     
     def setCmd(self,val):
-        for i in range(0,len(val)):
-            self.data['CMD'][i] = val[i]
+        self.data['CMD'] = val
+        self.write()
+    
+    def params(self):
+        return self.read('PARAM')
+    
+    def setParam(self,val):
+        self.data['PARAM'] = val
         self.write()
         
     
@@ -97,73 +100,15 @@ class Config:
         return self.readSetting('styleindex')
     def setstyleIndex(self,value):
         self.writeSetting("styleindex",value)
+        
+    def todo(self):
+        return self.read('TODO')
+    def setTodo(self,val):
+        self.data['TODO'] = val
+        self.write()
     
     def write(self):
         try:
             yaml.dump(self.data,open(self.configfile,'w'),default_flow_style=False)
         except:
             QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile) 
-    
-    def check(self,data,nfile):
-        #Python store reference to list so this points back to data
-        #so awesome and weird
-        #Must implement to add data not to rewrite data sad
-        if data != None:
-            for i in data:
-                if(i == nfile):
-                    return False
-        return True
-        
-                       
-    def addFile(self,nfile):
-        files = self.files()
-        if(files == None):
-            files = []
-        if(self.check(files,nfile)):
-            if(os.path.exists(nfile)):
-                files.append(nfile)
-                self.setfiles(files)
-                try:
-                    yaml.dump(self.data,open(self.configfile,'w'),default_flow_style=False)
-                except:
-                    QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile) 
-            else:
-                QMessageBox.about(self,"Can't Open","File Does not Exist\n")
-        else:
-            #print "File is Already Saved" #need to fix this
-            pass
-                
-    def removeFile(self,nfile):
-        files = self.files()
-        if not (self.check(files,nfile)):
-            files.remove(nfile)
-            try:
-                yaml.dump(self.data,open(self.configfile,'w'),default_flow_style=False)
-            except:
-                QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile) 
-                
-    def addProject(self,nfile):
-        pros = self.projects()
-        if pros == None:
-            pros = []
-        if(self.check(pros,nfile)):
-            if(os.path.exists(nfile)):
-                pros.append(nfile)
-                self.setProjects(pros)
-                try:
-                    yaml.dump(self.data,open(self.configfile,'w'),default_flow_style=False)
-                except:
-                    QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile) 
-            else:
-                QMessageBox.about(self,"Can't Open","Folder Does not Exist\n")
-        else:
-            pass
-                
-    def removeProject(self,nfile):
-        pros = self.projects()
-        if not(self.check(pros,nfile)):
-            pros.remove(nfile)
-            try:
-                yaml.dump(self.data,open(self.configfile,'w'),default_flow_style=False)
-            except:
-                QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile) 

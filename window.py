@@ -2,16 +2,17 @@ from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QHBoxLayout,QVBoxLayout,QTabWidget,QToolBar,QTextEdit,
                          QLineEdit,QPushButton,QToolButton,QSplitter,QStatusBar,
                          QMainWindow,QPalette,QColor,QSlider,QFontDialog,QLabel,
-                         QFont,QComboBox,QFileDialog,QInputDialog)      
+                         QFont,QComboBox,QFileDialog,QInputDialog,QProgressBar)      
 from PyQt4.QtCore import QSize,Qt,QStringList
-from Widget import (Tab,ProjectTree,ErrorTree,OutlineTree,DialogAndroid,DialogAbout,
-                    DialogAnt,DialogSquirrel,DialogTodo)
+from Widget import (EditorTab,Tiler,TreeTab,OutputTab,
+                    ProjectTree,ErrorTree,OutlineTree,
+                    DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo)
 from Widget.style import Styles
 from stylesheet import *
 
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
                      iconSize,iconDir,adblist,Icons,os_icon,
-                     fontName,fontSize,cmds)
+                     fontName,fontSize)
 
 class Window(QMainWindow):
     def __init__(self,parent = None):
@@ -24,24 +25,33 @@ class Window(QMainWindow):
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setMargin(0)
         self.styleIndex = config.styleIndex()
-        self.cmdList =cmds
+        self.cmdList = config.cmds()
+        self.paramList = config.params()
         self.mode = config.mode()
         
         #TabWidgets
+        #This parent is for findbar and vetical layount do not remove
         self.tab_1 = QWidget(self)
         self.tab_1.setMinimumWidth(800)
-        self.tabWidget = Tab(self.tab_1)
+        self.tabWidget = EditorTab(self)
         self.VericalLayout = QVBoxLayout(self.tab_1)
         self.VericalLayout.setMargin(0)
         self.VericalLayout.addWidget(self.tabWidget)
         
-        self.tabWidget_2 = QTabWidget(self)
+        self.tabWidget_2 = TreeTab(self)
         #self.tabWidget_2.setMaximumWidth(200)
-        self.tabWidget_3 = QTabWidget(self)
+        self.tabWidget_3 = OutputTab(self)
         self.tabWidget_3.setMaximumHeight(200)#260
-        
-        
+        self.tiler = Tiler(self)
+        self.tiler.setMinimumHeight(100) 
         self.tabWidget.tabBar().setStyleSheet(stletabb)
+        self.tabWidget_2.currentChanged.connect(self.closeExplorer)
+        self.tabWidget_3.currentChanged.connect(self.closeConsole)
+        self.tabWidget.setTabsClosable(True)
+        self.tabWidget.setTabShape(0)
+        #self.tiler.currentChanged.connect(self.closeDesigner)
+        self.tiler.setTabsClosable(True)
+        self.tiler.setTabShape(0)
          
         #Tree
         self.tab_5 = QWidget()
@@ -84,7 +94,6 @@ class Window(QMainWindow):
         self.textEdit = QTextEdit()
         self.inputLayout = QHBoxLayout()
         self.inputLayout.setMargin(0)
-        self.runEdit = QLineEdit()
         self.fileButton = QPushButton()
         self.fileButton.setText("File")
         self.fileButton.clicked.connect(self.getFile)
@@ -92,6 +101,7 @@ class Window(QMainWindow):
         self.runButton.setFlat(True)
         self.runButton.setIcon(Icons.go)
         self.combo = QComboBox()
+        self.combo.setFixedWidth(100)
         self.comboAdd = QPushButton()
         self.comboAdd.setIcon(Icons.add)
         self.comboAdd.setFlat(True)
@@ -99,15 +109,36 @@ class Window(QMainWindow):
         self.comboDel = QPushButton()
         self.comboDel.setIcon(Icons.close_view)
         self.comboDel.setFlat(True)
-        #self.comboDel.clicked.connect(self.delCmd)
-        for text in self.cmdList:
-            self.combo.addItem(text)
+        self.comboDel.clicked.connect(self.delCmd)
+        self.combo2 = QComboBox()
+        self.combo2.setFixedWidth(600)
+        self.combo2Add = QPushButton()
+        self.combo2Add.setIcon(Icons.add)
+        self.combo2Add.setFlat(True)
+        self.combo2Add.clicked.connect(self.addParam)
+        self.combo2Del = QPushButton()
+        self.combo2Del.setIcon(Icons.close_view)
+        self.combo2Del.setFlat(True)
+        self.combo2Del.clicked.connect(self.delParam)
+        if(self.checkHasValue(self.cmdList)):
+            for cmd in self.cmdList:
+                self.combo.addItem(cmd)
+        else:
+            self.cmdList = []
+        if(self.checkHasValue(self.paramList)):
+            for param in self.paramList:
+                self.combo2.addItem(param)
+        else:
+            self.paramList = []
+        
         self.horizontalLayout_2.addWidget(self.textEdit)
-        self.inputLayout.addWidget(QLabel("Input:"))
+        self.inputLayout.addWidget(QLabel("Command:"))
         self.inputLayout.addWidget(self.combo)
         self.inputLayout.addWidget(self.comboAdd)
         self.inputLayout.addWidget(self.comboDel)
-        self.inputLayout.addWidget(self.runEdit)
+        self.inputLayout.addWidget(self.combo2)
+        self.inputLayout.addWidget(self.combo2Add)
+        self.inputLayout.addWidget(self.combo2Del)
         self.inputLayout.addWidget(self.fileButton)
         self.inputLayout.addWidget(self.runButton)
         self.horizontalLayout_2.addLayout(self.inputLayout)
@@ -118,6 +149,12 @@ class Window(QMainWindow):
         self.horizontalLayout_4.setMargin(0)
         self.errorTree = ErrorTree(self.tab_7)
         self.horizontalLayout_4.addWidget(self.errorTree)
+        
+        #Tiler
+        #self.tab_11 = QWidget()
+        #self.horizontalLayout_11 = QHBoxLayout(self.tab_11)
+        #self.horizontalLayout_11.setMargin(0)
+        #self.horizontalLayout_11.addWidget(self.tiler)
         
         #Find
         self.tab_8 = QWidget()
@@ -170,26 +207,17 @@ class Window(QMainWindow):
         self.VericalLayout.addWidget(self.tab_8)
         self.tab_8.hide()
         
-        
-        
-        #Tab Widget Init
+        #Tabwidgets
         self.tabWidget_2.addTab(self.tab_5,"Projects")
         self.tabWidget_2.addTab(self.tab_2,"Outline")
         self.tabWidget_2.addTab(QWidget(self),"")
         self.tabWidget_2.setTabIcon(2,Icons.close_view)
-        self.tabWidget_2.currentChanged.connect(self.closeExplorer)
-        
         self.tabWidget_3.addTab(self.tab_7,"Error")
         self.tabWidget_3.addTab(self.tab_6,"Output")
         self.tabWidget_3.addTab(QWidget(self),"")
         self.tabWidget_3.setTabIcon(0,Icons.error)
         self.tabWidget_3.setTabIcon(1,Icons.console_view)
         self.tabWidget_3.setTabIcon(2,Icons.close_view)
-        self.tabWidget_3.currentChanged.connect(self.closeConsole)
-        
-        self.tabWidget.setTabsClosable(True)
-        self.tabWidget.setTabShape(0)
-        
         
         #Splitters
         self.split1 = QSplitter(Qt.Horizontal)
@@ -199,6 +227,8 @@ class Window(QMainWindow):
         
         self.split2 = QSplitter(Qt.Vertical)
         self.split2.addWidget(self.split1)
+        self.split2.addWidget(self.tiler)
+        self.tiler.hide()
         self.split2.addWidget(self.tabWidget_3)
         self.tabWidget_3.hide()
         self.horizontalLayout.addWidget(self.split2)
@@ -210,11 +240,20 @@ class Window(QMainWindow):
         self.aboutButton.setFlat(True)
         self.aboutButton.setIcon(Icons.anchor)
         self.aboutButton.clicked.connect(self.about)
+        self.expButton = QPushButton(self)
+        self.expButton.setFlat(True)
+        self.expButton.setIcon(Icons.prj)
+        self.expButton.clicked.connect(self.exp)
         self.cmdButton = QPushButton(self)
         self.cmdButton.setFlat(True)
         self.cmdButton.setIcon(Icons.console_view)
         self.cmdButton.clicked.connect(self.cmd)
         self.cmdButton.setShortcut('Ctrl+D')
+        self.imgButton = QPushButton(self)
+        self.imgButton.setFlat(True)
+        self.imgButton.setIcon(Icons.color_palette)
+        self.imgButton.clicked.connect(self.design)
+        self.imgButton.setShortcut('Ctrl+I')
         self.findButton = QPushButton(self)
         self.findButton.setFlat(True)
         self.findButton.setIcon(Icons.find)
@@ -232,12 +271,19 @@ class Window(QMainWindow):
         self.fontButton.setFlat(True)
         self.fontButton.setIcon(Icons.font)
         self.fontButton.clicked.connect(self.setFont)
+        self.progressbar = QProgressBar()
+        self.progressbar.setMinimum(0)
+        self.progressbar.setMaximum(100)
         self.statusbar.addWidget(self.aboutButton)
+        self.statusbar.addWidget(self.expButton)
         self.statusbar.addWidget(self.cmdButton)
+        self.statusbar.addWidget(self.imgButton)
         self.statusbar.addWidget(self.findButton)
         self.statusbar.addWidget(self.zoominButton)
         self.statusbar.addWidget(self.zoomoutButton)
         self.statusbar.addWidget(self.fontButton)
+        self.statusbar.addWidget(self.progressbar)
+        self.progressbar.hide()
         #self.statusbar.setFixedHeight(18)
         
         #Init colorstyling
@@ -252,7 +298,7 @@ class Window(QMainWindow):
         
     def initToolBar(self):
         self.action_NewProject = QAction(Icons.newprj, 'Project', self)
-        self.action_NewProject.triggered.connect(self.newProject)
+        self.action_NewProject.triggered.connect(self.treeWidget.newProject)
         self.action_NewProject.setToolTip("Create a New Project")
 
         self.action_Open = QAction(Icons.open, 'Open', self)
@@ -277,12 +323,12 @@ class Window(QMainWindow):
         self.action_Run.triggered.connect(self.adb.run)
         self.action_RunFile = QAction(Icons.go, 'Cmd', self)
         self.action_RunFile.triggered.connect(self.command.setCmd)
-        self.runEdit.returnPressed.connect(self.command.setCmdLine)
         self.runButton.clicked.connect(self.command.setCmdLine)
         self.action_Stop = QAction(Icons.stop, 'Stop', self)
         self.action_Stop.setShortcut('Ctrl+Q')
         self.action_Stop.triggered.connect(self.adb.stop)
         self.action_Design = QAction(Icons.color_palette, 'Design', self)
+        self.action_Design.triggered.connect(self.design)
         self.action_Todo = QAction(Icons.task_set, 'Todo', self)
         self.action_Todo.triggered.connect(self.todo)
         
@@ -312,12 +358,16 @@ class Window(QMainWindow):
         
         
         action_explorer = QAction("Show Explorer",self)
-        action_explorer.triggered.connect(lambda x=2:self.closeExplorer(2))
-        men.addAction(action_explorer)
+        action_explorer.triggered.connect(self.exp)
         action_console = QAction("Show Console",self)
-        action_console.triggered.connect(lambda x=2:self.closeConsole(2))
+        action_console.triggered.connect(self.cmd)
+        action_designer = QAction("Show Designer",self)
+        action_designer.triggered.connect(self.design)
+        action_Indentation = QAction("Indentation Guides",self)
+        men.addAction(action_explorer)
         men.addAction(action_console)
-        men.addAction(QAction("Idents",self))
+        men.addAction(action_designer)
+        men.addAction(action_Indentation)
         men.addSeparator()
         men.addAction(QAction("TabWidth",self))
         men.addAction(self.tabsSliderAction)
@@ -325,7 +375,7 @@ class Window(QMainWindow):
         men.addAction(QAction("Threshold",self))
         men.addAction(self.threshSliderAction)
         
-        self.action_Options = QAction(Icons.cmpC_pal, 'Options', self)
+        self.action_Options = QAction(Icons.emblem_system, 'Options', self)
         self.action_Options.setMenu(men)
         self.action_Options.triggered.connect(self.options)
         
@@ -445,7 +495,7 @@ class Window(QMainWindow):
             self.action_Squirrel.setChecked(True)
             
     def ios(self):
-        print "Nonr"
+        print "ios"
         
     
     def sq(self):
@@ -490,6 +540,12 @@ class Window(QMainWindow):
             self.tab_8.show()
         else:
             self.tab_8.hide()
+            
+    def exp(self):
+        if(self.tabWidget_2.isHidden()):
+            self.tabWidget_2.show()
+        else:
+            self.tabWidget_2.hide()
     
     def cmd(self):
         if(self.tabWidget_3.isHidden()):
@@ -497,6 +553,23 @@ class Window(QMainWindow):
         else:
             self.tabWidget_3.hide()
             
+    def design(self):
+        if(self.tiler.isHidden()):
+            self.tiler.show()
+        else:
+            self.tiler.hide()
+            
+    def closeDesigner(self,no):
+        pass
+        '''
+        if(no == self.tiler.closeIndex()):
+            if(self.tiler.isHidden()):
+                self.tiler.show()
+            else:
+                self.tiler.setCurrentIndex(1)
+                self.tiler.hide()
+        '''
+        
     def closeConsole(self,no = 2):
         if(no == 2):
             if(self.tabWidget_3.isHidden()):
@@ -511,6 +584,9 @@ class Window(QMainWindow):
             else:
                 self.tabWidget_2.setCurrentIndex(0)
                 self.tabWidget_2.hide()
+                
+    def updatePBar(self, val):
+         self.progressbar.setValue(val)
                 
 #-----------------------------------------------------------------------------------#
 #   Editor Functions                                                                #
@@ -591,7 +667,14 @@ class Window(QMainWindow):
     def getFile(self):
         fname = str(QFileDialog.getOpenFileName(self,"Open File", '.', "Files (*.*)"))
         if not (fname == ""):
-            self.runEdit.setText(fname)
+            index = self.combo2.currentIndex()
+            text = str(self.combo2.itemText(index))+" "+fname
+            self.combo2.setItemText(index,text)
+            self.paramList.pop(index)
+            self.paramList.insert(index,text)
+            config.setParam(self.paramList)
+            
+            
             
     def addCmd(self,index):
         text, ok = QInputDialog.getText(self, 'Add Command', 'Command:')
@@ -602,7 +685,32 @@ class Window(QMainWindow):
                 #print self.cmdList
                 self.combo.addItem(cmd)
                 config.setCmd(self.cmdList)
+                config.setParam(self.paramList)
                 
-    def delCmd(self,index):
-        pass
+    def delCmd(self):
+        index = self.combo.currentIndex()
+        self.combo.removeItem(index)
+        self.cmdList.pop(index)
+        #print self.cmdList
+        config.setCmd(self.cmdList)
         
+    def addParam(self,index):
+        text, ok = QInputDialog.getText(self, 'Add Parameters', 'Params:')
+        if(ok):
+            if(str(text) != ''):
+                param = str(text)
+                self.paramList.append(param)
+                self.combo2.addItem(param)
+                config.setParam(self.paramList)
+                
+    def delParam(self):
+        index = self.combo2.currentIndex()
+        self.combo2.removeItem(index)
+        self.paramList.pop(index)
+        config.setParam(self.paramList)
+        
+    def checkHasValue(self,list):
+        if(list != None and len(list) != 0):
+            return True
+        else:
+            return False

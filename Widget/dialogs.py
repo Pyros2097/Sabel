@@ -214,7 +214,7 @@ class DialogAbout(QtGui.QMessageBox):
                  POSSIBILITY OF SUCH DAMAGE.
                 """ % (__version__,PY_VERSION,QtCore.QT_VERSION_STR, QtCore.PYQT_VERSION_STR,OS_NAME)
         self.about(self,"About",text)
-        
+           
 class TodoWidget(QtGui.QWidget):
     def __init__(self,parent,task=None):
         QtGui.QWidget.__init__(self,parent)
@@ -225,8 +225,8 @@ class TodoWidget(QtGui.QWidget):
         self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.label)
         self.task = QtGui.QLineEdit(self)
         self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole, self.task)
-        self.done = QtGui.QCheckBox(self)
-        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.done)
+        self.ok = QtGui.QPushButton("add",self)
+        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.ok)
         self.label_2 = QtGui.QLabel(self)
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_2)
         self.dateTime = QtGui.QDateTimeEdit(self)
@@ -234,53 +234,8 @@ class TodoWidget(QtGui.QWidget):
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.dateTime)
         
         self.verticalLayout.addLayout(self.formLayout)
-        self.label.setBuddy(self.task)
-        self.label_2.setBuddy(self.dateTime)
-        #QtCore.QObject.connect(self.dateTime, QtCore.SIGNAL(("dateTimeChanged(QDateTime)")), self.save)
-        #QtCore.QObject.connect(self.done, QtCore.SIGNAL(("stateChanged(int)")), self.save)
-        #QtCore.QObject.connect(self.task, QtCore.SIGNAL(("textChanged(QString)")), selfsave)
-        #QtCore.QObject.connect(self.tags, QtCore.SIGNAL(("textChanged(QString)")), self.save)
-        self.setTabOrder(self.task, self.done)
-        #self.setWindowTitle("Form")
         self.label.setText("Task:")
-        self.done.setText("Finished")
-        self.label_2.setText("Due Date:")
         self.item=None
-
-    def edit(self,item):
-        """Takes an item, loads the widget with the item's
-        task contents, shows the widget"""
-        self.item=item
-        self.task.setText(self.item.task.text)
-        self.done.setChecked(self.item.task.done)
-        dt=self.item.task.date
-        if dt:
-            self.dateTime.setDate(QtCore.QDate(dt.year,dt.month,dt.day))
-            self.dateTime.setTime(QtCore.QTime(dt.hour,dt.minute))
-        else:
-            self.dateTime.setDateTime(QtCore.QDateTime())
-        self.show()
-        
-    def save(self):
-        if self.item==None: 
-            return
-        # Save date and time in the task
-        d=self.dateTime.date()
-        t=self.dateTime.time()
-        
-        self.item.task.date=datetime(
-            d.year(),
-            d.month(),
-            d.day(),
-            t.hour(),
-            t.minute()
-        )
-        
-        # Save text in the task
-        self.item.task.text=str(self.task.text())
-        # Display the data in the item
-        self.item.setText(0,self.item.task.text)
-        self.item.setText(1,str(self.item.task.date))
         
 class DialogTodo(QtGui.QDialog):
     def __init__(self,parent = None):
@@ -297,32 +252,66 @@ class DialogTodo(QtGui.QDialog):
         self.list.setUniformRowHeights(True)
         self.list.setAllColumnsShowFocus(True)
         self.list.setSortingEnabled(True)
-        self.list.headerItem().setText(0,"Date")
-        self.list.headerItem().setText(1,"Task")
+        self.list.headerItem().setText(0,"Task")
+        self.list.setColumnCount(1)
+        self.list.setStyleSheet("QTreeWidget::item{height:24px;font-size:20px}");
+        #self.list.headerItem().setText(1,"Date")
         self.editor = TodoWidget(self.horizontalLayoutWidget) 
         self.toolBar = QtGui.QToolBar(self)
         self.actionDelete_Task = QtGui.QAction(self)
         self.actionDelete_Task.setIcon(Icons.close_view)
+        self.actionDelete_Task.triggered.connect(self.delItem)
         self.actionNew_Task = QtGui.QAction(self)
         self.actionNew_Task.setIcon(Icons.add)
-        self.actionNew_Task.triggered.connect(self.add)
+        self.actionNew_Task.triggered.connect(self.showAddBar)
         self.actionEdit_Task = QtGui.QAction(self)
-        self.actionEdit_Task.setChecked(False)
-        self.actionEdit_Task.setIcon(Icons.cut_edit)
         self.toolBar.addAction(self.actionNew_Task)
         self.toolBar.addAction(self.actionDelete_Task)
-        self.toolBar.addAction(self.actionEdit_Task)
         self.actionDelete_Task.setShortcut("Del")
         self.horizontalLayout.addWidget(self.toolBar)
         self.horizontalLayout.addWidget(self.list)
         self.horizontalLayout.addWidget(self.editor)
         self.editor.hide()
+        self.editor.ok.clicked.connect(self.enterText)
+        self.taskList = []
+        temp = config.todo()
+        if(temp != None):
+            if(len(temp) != 0):
+                for i in temp:
+                    self.addItem(i)
+                
         
-    def add(self):
+    def showAddBar(self):
         if(self.editor.isHidden()):
             self.editor.show()
         else:
             self.editor.hide()
+            
+    def enterText(self):
+        text = self.editor.task.text()
+        self.addItem(str(text))
+            
+    def addItem(self,text):
+        if(text != ""):
+            if(self.taskList != None):
+                if(len(self.taskList) != 0):
+                    if(text not in self.taskList):
+                        self.taskList.append(text)
+                        i = QtGui.QTreeWidgetItem(self.list)
+                        i.setText(0,text)
+                        self.list.addTopLevelItem(i)
+                        config.setTodo(self.taskList)
+                else:
+                    self.taskList.append(text)
+                    i = QtGui.QTreeWidgetItem(self.list)
+                    i.setText(0,text)
+                    self.list.addTopLevelItem(i)
+                    config.setTodo(self.taskList)
+                    
+    def delItem(self):
+        item = self.list.takeTopLevelItem(self.list.indexOfTopLevelItem(self.list.currentItem()))
+        self.taskList.remove(item.text(0))
+        config.setTodo(self.taskList)
         
 class DialogAbout2(QtGui.QDialog):
     def __init__(self, parent=None):

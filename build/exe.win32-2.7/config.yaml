@@ -1,5 +1,5 @@
 ADB:
-- C:/CODE/main.nut /sdcard/
+- C:/CODE/sabel.png /sdcard/
 - com.emo_framework.examples/com.emo_framework.EmoActivity
 - EmoFramework
 - com.emo_framework.examples
@@ -7,30 +7,35 @@ ANT:
 - android update project --target 5 --path .
 - ant debug install
 CMD:
-- ADD
 - GCC
 - CMD
 - PYTHON
 - ADB
 - G++
 - Make
-- Sq
+- SQ
+- JAVA
+ClosedProject:
+- 0
+- 0
 File:
-- C:/CODE/assets/common.nut
-- C:/CODE/assets/creditscene.nut
-- C:/CODE/assets/logoscene.nut
-- C:/PaintOnAPanel.py
+- C:/CODE/datad/runtime.nut
+PARAM:
+- dude
 Project:
-- C:/CODE/data/
-- C:/CODE/assets/
-Recent:
-- C:\CODE\main.nut
+- C:/CODE/datad/
+Recent: []
 Setting:
   device: 1
   fontname: Courier New
   fontsize: 10
   iconsize: 16
+  mode: 0
   styleindex: 8
+  tabwidth: 4
   thresh: 2
   workspace: C:/CODE/
 Style: 0
+TODO:
+- Remove Headers
+- Rewrite code

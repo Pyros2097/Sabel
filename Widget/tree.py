@@ -1,5 +1,6 @@
 from PyQt4.QtGui import (QTreeWidgetItem,QTreeWidget,QMessageBox,
-                         QIcon,QDrag,QMenu,QAction,QInputDialog,QCursor,QToolBar)
+                         QIcon,QDrag,QMenu,QAction,QInputDialog,QCursor,QToolBar,
+                         QHeaderView,QFileDialog)
 from PyQt4.QtCore import SIGNAL,Qt,QMimeData,QUrl,QPoint
 from globals import (oslistdir,ospathisdir,ospathsep,ospathjoin,ospathexists,
                      ospathbasename,os_icon,osremove,osrename,ospathdirname,
@@ -11,7 +12,7 @@ class Dir(QTreeWidgetItem):
         QTreeWidgetItem.__init__(self,parent)
         self.path = ospathjoin(path,name)
         self.setText (0, name)
-        self.setIcon(0,Icons.package)
+        self.setIcon(0,Icons.foldej)
     
     def getPath(self):
         return self.path
@@ -30,28 +31,30 @@ class File(QTreeWidgetItem):
         self.setText (0, name)
         self.doc = False
         self.pic = False
+        self.audio = False
         #mime = QMimeData()
         #mime.setUrls([QUrl.fromLocalFile(self.path)])
         #print self.path+":"+str(mime.hasUrls())
+        self.setIcon(0,Icons.file_obj)
         self.Doc(name)
         self.Pic(name)
-        if not (self.doc and self.pic):
-            self.setIcon(0,Icons.file_obj)
-        
+        self.Audio(name)
         
     def Doc(self,name):
         for e in self.ext:
             if name.endswith(e):
                 self.setIcon(0,Icons.file_obj)
                 self.doc = True
-        #if(name.endswith(".txt") or name.endswith(".nut") or name.endswith(".py")):
-        #    self.setIcon(0,os_icon("file_obj"))
-        #    self.doc = True
             
     def Pic(self,name):
         if(name.endswith(".png") or name.endswith(".gif") or name.endswith(".jpg")):
-            self.setIcon(0,Icons.file_obj)
+            self.setIcon(0,Icons.image)
             self.pic = True
+            
+    def Audio(self,name):
+        if(name.endswith(".wav") or name.endswith(".mp3") or name.endswith(".ogg")):
+            self.setIcon(0,Icons.image)
+            self.audio = True
         
     def getPath(self):
         return self.path
@@ -65,6 +68,8 @@ class File(QTreeWidgetItem):
         return self.doc
     def isPic(self):
         return self.pic
+    def isAudio(self):
+        return self.audio
         
 class Project(QTreeWidgetItem):
     Count = -1
@@ -107,7 +112,15 @@ class ProjectTree(QTreeWidget):
         self.connect(self, SIGNAL("dropped"), self.addItem)
         self.projects = []
         self.closed = config.closedProjects()
-        #print self.closed[0]
+        if(self.closed == None):
+            self.closed = []
+        self.header().setStretchLastSection(False)
+        self.header().setResizeMode(QHeaderView.ResizeToContents)
+        #self.setColumnWidth(0,280)
+        
+    def initProjects(self):
+        for pro in config.projects():
+            self.createProject(pro)
             
     def readDir(self,parent,path):
         for d in oslistdir(path):
@@ -138,21 +151,46 @@ class ProjectTree(QTreeWidget):
             if not ospathisdir(ospathjoin(path,f)):
                 if not ospathjoin(f).startswith('.'):
                         File(parent,f,path)
+                        
+                        
+    def newProject(self):
+        fname = str(QFileDialog.getExistingDirectory(self,"Open Project Folder"))
+        if not (fname == ""):
+            fname = fname+"/"
+            if len(self.projects) != 0:
+                if(fname in self.projects):
+                    QMessageBox.about(self, "Already Open","Project Already Open\n"+fname)
+                else:
+                    self.createProject(fname)
+            else:
+                self.createProject(fname)
+    
+    #Important all projects must go through this          
+    def createProject(self,startDir):
+        if(ospathexists(startDir)):
+            self.projects.append(startDir)
+            self.addProject(startDir)
+            config.setProject(self.projects)
+            #print "adding"+startDir
+        else:
+            #print "removing"+startDir
+            self.projects.remove(startDir)
+            config.setProject(self.projects)
+            QMessageBox.about(self,"Can't Open Project","Project Does Not Exist %s"%startDir)
+    
                 
                 
     def addProject(self,startDir):
-        if(ospathexists(startDir)):
-            self.projects.append(startDir)
-            if(self.closed[self.projects.index(startDir)] == 0):
-                i = Project(self,startDir)
-                self.addTopLevelItem(i)
-                self.readDir(i,startDir)
-                self.readMainFiles(i,startDir)
-            else:
-                i = Project(self,startDir,True)
-                self.addTopLevelItem(i)    
+        if(len(self.closed) == len(self.projects)):
+            self.closed.append(0)
+        if(self.closed[self.projects.index(startDir)] == 0):
+            i = Project(self,startDir)
+            self.addTopLevelItem(i)
+            self.readDir(i,startDir)
+            self.readMainFiles(i,startDir)
         else:
-            QMessageBox.about(self,"Can't Close Project","Project Does Not Exist %s"%startDir)
+            i = Project(self,startDir,True)
+            self.addTopLevelItem(i)    
             
     def addClosedProject(self,startDir):
         if(ospathexists(startDir)):
@@ -162,6 +200,16 @@ class ProjectTree(QTreeWidget):
             config.setClosedProjects(self.closed)
         else:
             QMessageBox.about(self,"Can't Close Project","Project Does Not Exist %s"%startDir)
+    
+    def removeProject(self,item):
+        itemPath = item.getPath()
+        self.closed.pop(self.projects.index(itemPath))
+        config.setClosedProjects(self.closed)
+        self.projects.remove(itemPath)
+        config.setProject(self.projects)
+        self.takeTopLevelItem(self.indexOfTopLevelItem(item))
+        
+        
       
     def addItem(self,links):
         print links
@@ -249,13 +297,14 @@ class ProjectTree(QTreeWidget):
         action_DeleteProject = QAction(Icons.trash,'Delete', self)
         action_DeleteProject.triggered.connect(lambda:self.deleteProject(item))
         
-        
+        action_CreateProject = QAction('Create', self)
+        action_CreateProject.triggered.connect(lambda:self.create(item))
         action_BuildProject = QAction('Build', self)
         action_BuildProject.triggered.connect(lambda:self.build(item))
         action_BuildRunProject = QAction('Build and Run', self)
         action_BuildRunProject.triggered.connect(lambda:self.buildRun(item))
         action_CleanProject = QAction('Clean', self)
-        action_CleanProject.triggered.connect(lambda:self.buildRun(item))
+        action_CleanProject.triggered.connect(lambda:self.clean(item))
         action_RunProject = QAction('Run', self)
         action_RunProject.triggered.connect(lambda:self.run(item))
         if(item.isProject()):
@@ -263,6 +312,7 @@ class ProjectTree(QTreeWidget):
                 menu.addAction(action_Folder)
                 menu.addAction(action_File)
                 menu.addSeparator()
+                menu.addAction(action_CreateProject)
                 menu.addAction(action_BuildProject)
                 menu.addAction(action_BuildRunProject)
                 menu.addAction(action_RunProject)
@@ -331,14 +381,6 @@ class ProjectTree(QTreeWidget):
                 print ind+pro
                 self.addProject(pro)
         
-    def removeProject(self,item):
-        itemPath = item.getPath()
-        self.closed.pop(self.projects.index(itemPath))
-        config.setClosedProjects(self.closed)
-        self.projects.remove(itemPath)
-        config.removeProject(itemPath)
-        self.takeTopLevelItem(self.indexOfTopLevelItem(item))
-        
     
     def newFolder(self,item):
         text,ok = QInputDialog.getText(self,"QInputDialog::getText()","Name:")
@@ -380,14 +422,16 @@ class ProjectTree(QTreeWidget):
     def pasteDir(self,item):
         pass
     
+    def create(self,item):
+        self.emit(SIGNAL("create"),item)
     def build(self,item):
-        print item.getPath() 
+        self.emit(SIGNAL("build"),item)
     def buildRun(self,item):
-        print item.getPath()  
+        self.emit(SIGNAL("buildRun"),item)
     def clean(self,item):
-        print item.getPath()
+        self.emit(SIGNAL("clean"),item)
     def run(self,item):
-        pass
+        self.emit(SIGNAL("run"),item)
         
     def renameProject(self,item):
         itempath = item.getPath()
