@@ -24,15 +24,7 @@ class Editor(QsciScintilla):
             self.setEolMode(self.EolMac)
         self.init()
         self.setTabWidth(1)
-        #self.installEventFilter(self)
         
-    #def eventFilter(self, widget, event):
-    #    if (event.type() == QEvent.ShortcutOverride and widget is self):
-    #        #if event.type
-    #        event.accept()
-    #        return True
-    #    return QWidget.eventFilter(self, widget, event)
-    
     def init(self):
         #Margin
         #print self.marginType(self.SymbolMargin)

@@ -8,13 +8,16 @@ class WorkThread(QThread):
         self.process.readyReadStandardOutput.connect(self.readOutput)
         self.process.readyReadStandardError.connect(self.readErrors)
         self.process.finished.connect(self.fini)
-        
-        
+        #self.procDone = QtCore.pyqtSignal(bool)
+              
     def setCmd(self,val):
         self.cmd = val
         
     def kill_process(self):
         self.process.kill()
+        
+    def close_process(self):
+        self.process.close()
         
     def run(self):
         if(self.process.isOpen()):
@@ -28,6 +31,7 @@ class WorkThread(QThread):
         self.exec_()
         self.process.waitForFinished()
         self.process.kill()
+        #self.procDone.emit(True)
         
     def run2(self):
         if(self.process.isOpen()):

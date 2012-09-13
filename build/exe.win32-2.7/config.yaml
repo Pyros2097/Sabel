@@ -18,12 +18,19 @@ CMD:
 ClosedProject:
 - 0
 - 0
+- 0
 File:
-- C:/CODE/datad/runtime.nut
+- C:/CODE/assetsd/main.nut
+- C:/CODE/assetsd/creditscene.nut
+- C:/CODE/assetsd/logoscene.nut
+- C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/index.html
+- C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/style.css
+- C:/neko-1.8.2/Makefile
 PARAM:
 - dude
 Project:
 - C:/CODE/datad/
+- C:/CODE/assetsd/
 Recent: []
 Setting:
   device: 1
@@ -39,3 +46,4 @@ Style: 0
 TODO:
 - Remove Headers
 - Rewrite code
+- Dude Check This Out

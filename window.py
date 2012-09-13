@@ -11,8 +11,7 @@ from Widget.style import Styles
 from stylesheet import *
 
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
-                     iconSize,iconDir,adblist,Icons,os_icon,
-                     fontName,fontSize)
+                     iconSize,iconDir,Icons)
 
 class Window(QMainWindow):
     def __init__(self,parent = None):
@@ -62,15 +61,12 @@ class Window(QMainWindow):
         self.treeWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.treeWidget.horizontalScrollBar().show()
         self.treebar = QToolBar()
-        action_Folder = QAction(Icons.newfolder,'New Folder', self)
-        action_Folder.triggered.connect(self.about)
         action_Android = QAction(Icons.android,'Android', self)
         action_Android.triggered.connect(self.android)
         action_Ant = QAction(Icons.ant_view,'Ant', self)
         action_Ant.triggered.connect(self.ant)
         action_Squirrel = QAction(Icons.nut,'Squirrel', self)
         action_Squirrel.triggered.connect(self.squirrel)
-        self.treebar.addAction(action_Folder)
         self.treebar.addAction(action_Android)
         self.treebar.addAction(action_Ant)
         self.treebar.addAction(action_Squirrel)
@@ -111,7 +107,7 @@ class Window(QMainWindow):
         self.comboDel.setFlat(True)
         self.comboDel.clicked.connect(self.delCmd)
         self.combo2 = QComboBox()
-        self.combo2.setFixedWidth(600)
+        self.combo2.setFixedWidth(500)
         self.combo2Add = QPushButton()
         self.combo2Add.setIcon(Icons.add)
         self.combo2Add.setFlat(True)
@@ -132,10 +128,11 @@ class Window(QMainWindow):
             self.paramList = []
         
         self.horizontalLayout_2.addWidget(self.textEdit)
-        self.inputLayout.addWidget(QLabel("Command:"))
+        self.inputLayout.addWidget(QLabel("<b>Command:</b>"))
         self.inputLayout.addWidget(self.combo)
         self.inputLayout.addWidget(self.comboAdd)
         self.inputLayout.addWidget(self.comboDel)
+        self.inputLayout.addWidget(QLabel("<b>Parameters:</b>"))
         self.inputLayout.addWidget(self.combo2)
         self.inputLayout.addWidget(self.combo2Add)
         self.inputLayout.addWidget(self.combo2Del)
@@ -282,8 +279,8 @@ class Window(QMainWindow):
         self.statusbar.addWidget(self.zoominButton)
         self.statusbar.addWidget(self.zoomoutButton)
         self.statusbar.addWidget(self.fontButton)
-        self.statusbar.addWidget(self.progressbar)
-        self.progressbar.hide()
+        #self.statusbar.addWidget(self.progressbar)
+        #self.progressbar.hide()
         #self.statusbar.setFixedHeight(18)
         
         #Init colorstyling
@@ -293,185 +290,8 @@ class Window(QMainWindow):
         self.setCentralWidget(self.centralwidget)
         self.setStatusBar(self.statusbar)
         self.textEdit.setReadOnly(True)
-        self.fontName = fontName
         #QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         
-    def initToolBar(self):
-        self.action_NewProject = QAction(Icons.newprj, 'Project', self)
-        self.action_NewProject.triggered.connect(self.treeWidget.newProject)
-        self.action_NewProject.setToolTip("Create a New Project")
-
-        self.action_Open = QAction(Icons.open, 'Open', self)
-        self.action_Open.setShortcut('Ctrl+O')
-        self.action_Open.triggered.connect(self.fileOpen)
-        self.action_Open.setToolTip("Open File")
-
-        self.action_Save = QAction(Icons.save, 'Save', self)
-        self.action_Save.setShortcut('Ctrl+S')
-        self.action_Save.triggered.connect(self.fileSave)
-        self.action_Save.setToolTip("Save Current File")
-
-        self.action_SaveAll = QAction(Icons.saveall, 'SaveAll', self)
-        self.action_SaveAll.setShortcut('Ctrl+A')
-        self.action_SaveAll.triggered.connect(self.fileSaveAll)
-        self.action_SaveAll.setToolTip("Save All Files")
-        
-        self.action_Help = QAction(Icons.toc_open, 'Help', self)
-        self.action_Help.triggered.connect(self.help)
-        self.action_Run = QAction(Icons.run, 'Run', self)
-        self.action_Run.setShortcut('Ctrl+R')
-        self.action_Run.triggered.connect(self.adb.run)
-        self.action_RunFile = QAction(Icons.go, 'Cmd', self)
-        self.action_RunFile.triggered.connect(self.command.setCmd)
-        self.runButton.clicked.connect(self.command.setCmdLine)
-        self.action_Stop = QAction(Icons.stop, 'Stop', self)
-        self.action_Stop.setShortcut('Ctrl+Q')
-        self.action_Stop.triggered.connect(self.adb.stop)
-        self.action_Design = QAction(Icons.color_palette, 'Design', self)
-        self.action_Design.triggered.connect(self.design)
-        self.action_Todo = QAction(Icons.task_set, 'Todo', self)
-        self.action_Todo.triggered.connect(self.todo)
-        
-        men = QMenu()
-        #Threshold Slider
-        self.threshSlider = QSlider()
-        self.threshSlider.setTickPosition(QSlider.TicksLeft)
-        self.threshSlider.setOrientation(Qt.Horizontal)
-        self.threshSlider.setValue(config.thresh())
-        self.threshSlider.setMinimum(0)
-        self.threshSlider.setMaximum(5)
-        self.threshSlider.valueChanged.connect(self.setThreshold)
-        #self.threshSlider.setInvertedAppearance(True)
-        self.threshSliderAction = QWidgetAction(men)
-        self.threshSliderAction.setDefaultWidget(self.threshSlider)
-        
-        #TabsWidth Slider
-        self.tabsSlider = QSlider()
-        self.tabsSlider.setTickPosition(QSlider.TicksLeft)
-        self.tabsSlider.setOrientation(Qt.Horizontal)
-        self.tabsSlider.setValue(config.tabwidth())
-        self.tabsSlider.setMinimum(0)
-        self.tabsSlider.setMaximum(8)
-        self.tabsSlider.valueChanged.connect(self.setTabWidth)
-        self.tabsSliderAction = QWidgetAction(men)
-        self.tabsSliderAction.setDefaultWidget(self.tabsSlider)
-        
-        
-        action_explorer = QAction("Show Explorer",self)
-        action_explorer.triggered.connect(self.exp)
-        action_console = QAction("Show Console",self)
-        action_console.triggered.connect(self.cmd)
-        action_designer = QAction("Show Designer",self)
-        action_designer.triggered.connect(self.design)
-        action_Indentation = QAction("Indentation Guides",self)
-        men.addAction(action_explorer)
-        men.addAction(action_console)
-        men.addAction(action_designer)
-        men.addAction(action_Indentation)
-        men.addSeparator()
-        men.addAction(QAction("TabWidth",self))
-        men.addAction(self.tabsSliderAction)
-        men.addSeparator()
-        men.addAction(QAction("Threshold",self))
-        men.addAction(self.threshSliderAction)
-        
-        self.action_Options = QAction(Icons.emblem_system, 'Options', self)
-        self.action_Options.setMenu(men)
-        self.action_Options.triggered.connect(self.options)
-        
-        
-        self.action_Full = QAction(Icons.fullscreen, 'Full', self)
-        self.action_Full.setShortcut('Shift+Enter')
-        self.action_Full.triggered.connect(self.full)
-        
-        self.action_Squirrel = QAction(Icons.nut, 'Squirrel', self)
-        self.action_Squirrel.setCheckable(True)
-        self.action_Squirrel.triggered.connect(self.sq)
-        self.action_Emo = QAction(Icons.emo, 'Emo', self)
-        self.action_Emo.setCheckable(True)
-        self.action_Emo.triggered.connect(self.emo)
-        self.action_Ios = QAction(Icons.ios, '', self)
-        self.action_Ios.setCheckable(True)
-        self.action_Ios.triggered.connect(self.ios)
-
-        
-        self.action_Style = QAction(Icons.style, 'Style', self)
-        men1 = QMenu()
-        self.styleslist = []
-        self.style1 = QAction("All Hallow's Eve",self)
-        self.style1.triggered.connect(lambda:self.style_clicked(1))
-        self.style1.setCheckable(True)
-        self.style2 = QAction("Amy",self)
-        self.style2.triggered.connect(lambda:self.style_clicked(2))
-        self.style2.setCheckable(True)
-        self.style3 = QAction("Aptana Studio",self)
-        self.style3.triggered.connect(lambda:self.style_clicked(3))
-        self.style3.setCheckable(True)
-        self.style4 = QAction("Bespin",self)
-        self.style4.triggered.connect(lambda:self.style_clicked(4))
-        self.style4.setCheckable(True)
-        self.style5 = QAction("Blackboard",self)
-        self.style5.triggered.connect(lambda:self.style_clicked(5))
-        self.style5.setCheckable(True)
-        self.style6 = QAction("Choco",self)
-        self.style6.triggered.connect(lambda:self.style_clicked(6))
-        self.style6.setCheckable(True)
-        self.style7 = QAction("Cobalt",self)
-        self.style7.triggered.connect(lambda:self.style_clicked(7))
-        self.style7.setCheckable(True)
-        self.style8 = QAction("Dawn",self)
-        self.style8.triggered.connect(lambda:self.style_clicked(8))
-        self.style8.setCheckable(True)
-        self.style9 = QAction("Eclipse",self)
-        self.style9.triggered.connect(lambda:self.style_clicked(9))
-        self.style9.setCheckable(True)
-        self.styleslist.append(self.style1)
-        self.styleslist.append(self.style2)
-        self.styleslist.append(self.style3)
-        self.styleslist.append(self.style4)
-        self.styleslist.append(self.style5)
-        self.styleslist.append(self.style6)
-        self.styleslist.append(self.style7)
-        self.styleslist.append(self.style8)
-        self.styleslist.append(self.style9)
-        men1.addActions(self.styleslist)
-        self.action_Style.setMenu(men1)
-        self.styleslist[self.styleIndex].setChecked(True)
-
-
-        self.action_Stop.setDisabled(True)
-        self.toolbar = self.addToolBar('ToolBar')
-        self.toolbar.setIconSize(QSize(16,16))
-        self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-        self.toolbar.setAllowedAreas(Qt.AllToolBarAreas)
-        #self.toolbar.setFixedHeight(40)
-
-        self.toolbar.addAction(self.action_NewProject)
-        self.toolbar.addAction(self.action_Open)
-        self.toolbar.addAction(self.action_Save)
-        self.toolbar.addAction(self.action_SaveAll)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.action_Run)
-        self.toolbar.addAction(self.action_RunFile)
-        self.toolbar.addAction(self.action_Stop)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.action_Design)
-        self.toolbar.addAction(self.action_Todo)
-        self.toolbar.addAction(self.action_Options)
-        self.toolbar.addAction(self.action_Style)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.action_Help)
-        self.toolbar.addAction(self.action_Full)
-        self.toolbar.addSeparator()
-        self.toolbar.addAction(self.action_Squirrel)
-        self.toolbar.addAction(self.action_Emo)
-        self.toolbar.addAction(self.action_Ios)
-        if(self.mode == 0):
-            self.action_Squirrel.setChecked(True)
-        else:
-            self.action_Emo.setChecked(True)
-            
-   
 #-----------------------------------------------------------------------------------#
 #   Menu Actions Functions                                                          #
 #-----------------------------------------------------------------------------------#
@@ -490,9 +310,9 @@ class Window(QMainWindow):
     def emo(self):
         if(self.mode == 0):
             self.mode = 1
-            self.action_Squirrel.setChecked(False)
+            self.toolBar.action_Squirrel.setChecked(False)
         else:
-            self.action_Squirrel.setChecked(True)
+            self.toolBar.action_Squirrel.setChecked(True)
             
     def ios(self):
         print "ios"
@@ -501,9 +321,9 @@ class Window(QMainWindow):
     def sq(self):
         if(self.mode == 1):
             self.mode = 0
-            self.action_Emo.setChecked(False)
+            self.toolBar.action_Emo.setChecked(False)
         else:
-            self.action_Emo.setChecked(True)
+            self.toolBar.action_Emo.setChecked(True)
      
     def about(self):
         form = DialogAbout(self)
@@ -513,7 +333,7 @@ class Window(QMainWindow):
         form.show()
 
     def help(self):
-        QMessageBox.about(self, "About Simple Editor","This is The Help")
+        QMessageBox.about(self,"Help","This is about all The Help that i can Give you now")
         
     def full(self):
         if not self.isFull:
@@ -663,7 +483,9 @@ class Window(QMainWindow):
             #self.tabWidget.
             #self.tabWidget.widget(i).setColorStyle(self.colorStyle)
             
-    '''Command Functions'''
+#-----------------------------------------------------------------------------------#
+#   Command Functions                                                               #
+#-----------------------------------------------------------------------------------#   
     def getFile(self):
         fname = str(QFileDialog.getOpenFileName(self,"Open File", '.', "Files (*.*)"))
         if not (fname == ""):

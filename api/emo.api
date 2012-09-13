@@ -214,3 +214,5 @@ _add?1(other)
 _sub?1(other)
 _mul?1(other)
 _div?1(other)
+function
+class

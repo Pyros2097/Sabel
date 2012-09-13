@@ -4,7 +4,7 @@ from PyQt4.QtGui import QIcon,QPixmap,QApplication,QSplashScreen
 from send2trash import send2trash
 from config import Config
 
-__version__ = "0.56"
+__version__ = "0.57"
 #Python accesses local variables much more efficiently than global variables. 
 oslistdir = os.listdir
 ospathisdir = os.path.isdir
@@ -21,14 +21,12 @@ osrename = os.rename
 ossep = os.sep
 OS_NAME = system()
 eol = 0
-#'posix', 'nt', 'mac', 'os2', 'ce', 'java', 'riscos'.
 if(OS_NAME == 'Windows'):
     eol = 0
 elif(OS_NAME == 'Linux'):
     eol = 1
 else:
     eol = 2
-
 
 workDir = os.getcwd()
 apiDir = ospathjoin(workDir,"api")
@@ -45,8 +43,6 @@ workSpace = config.workSpace()
 fontSize = config.fontSize()
 fontName = config.fontName()
 iconSize = config.iconSize()
-adblist = config.adb()
-device = config.device()
 
 def os_icon(name):
         return QIcon(":/{0}.png".format(ospathjoin(iconDir,name)))

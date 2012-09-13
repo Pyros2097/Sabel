@@ -1,6 +1,6 @@
 from PyQt4 import QtGui 
 from PyQt4 import QtCore
-from globals import adblist,config,device
+from globals import config
 from globals import PY_VERSION,__version__,OS_NAME,Icons
 from datetime import datetime
 
@@ -71,10 +71,10 @@ class DialogAndroid(QtGui.QDialog):
         self.label_4.setText("Logcat:")
         self.label_5.setText("Exit Activity:")
         self.buttonBox.clicked.connect(self.update)
-        self.lineEdit_2.setText(adblist[0])
-        self.lineEdit_3.setText(adblist[1])
-        self.lineEdit_4.setText(adblist[2])
-        self.lineEdit_5.setText(adblist[3])
+        self.lineEdit_2.setText(config.adb()[0])
+        self.lineEdit_3.setText(config.adb()[1])
+        self.lineEdit_4.setText(config.adb()[2])
+        self.lineEdit_5.setText(config.adb()[3])
         self.fileButton.clicked.connect(self.getFile)
         
         
@@ -247,11 +247,11 @@ class DialogTodo(QtGui.QDialog):
         self.horizontalLayout = QtGui.QVBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setMargin(0)
         self.list = QtGui.QTreeWidget(self.horizontalLayoutWidget)
-        self.list.setAlternatingRowColors(True)
         self.list.setRootIsDecorated(False)
         self.list.setUniformRowHeights(True)
         self.list.setAllColumnsShowFocus(True)
         self.list.setSortingEnabled(True)
+        #here 0 represents the first column
         self.list.headerItem().setText(0,"Task")
         self.list.setColumnCount(1)
         self.list.setStyleSheet("QTreeWidget::item{height:24px;font-size:20px}");
@@ -300,13 +300,21 @@ class DialogTodo(QtGui.QDialog):
                         i = QtGui.QTreeWidgetItem(self.list)
                         i.setText(0,text)
                         self.list.addTopLevelItem(i)
-                        config.setTodo(self.taskList)
+                        config.setTodo(self.taskList)    
+                        #b = QtGui.QCheckBox(self.list)
+                        #c = QtGui.QLabel(text,self.list)
+                        #self.list.setItemWidget(i, 0, b)
+                        #self.list.setItemWidget(i, 0, c)
                 else:
                     self.taskList.append(text)
                     i = QtGui.QTreeWidgetItem(self.list)
                     i.setText(0,text)
                     self.list.addTopLevelItem(i)
                     config.setTodo(self.taskList)
+                    #b = QtGui.QCheckBox(self.list)
+                    #c = QtGui.QLabel(text,self.list)
+                    #self.list.setItemWidget(i, 0, b)
+                    #self.list.setItemWidget(i, 0, c)
                     
     def delItem(self):
         item = self.list.takeTopLevelItem(self.list.indexOfTopLevelItem(self.list.currentItem()))

@@ -405,7 +405,7 @@ class ProjectTree(QTreeWidget):
                 QMessageBox.about(self,"Error","Could Not Create The File")
     
     def openFile(self,item):
-        pass
+        self.emit(SIGNAL("openFileClicked"),item)
                 
     def runFile(self,item):
         pass

@@ -1,6 +1,7 @@
 from editor import Editor
 from tab import *
 from tree import *
+from tool import Tool
 from adb import Adb
 from ant import Ant
 from parser import Parser

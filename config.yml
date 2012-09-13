@@ -7,7 +7,6 @@ ANT:
 - android update project --target 5 --path .
 - ant debug install
 CMD:
-- GCC
 - CMD
 - PYTHON
 - ADB
@@ -15,17 +14,18 @@ CMD:
 - Make
 - SQ
 - JAVA
+- GCC
 ClosedProject:
 - 0
 - 0
 - 0
 File:
+- C:/CODE/assetsd/common.nut
 - C:/CODE/assetsd/creditscene.nut
-- C:/CODE/assetsd/common.nut
-- C:/CODE/assetsd/common.nut
+- C:/CODE/assetsd/logoscene.nut
 - C:/CODE/assetsd/howtoscene.nut
 PARAM:
-- hh C:/CODE/152940-ios.jpeg
+- Dude
 Project:
 - C:/CODE/datad/
 - C:/CODE/assetsd/
@@ -37,7 +37,7 @@ Setting:
   iconsize: 16
   mode: 0
   styleindex: 8
-  tabwidth: 4
+  tabwidth: 3
   thresh: 2
   workspace: C:/CODE/
 Style: 0
@@ -45,3 +45,11 @@ TODO:
 - Fix Closed Projects Bug
 - Add Build Options
 - Add OS support
+- Add Style Options
+- Add iOS support
+- Make Mac Build
+- Add Lua and Neko Lexers
+- Dude Thats it for now
+- Squirrel Parser
+- Lua Parser
+- Neko Parser

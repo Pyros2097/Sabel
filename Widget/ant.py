@@ -1,4 +1,4 @@
-from globals import adblist,device,ospathjoin
+from globals import ospathjoin
 from PyQt4.QtGui import QWidget
 from PyQt4.QtCore import pyqtSignal,SIGNAL,QThread,QProcess,QString,QTimer
 from workthread import WorkThread
@@ -10,7 +10,6 @@ class Ant(QWidget):
         self.parent = parent 
         self.adb_thread = WorkThread()
         self.timer = QTimer()
-        self.device = device
         #self.adb_thread = AdbThread()
         self.connect(self.adb_thread, SIGNAL("update"),self.update)
         self.connect(self.adb_thread, SIGNAL("fini"),self.newstart)

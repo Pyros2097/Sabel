@@ -2,7 +2,7 @@ from PyQt4.QtGui import (QApplication,QPixmap,QSplashScreen,QMessageBox,
                          QIcon,QAction,QCheckBox,QFileDialog)
 from PyQt4.QtCore import SIGNAL,Qt,QStringList,QString
 from window import Window
-from Widget import Editor,PyInterp,Adb,Ant,Parser,Command,Audio,Image
+from Widget import Editor,PyInterp,Adb,Ant,Parser,Command,Audio,Image,Tool
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
                      iconSize,iconDir,ospathexists,os_icon)
 import sys
@@ -21,20 +21,21 @@ class MainWindow(Window):
         self.ant = Ant(self)
 
     def init(self):
-        self.initToolBar()
+        self.toolBar = Tool(self)
+        self.addToolBar(self.toolBar)
         self.initConfig()
         self.treeWidget.initProjects()
         self.connect(self, SIGNAL('triggered()'), self.closeEvent)
         self.connect(self.tabWidget,SIGNAL("dropped"), self.createTabs)
         self.tabWidget.tabCloseRequested.connect(self.closeTab)
         self.treeWidget.itemDoubleClicked.connect(self.treeItemClicked)
+        self.connect(self.treeWidget,SIGNAL("openFileClicked"),self.treeItemClicked)
         self.connect(self.treeWidget,SIGNAL("create"), lambda x:self.ant.create(x))
         self.connect(self.treeWidget,SIGNAL("build"), lambda x:self.ant.build(x))
         self.connect(self.treeWidget,SIGNAL("buildRun"), lambda x:self.ant.buildRun(x))
         self.connect(self.treeWidget,SIGNAL("clean"), lambda x:self.ant.clean(x))
         self.connect(self.treeWidget,SIGNAL("run"), lambda x:self.ant.run(x))
-        
-        #self.initInterpreter()
+        self.initInterpreter()
 
     def initConfig(self): 
         self.recent = config.recent()
@@ -64,8 +65,10 @@ class MainWindow(Window):
                         if(nfile in self.files):
                             #print "File Already Open\n"+nfile
                             self.tabWidget.setCurrentIndex(self.files.index(nfile))
+                            return
                 if(ospathexists(nfile)):
-                    self.openEditor(nfile)          
+                        self.openEditor(nfile)  
+                        return        
                 else:
                     #dont know must check this the last file is not removed executes only
                     #1 when it has to remove 2 files
@@ -75,6 +78,7 @@ class MainWindow(Window):
                     self.files.remove(nfile)
                     config.setFile(self.files)
                     QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile) 
+                    return
                            
     def createTabs(self,links):
         for i in links:
@@ -85,7 +89,6 @@ class MainWindow(Window):
         try:
             infile = open(nfile, 'r')
             text = infile.read()
-            infile.close()
             self.files.append(nfile)
             config.setFile(self.files) 
             self.dirty.append(False)
@@ -102,6 +105,9 @@ class MainWindow(Window):
             self.files.remove(nfile)
             config.setFile(self.files)
             QMessageBox.about(self,"Can't Open","File is Being Used\n"+nfile)
+        finally:
+            infile.close()
+            
                
     def openImage(self,nfile):
         form = Image(self,nfile)
@@ -131,6 +137,7 @@ class MainWindow(Window):
                 done = True
         if(done):
             #print index
+            '''Must set the editor text to None to gc the memory used by text'''
             self.files.remove(self.files[index])
             config.setFile(self.files)
             self.tabWidget.removeTab(index)
@@ -177,31 +184,37 @@ class MainWindow(Window):
                 if not self.dirty[index]:
                     return
                 fname = self.files[index]
-                fl = open(fname, 'w')
-                tempText = self.tabWidget.widget(index).text()
-                if tempText:
-                    fl.write(tempText)
-                    fl.close()
-                    self.clearDirty(index)
-                    self.parser.run(self.files[index])
-                else:
-                    QMessageBox.about(self, "Can't Save","Failed to save ...")
-                    self.statusBar().showMessage('Failed to save ...', 5000)
+                try:
+                    fl = open(fname, 'w')
+                    tempText = self.tabWidget.widget(index).text()
+                    if tempText:
+                        fl.write(tempText)
+                        fl.close()
+                        self.clearDirty(index)
+                        self.parser.run(self.files[index])
+                    else:
+                        QMessageBox.about(self, "Can't Save","Failed to save ...")
+                        self.statusBar().showMessage('Failed to save ...', 5000)
+                except:
+                    QMessageBox.about(self, "Can't Save","File is Locked")
 
     def fileSaveAll(self):
         def fileSaveIndex(index):
                 if not self.dirty[index]:
                     return
                 fname = self.files[index]
-                fl = open(fname, 'w')
-                tempText = self.tabWidget.widget(index).text()
-                if tempText:
-                    fl.write(tempText)
-                    fl.close()
-                    self.clearDirty(index)
-                else:
-                    QMessageBox.about(self, "Can't Save","Failed to save ...")
-                    self.statusBar().showMessage('Failed to save ...', 5000)
+                try:
+                    fl = open(fname, 'w')
+                    tempText = self.tabWidget.widget(index).text()
+                    if tempText:
+                        fl.write(tempText)
+                        fl.close()
+                        self.clearDirty(index)
+                    else:
+                        QMessageBox.about(self, "Can't Save","Failed to save ...")
+                        self.statusBar().showMessage('Failed to save ...', 5000)
+                except:
+                    QMessageBox.about(self, "Can't Save","File is Locked")
         if(self.files != None):
             if len(self.files) != 0:
                 for file in self.files:
@@ -238,6 +251,3 @@ class MainWindow(Window):
         elif nfile.endswith(".nut"):
             lang = 2
         return lang
-            
-    def options(self):
-        pass

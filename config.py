@@ -3,7 +3,7 @@ import os
 from PyQt4.QtGui import QMessageBox
 class Config:
     def __init__(self):     
-        self.configfile = 'config.yaml'
+        self.configfile = 'config.yml'
         self.data = yaml.load(open(self.configfile).read())
         
     def read(self,section):
