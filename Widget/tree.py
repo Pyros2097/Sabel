@@ -119,8 +119,10 @@ class ProjectTree(QTreeWidget):
         #self.setColumnWidth(0,280)
         
     def initProjects(self):
-        for pro in config.projects():
-            self.createProject(pro)
+        if(config.projects() != None):
+            if(len(config.projects()) != None):
+                for pro in config.projects():
+                    self.createProject(pro)
             
     def readDir(self,parent,path):
         for d in oslistdir(path):
@@ -174,7 +176,8 @@ class ProjectTree(QTreeWidget):
             #print "adding"+startDir
         else:
             #print "removing"+startDir
-            self.projects.remove(startDir)
+            if(startDir in self.projects):
+                self.projects.remove(startDir)
             config.setProject(self.projects)
             QMessageBox.about(self,"Can't Open Project","Project Does Not Exist %s"%startDir)
     
@@ -524,31 +527,31 @@ class ProjectTree(QTreeWidget):
 class Error(QTreeWidgetItem):
     def __init__(self,parent,line,text):
         QTreeWidgetItem.__init__(self,parent)
-        self.closed = False
-        if(self.closed):
-            self.setIcon(0,Icons.error)
-        else:
-            self.setIcon(0,Icons.error)
-        self.setText(0,"Line: "+line)
-        self.setText(1,text)
+        self.setIcon(0,Icons.error)
+        self.setText(0,"Line "+line+":      "+text)
+        
+class ErrorFile(QTreeWidgetItem):
+    def __init__(self,parent,name):
+        QTreeWidgetItem.__init__(self,parent)
+        self.setIcon(0,Icons.file_obj)
+        self.setText(0,"File: "+name)
         
 class ErrorTree(QTreeWidget):
     def __init__(self,parent = None):
         QTreeWidget.__init__(self,parent)
         self.errorCount = 0
-        self.setColumnCount(2)
-        self.setHeaderLabels(["Line","Error"])
+        self.setColumnCount(1)
+        self.header().close()
         
-    def addError(self,errorlist):
-        self.errorCount+=1
-        i = Error(self,errorlist[0],errorlist[2])
-        self.addTopLevelItem(i)
+    def addError(self,fileName,errorlist):
+        f = ErrorFile(self,fileName)
+        i = Error(f,errorlist[0],errorlist[2])
+        self.addTopLevelItem(f)
+        self.expandAll()
         
     def reset(self):
-        #print self.topLevelItemCount()
         if(self.topLevelItemCount() != 0):
             self.clear()
-        self.errorCount = 0
         
 class OutlineTree(QTreeWidget):
     def __init__(self,parent = None):

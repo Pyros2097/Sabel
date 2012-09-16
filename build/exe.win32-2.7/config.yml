@@ -7,7 +7,6 @@ ANT:
 - android update project --target 5 --path .
 - ant debug install
 CMD:
-- GCC
 - CMD
 - PYTHON
 - ADB
@@ -15,22 +14,19 @@ CMD:
 - Make
 - SQ
 - JAVA
+- GCC
+- NEKO
+- NEKOC
 ClosedProject:
 - 0
 - 0
-- 0
 File:
-- C:/CODE/assetsd/main.nut
-- C:/CODE/assetsd/creditscene.nut
-- C:/CODE/assetsd/logoscene.nut
 - C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/index.html
 - C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/style.css
-- C:/neko-1.8.2/Makefile
 PARAM:
-- dude
+- hh
 Project:
 - C:/CODE/datad/
-- C:/CODE/assetsd/
 Recent: []
 Setting:
   device: 1
@@ -44,6 +40,14 @@ Setting:
   workspace: C:/CODE/
 Style: 0
 TODO:
-- Remove Headers
-- Rewrite code
-- Dude Check This Out
+- Fix Closed Projects Bug
+- Add Build Options
+- Add OS support
+- Add Style Options
+- Add iOS support
+- Make Mac Build
+- Add Lua and Neko Lexers
+- Dude Thats it for now
+- Squirrel Parser
+- Lua Parser
+- Neko Parser

@@ -23,7 +23,7 @@ class Editor(QsciScintilla):
         else:
             self.setEolMode(self.EolMac)
         self.init()
-        self.setTabWidth(1)
+        self.setTabWidth(config.tabwidth())
         
     def init(self):
         #Margin
@@ -111,16 +111,10 @@ class Editor(QsciScintilla):
         #fix this lines not showing properly
     def addError(self,lineno):
         '''First delete all present markers then add new lines or errors'''
+        '''sqc can only find out 1 error line just like an interpreter'''
         if(len(self.errorLines) == 0):
                 self.errorLines.append(lineno-1)
                 self.markerAdd(lineno-1, 0)
-        else:
-            #print self.errorLines
-            for i in self.errorLines:
-                self.markerDelete(i, 0)
-            self.errorLines[:] = []
-            self.errorLines.append(lineno-1)
-            self.markerAdd(lineno-1, 0)
             #print self.errorLines
 
         #if self.markersAtLine() != 0:
@@ -131,7 +125,12 @@ class Editor(QsciScintilla):
                     
         #assert self.errorLines == []
         
-    
+    def reset(self):
+         if(len(self.errorLines) != 0):
+             for i in self.errorLines:
+                self.markerDelete(i, 0)
+             self.errorLines[:] = []
+        
     def zoomin(self):
         self.fontSize += 1
         config.setFontSize(self.fontSize)
@@ -154,6 +153,10 @@ class Editor(QsciScintilla):
         
     def setThreshold(self,val):
         self.setAutoCompletionThreshold(val)
+        
+    def setLine(self,lineno):
+        self.setCursorPosition(int(lineno),0)
+        self.setCaretLineVisible(True)
             
             
     """

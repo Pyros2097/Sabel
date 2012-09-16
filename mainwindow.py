@@ -29,20 +29,22 @@ class MainWindow(Window):
         self.connect(self.tabWidget,SIGNAL("dropped"), self.createTabs)
         self.tabWidget.tabCloseRequested.connect(self.closeTab)
         self.treeWidget.itemDoubleClicked.connect(self.treeItemClicked)
+        self.errorTree.itemDoubleClicked.connect(self.errorLine)
         self.connect(self.treeWidget,SIGNAL("openFileClicked"),self.treeItemClicked)
         self.connect(self.treeWidget,SIGNAL("create"), lambda x:self.ant.create(x))
         self.connect(self.treeWidget,SIGNAL("build"), lambda x:self.ant.build(x))
         self.connect(self.treeWidget,SIGNAL("buildRun"), lambda x:self.ant.buildRun(x))
         self.connect(self.treeWidget,SIGNAL("clean"), lambda x:self.ant.clean(x))
         self.connect(self.treeWidget,SIGNAL("run"), lambda x:self.ant.run(x))
-        self.initInterpreter()
+        #self.initInterpreter()
 
     def initConfig(self): 
         self.recent = config.recent()
         self.dirty = []
         if(config.files() != None):
-            for i in config.files():
-                self.createTab(i)
+            if(len(config.files()) != 0):
+                for i in config.files():
+                    self.createTab(i)
           
     def treeItemClicked(self,item):
         if(item.isFile()):
@@ -58,6 +60,7 @@ class MainWindow(Window):
         self.ipy.initInterpreter(locals())
         self.tabWidget_3.addTab(self.ipy, "Python")
 
+    '''Must go through this only'''
     def createTab(self,nfile):
         if(nfile != None):
             if(self.files != None):
@@ -65,30 +68,29 @@ class MainWindow(Window):
                         if(nfile in self.files):
                             #print "File Already Open\n"+nfile
                             self.tabWidget.setCurrentIndex(self.files.index(nfile))
-                            return
+                            return False
                 if(ospathexists(nfile)):
                         self.openEditor(nfile)  
-                        return        
+                        return True    
                 else:
-                    #dont know must check this the last file is not removed executes only
-                    #1 when it has to remove 2 files
-                    #check sel.files 
-                    #print len(config.files())
-                    print "removing"+nfile
-                    self.files.remove(nfile)
+                    if(nfile in self.files):
+                        self.files.remove(nfile)
                     config.setFile(self.files)
                     QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile) 
-                    return
+                    return False
                            
     def createTabs(self,links):
-        for i in links:
-            self.createTab(i)
+        if(links != None):
+            if(len(links) != 0):
+                for i in links:
+                    self.createTab(i)
             
     def openEditor(self,nfile):
         text = ""
         try:
             infile = open(nfile, 'r')
             text = infile.read()
+            #infile.close()
             self.files.append(nfile)
             config.setFile(self.files) 
             self.dirty.append(False)
@@ -100,25 +102,37 @@ class MainWindow(Window):
                 if(len(self.files)) != 0:
                     #This line sets the opened file to display first Important not checked
                     self.tabWidget.setCurrentIndex(len(self.files)-1)
+            return True
         except:
-            #print "removing"+nfile
-            self.files.remove(nfile)
+            if(nfile in self.files):
+                self.files.remove(nfile)
             config.setFile(self.files)
             QMessageBox.about(self,"Can't Open","File is Being Used\n"+nfile)
-        finally:
-            infile.close()
+            return False
+        #finally:
+        #    infile.close()
             
                
     def openImage(self,nfile):
-        form = Image(self,nfile)
-        form.show()
+        if(ospathexists(nfile)):
+            form = Image(self,nfile)
+            form.show()
+            return True
+        else:
+            QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile)
+            return False
         #print nfile
         #self.tiler.addImage(nfile)
         #self.tiler.show()
         
     def openAudio(self,nfile):
-        form = Audio(self,nfile)
-        form.show()
+        if(ospathexists(nfile)):
+            form = Audio(self,nfile)
+            form.show()
+            return True
+        else:
+            QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile)
+            return False
             
     def closeTab(self,index):
         '''Boolean result invocation method.'''
@@ -165,15 +179,13 @@ class MainWindow(Window):
                 if len(self.files) != 0:
                         if(fname in self.files):
                             self.createTab(fname)
-                            return
+                            return True
                         else:
                             QMessageBox.about(self, "Already Open","File Already Open")
-                            return
+                            return False
                 else:
                     self.createTab(fname)
             else:
-                #print "not"
-                #this is when the files list is empty and None type
                 self.files = []
                 self.createTab(fname)
 
@@ -191,12 +203,12 @@ class MainWindow(Window):
                         fl.write(tempText)
                         fl.close()
                         self.clearDirty(index)
-                        self.parser.run(self.files[index])
                     else:
                         QMessageBox.about(self, "Can't Save","Failed to save ...")
-                        self.statusBar().showMessage('Failed to save ...', 5000)
                 except:
                     QMessageBox.about(self, "Can't Save","File is Locked")
+                self.parser.run(self.files[index])
+                #must implement for all files
 
     def fileSaveAll(self):
         def fileSaveIndex(index):
@@ -212,7 +224,6 @@ class MainWindow(Window):
                         self.clearDirty(index)
                     else:
                         QMessageBox.about(self, "Can't Save","Failed to save ...")
-                        self.statusBar().showMessage('Failed to save ...', 5000)
                 except:
                     QMessageBox.about(self, "Can't Save","File is Locked")
         if(self.files != None):
@@ -222,7 +233,7 @@ class MainWindow(Window):
 
 
     def closeEvent(self, event):
-        #check this ine adb.exe process is always on
+        #check this adb.exe process is always on
         self.adb.close()
         self.parser.close()
         self.command.close()
@@ -246,8 +257,12 @@ class MainWindow(Window):
         lang = 0
         if nfile.endswith(".py"):
             lang = 0
-        elif (nfile.endswith(".cpp") or nfile.endswith(".h") or nfile.endswith(".c")):
+        elif (nfile.endswith(".cpp") or nfile.endswith(".h") or nfile.endswith(".c") or nfile.endswith(".hpp")):
             lang = 1
         elif nfile.endswith(".nut"):
+            lang = 2
+        elif nfile.endswith(".neko"):
+            lang = 2
+        elif nfile.endswith(".lua"):
             lang = 2
         return lang

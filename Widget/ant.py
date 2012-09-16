@@ -8,14 +8,14 @@ class Ant(QWidget):
     def __init__(self,parent):
         QWidget.__init__(self,parent)
         self.parent = parent 
-        self.adb_thread = WorkThread()
+        self.ant_thread = WorkThread()
         self.timer = QTimer()
-        #self.adb_thread = AdbThread()
-        self.connect(self.adb_thread, SIGNAL("update"),self.update)
-        self.connect(self.adb_thread, SIGNAL("fini"),self.newstart)
+        #self.ant_thread = antThread()
+        self.connect(self.ant_thread, SIGNAL("update"),self.update)
+        self.connect(self.ant_thread, SIGNAL("fini"),self.newstart)
         #self.connect(self.timer , SIGNAL('timeout()') , self.onTimeout)
-        #self.connect(self.adb_thread , SIGNAL('started()') , self.onThreadStarted)
-        #self.connect(self.adb_thread , SIGNAL('finished()'), self.onThreadFinished) 
+        #self.connect(self.ant_thread , SIGNAL('started()') , self.onThreadStarted)
+        #self.connect(self.ant_thread , SIGNAL('finished()'), self.onThreadFinished) 
         
     def onTimeout(self):
         print "timeout"
@@ -66,8 +66,8 @@ class Ant(QWidget):
         self.showOutput()
         self.parent.textEdit.clear()
         self.parent.textEdit.append("Creating... "+prj.getPath())
-        self.adb_thread.setCmd("android.bat update project -p "+prj.getPath())
-        self.adb_thread.run()
+        self.ant_thread.setCmd("android.bat update project -p "+prj.getPath())
+        self.ant_thread.run()
         
     def build(self,prj):
         if self.isRunning == False:
@@ -75,8 +75,8 @@ class Ant(QWidget):
         self.showOutput()
         self.parent.textEdit.clear()
         self.parent.textEdit.append("Ant Building Debug... "+ospathjoin(prj.getPath(),"build.xml"))
-        self.adb_thread.setCmd("ant.bat debug -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
-        self.adb_thread.run()
+        self.ant_thread.setCmd("ant.bat debug -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
+        self.ant_thread.run()
         
     def clean(self,prj):
         if self.isRunning == False:
@@ -84,8 +84,8 @@ class Ant(QWidget):
         self.showOutput()
         self.parent.textEdit.clear()
         self.parent.textEdit.append("Ant Cleaning... "+prj.getPath())
-        self.adb_thread.setCmd("ant.bat clean -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
-        self.adb_thread.run()
+        self.ant_thread.setCmd("ant.bat clean -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
+        self.ant_thread.run()
         
     def buildRun(self,prj):
         if self.isRunning == False:
@@ -93,8 +93,8 @@ class Ant(QWidget):
         self.showOutput()
         self.parent.textEdit.clear()
         self.parent.textEdit.append("Ant Building and Installing... "+ospathjoin(prj.getPath(),"build.xml"))
-        self.adb_thread.setCmd("ant.bat debug install -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
-        self.adb_thread.run()
+        self.ant_thread.setCmd("ant.bat debug install -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
+        self.ant_thread.run()
         
     def run(self,prj):
         if self.isRunning == False:
@@ -102,8 +102,10 @@ class Ant(QWidget):
         self.showOutput()
         self.parent.textEdit.clear()
         self.parent.textEdit.append("Installing... "+prj.getPath())
-        self.adb_thread.setCmd("ant.bat install -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
-        self.adb_thread.run()
+        self.ant_thread.setCmd("ant.bat install -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
+        self.ant_thread.run()
         
     def close(self):
-        self.adb_thread.quit()
+        self.ant_thread.kill_process()
+        self.ant_thread.close_process()
+        self.ant_thread.quit()

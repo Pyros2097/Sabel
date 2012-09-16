@@ -68,7 +68,7 @@ class Style8:
     def __init__(self):
         self.color = QColor('#000000')
         self.paper = QColor('#ffffff')
-        self.caret = QColor('#ffe4e4')
+        self.caret = QColor('#e8f2fe')#eclipse java blue caret bg
         self.marker = QColor('#ee1111')
         self.margin = QColor('#cccccc')
         

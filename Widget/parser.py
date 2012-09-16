@@ -1,52 +1,45 @@
-from globals import sqcDir
+from globals import sqc
 from PyQt4.QtGui import QWidget
-import threading
-from subprocess import PIPE,Popen
 from PyQt4.QtCore import SIGNAL
+from workthread import WorkThread
 
 
 class Parser(QWidget):
     def __init__(self,parent):
         QWidget.__init__(self,parent)
         self.parent = parent
-        self.parser_process = None
-        self.isRunning = False
-        self.connect(self, SIGNAL("parse"),self.update)
+        self.par_thread = WorkThread()
+        self.connect(self.par_thread, SIGNAL("update"),self.error)
+        self.connect(self.par_thread, SIGNAL("fini"),self.stop)
         
-    def update(self,text):
-        errorlist = text.split(',')
-        self.parent.errorTree.addError(errorlist)
-        self.parent.tabWidget.currentWidget().addError(int(errorlist[0]))
-        if(self.parent.tabWidget_3.isHidden()):
-            self.parent.tabWidget_3.show()
-        self.parent.tabWidget_3.setCurrentIndex(0)
-        
-    def output(self,pipe):
-        while True:
-            try:
-                if self.parser_process.poll() != None:
-                    break
-                line = pipe.readline().strip()
-
-                if len(line) > 0:
-                     self.emit(SIGNAL("parse"),line)
-            except:
-                print "except"
-                #traceback.print_exc()
-
-
-    def run(self,nfile):
-        #print nfile
-        if(nfile.endswith(".nut")):
+    def error(self,text):
+        '''Solved problem by adding Success to sqc file'''
+        self.parent.errorTree.reset() 
+        if(text != "" and text != "Success"):
+            if(self.parent.tabWidget_3.isHidden()):
+                self.parent.tabWidget_3.show()
+                self.parent.tabWidget_3.setCurrentIndex(0)
+            errorlist = text.split(',')
+            fileName = self.parent.files[self.parent.tabWidget.currentIndex()]
+            self.parent.errorTree.addError(fileName,errorlist)
+            self.parent.tabWidget.currentWidget().reset()
+            self.parent.tabWidget.currentWidget().addError(int(errorlist[0]))
+        else:
+            if not(self.parent.tabWidget_3.isHidden()):
+                self.parent.tabWidget_3.hide()
+            self.parent.tabWidget.currentWidget().reset()
             self.parent.errorTree.reset()
-            if self.parser_process != None and self.parser_process.poll() == None:
-                self.parser_process.kill()
-            self.parser_process = Popen(sqcDir+" "+nfile, creationflags=0x08000000, shell=False, stdout=PIPE,stderr=PIPE)
-            t = threading.Thread(target=self.output, args=(self.parser_process.stdout,))
-            t.start()
-            t.join()
+                
+                
+    def run(self,nfile):
+        if(nfile.endswith(".nut")):
+            self.par_thread.setCmd(sqc+" "+nfile)
+            self.par_thread.run()
+            
+    def stop(self):
+        self.par_thread.close_process()
         
-                    
     def close(self):
-        if self.parser_process != None and self.parser_process.poll() == None:
-            self.parser_process.kill()
+        self.par_thread.kill_process()
+        self.par_thread.close_process()
+        self.par_thread.quit()

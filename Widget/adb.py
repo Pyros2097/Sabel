@@ -4,10 +4,10 @@ from PyQt4.QtCore import pyqtSignal,SIGNAL,QThread,QProcess,QString,QTimer
 from workthread import WorkThread
 
 class Adb(QWidget):
+    isRunning = False
     def __init__(self,parent):
         QWidget.__init__(self,parent)
         self.parent = parent
-        self.isRunning = False
         self.adb_thread = WorkThread()
         self.timer = QTimer()
         self.device = config.device()

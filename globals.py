@@ -32,7 +32,7 @@ workDir = os.getcwd()
 apiDir = ospathjoin(workDir,"api")
 iconDir = ospathjoin("Icons")
 binDir = ospathjoin(workDir,"bin")
-sqcDir = ospathjoin(binDir,"sqc.exe")
+sqc = ospathjoin(binDir,"sqc.exe")
 
 recycle = send2trash
 PY_VERSION = python_version()

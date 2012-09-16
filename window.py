@@ -425,8 +425,11 @@ class Window(QMainWindow):
     def replaceAllText(self):
         edt = self.tabWidget.widget(self.tabWidget.currentIndex())
         while(edt.findText(self.lineEdit.text(),self.regex.isChecked(),self.caseSensitive.isChecked(),self.wholeWord.isChecked(),self.backward.isChecked())):
-            edt.replaceText(self.lineEdit_2.text())
-             
+            edt.replaceText(self.lineEdit_2.text())      
+    def errorLine(self,error):
+        index = self.tabWidget.currentIndex()
+        edt = self.tabWidget.widget(index)
+        edt.setLine(error.line)
     '''Font Functions'''       
     def zoomin(self):
         for i in range(len(self.files)):

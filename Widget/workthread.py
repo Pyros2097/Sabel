@@ -49,10 +49,10 @@ class WorkThread(QThread):
         self.emit(SIGNAL("fini"),no,self.cmd)
         
     def readOutput(self):
-        self.emit(SIGNAL("update"),QString(self.process.readAllStandardOutput()))
+        self.emit(SIGNAL("update"),str(self.process.readAllStandardOutput()))
         
     def readErrors(self):
-        self.emit(SIGNAL("update"),QString(self.process.readAllStandardError()))
+        self.emit(SIGNAL("update"),str(self.process.readAllStandardError()))
     
     def __del__(self):
         self.wait()
