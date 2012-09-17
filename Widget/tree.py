@@ -123,6 +123,9 @@ class ProjectTree(QTreeWidget):
             if(len(config.projects()) != None):
                 for pro in config.projects():
                     self.createProject(pro)
+                    
+    def contains(self,pro):
+        return (pro in self.projects)
             
     def readDir(self,parent,path):
         for d in oslistdir(path):
@@ -159,27 +162,28 @@ class ProjectTree(QTreeWidget):
         fname = str(QFileDialog.getExistingDirectory(self,"Open Project Folder"))
         if not (fname == ""):
             fname = fname+"/"
-            if len(self.projects) != 0:
-                if(fname in self.projects):
-                    QMessageBox.about(self, "Already Open","Project Already Open\n"+fname)
-                else:
-                    self.createProject(fname)
-            else:
-                self.createProject(fname)
-    
+            self.createProject(fname)
+                    
     #Important all projects must go through this          
     def createProject(self,startDir):
         if(ospathexists(startDir)):
+            if self.projects != None:
+                if(startDir in self.projects):#will work even if list is empty
+                    QMessageBox.about(self, "Already Open","Project Already Open\n"+startDir)
+                    return False
             self.projects.append(startDir)
             self.addProject(startDir)
             config.setProject(self.projects)
+            return True
             #print "adding"+startDir
         else:
-            #print "removing"+startDir
-            if(startDir in self.projects):
-                self.projects.remove(startDir)
+            #This is important very very important otherwise it will crash
+            if self.projects != None:
+                if(startDir in self.projects):
+                    self.projects.remove(startDir)
             config.setProject(self.projects)
             QMessageBox.about(self,"Can't Open Project","Project Does Not Exist %s"%startDir)
+            return False
     
                 
                 
@@ -211,8 +215,6 @@ class ProjectTree(QTreeWidget):
         self.projects.remove(itemPath)
         config.setProject(self.projects)
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
-        
-        
       
     def addItem(self,links):
         print links

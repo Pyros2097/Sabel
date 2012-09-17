@@ -23,10 +23,12 @@ File:
 - C:/CODE/assets/creditscene.nut
 - C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/index.html
 - C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/style.css
+- C:/CODE/Sabel/Test/testMain.py
 PARAM:
 - Dude
 Project:
 - C:/CODE/assets/
+- C:/port/
 Recent: []
 Setting:
   device: 1
@@ -35,7 +37,7 @@ Setting:
   iconsize: 16
   mode: 0
   styleindex: 8
-  tabwidth: 3
+  tabwidth: 2
   thresh: 2
   workspace: C:/CODE/
 Style: 0

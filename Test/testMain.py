@@ -6,6 +6,7 @@ import mainwindow
 import icons
 import sys
 import os
+from globals import config
 
 path = os.getcwd()
 
@@ -14,12 +15,20 @@ class TestMainWindow:
         self.frame = mainwindow.MainWindow()
         self.frame.showMaximized()
         self.frame.init()
+        self.test_project()
         #self.test_file()
         #self.test_syntax()
         #self.test_openImage()
         #self.test_openAudio()
-        self.test_openEditor()
+        #self.test_openEditor()
         sys.exit(app.exec_())
+        
+    def test_project(self):
+        eq_(False,self.frame.treeWidget.createProject("C:/gg/gg/"))
+        if not(self.frame.treeWidget.contains("C:/port/")):
+            eq_(True,self.frame.treeWidget.createProject("C:/port/"))
+        else:
+            eq_(False,self.frame.treeWidget.createProject("C:/port/"))
          
     def test_file(self):
         eq_(False,self.frame.createTab("somefile.c"))
