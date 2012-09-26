@@ -31,7 +31,7 @@ emo.Runtime.getDefaultLocale?1()
 emo.Runtime().uptime?1()
 emo.Stage?0(use = stage)
 stage.load?1()
-stage.load?1(nextScene, currentSceneModifier, nextSceneModifier, immediate)
+stage.load?1(nextScene, currentScenemodifier, nextScenemodifier, immediate)
 stage.getWindowWidth?1()
 stage.windowWidth?1(value)
 stage.getWindowHeight?1()
@@ -120,9 +120,9 @@ emo.DigitalOnScreenController?0(base_name ='controller_base.png', knob_name='con
 controller.updateInterval = 16
 onControlEvent?1(controller, controlX, controlY, hasChanged)
 emo.AlphaModifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
-emo.ScaleModifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
-emo.RotateModifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
-emo.MoveModifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
+emo.Scalemodifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
+emo.Rotatemodifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
+emo.Movemodifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
 emo.MoveCenterModifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
 emo.ColorModifier?0(from, to, duration, equation, repeatCount=0, startTime = null)
 emo.easing?0
@@ -166,8 +166,8 @@ database.getLastError?1()
 database.getLastErrorMessage?1()
 database.deleteDatabase?1(DEFAULT_DATABASE_NAME)
 emo.Preference?0(use = preference)
-preference.openOrCreate?1() == EMO_NO_ERROR
-preference.open?1() == EMO_NO_ERROR
+preference.openOrCreate?1() == emo_NO_ERROR
+preference.open?1() == emo_NO_ERROR
 preference.set?1(key, value)
 preference.get?1(key)
 preference.keys?1()
@@ -214,3 +214,6 @@ _add?1(other)
 _sub?1(other)
 _mul?1(other)
 _div?1(other)
+function
+class
+local

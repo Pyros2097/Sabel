@@ -1,5 +1,5 @@
 ADB:
-- C:/CODE/sabel.png /sdcard/
+- C:/CODE/assets/main.nut  /sdcard/
 - com.emo_framework.examples/com.emo_framework.EmoActivity
 - EmoFramework
 - com.emo_framework.examples
@@ -15,22 +15,18 @@ CMD:
 - SQ
 - JAVA
 - GCC
-- NEKO
-- NEKOC
-- PHP
 ClosedProject:
 - 0
 - 0
+- 0
 File:
-- C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/index.html
-- C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/style.css
-- C:/gg.php
-- C:/CODE/Sabel/api/php.api
+- C:/CODE/assets/howtoscene.nut
+- C:/CODE/assets/creditscene.nut
 PARAM:
-- hh
-- C:/gg.php
+- Dude
 Project:
-- C:/CODE/datad/
+- C:/CODE/assets/
+- C:/port/
 Recent: []
 Setting:
   device: 1
@@ -39,7 +35,7 @@ Setting:
   iconsize: 16
   mode: 0
   styleindex: 8
-  tabwidth: 4
+  tabwidth: 2
   thresh: 2
   workspace: C:/CODE/
 Style: 0

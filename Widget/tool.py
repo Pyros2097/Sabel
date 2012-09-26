@@ -41,6 +41,7 @@ class Tool(QToolBar):
         self.action_Todo.triggered.connect(self.parent.todo)
         
         men = QMenu()
+        
         #Threshold Slider
         self.threshSlider = QSlider()
         self.threshSlider.setTickPosition(QSlider.TicksLeft)
@@ -49,7 +50,6 @@ class Tool(QToolBar):
         self.threshSlider.setMinimum(0)
         self.threshSlider.setMaximum(5)
         self.threshSlider.valueChanged.connect(self.parent.setThreshold)
-        #self.threshSlider.setInvertedAppearance(True)
         self.threshSliderAction = QWidgetAction(men)
         self.threshSliderAction.setDefaultWidget(self.threshSlider)
         
@@ -63,6 +63,18 @@ class Tool(QToolBar):
         self.tabsSlider.valueChanged.connect(self.parent.setTabWidth)
         self.tabsSliderAction = QWidgetAction(men)
         self.tabsSliderAction.setDefaultWidget(self.tabsSlider)
+        
+        #iconSize Slider
+        self.iconSlider = QSlider()
+        self.iconSlider.setTickPosition(QSlider.TicksLeft)
+        self.iconSlider.setOrientation(Qt.Horizontal)
+        self.iconSlider.setValue(config.iconSize())
+        self.iconSlider.setMinimum(16)
+        self.iconSlider.setMaximum(60)
+        self.iconSlider.setSingleStep(2)
+        self.iconSlider.valueChanged.connect(self.setIcon)
+        self.iconSliderAction = QWidgetAction(men)
+        self.iconSliderAction.setDefaultWidget(self.iconSlider)
         
         
         action_explorer = QAction("Show Explorer",self)
@@ -82,6 +94,8 @@ class Tool(QToolBar):
         men.addSeparator()
         men.addAction(QAction("Threshold",self))
         men.addAction(self.threshSliderAction)
+        men.addAction(QAction("Icon Size",self))
+        men.addAction(self.iconSliderAction)
         
         self.action_Options = QAction(Icons.emblem_system, 'Options', self)
         self.action_Options.setMenu(men)
@@ -151,6 +165,7 @@ class Tool(QToolBar):
         self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self.setAllowedAreas(Qt.AllToolBarAreas)
         #self.setFixedHeight(40)
+        self.setIconSize(QSize(config.iconSize(),config.iconSize()))
 
         self.addAction(self.action_NewProject)
         self.addAction(self.action_Open)
@@ -176,3 +191,7 @@ class Tool(QToolBar):
             self.action_Squirrel.setChecked(True)
         else:
             self.action_Emo.setChecked(True)
+            
+    def setIcon(self,val):
+        config.setIconSize(val)
+        self.setIconSize(QSize(val,val))

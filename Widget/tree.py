@@ -277,6 +277,8 @@ class ProjectTree(QTreeWidget):
         action_OpenFile.triggered.connect(lambda:self.openFile(item))
         action_RunFile = QAction(Icons.go,'Python Run', self)
         action_RunFile.triggered.connect(lambda:self.runFile(item))
+        action_SendFile = QAction(Icons.file_obj,'Send to SDcard', self)
+        action_SendFile.triggered.connect(lambda:self.sendFile(item))
         action_CopyFile = QAction(Icons.file_obj,'Copy', self)
         action_CopyFile.triggered.connect(lambda:self.copyFile(item))
         action_CopyDir = QAction(Icons.file_obj,'Copy', self)
@@ -344,9 +346,10 @@ class ProjectTree(QTreeWidget):
                 menu1 = QMenu(self)
                 menu1.setTitle("Run As")
                 menu1.addAction(action_RunFile)
-                
-                menu.addAction(action_OpenFile)
                 menu.addMenu(menu1)
+                menu.addAction(action_OpenFile)
+                menu.addSeparator()
+                menu.addAction(action_SendFile)
                 menu.addSeparator()
                 menu.addAction(action_CopyFile)
                 menu.addAction(action_PasteFile)
@@ -413,6 +416,10 @@ class ProjectTree(QTreeWidget):
         self.emit(SIGNAL("openFileClicked"),item)
                 
     def runFile(self,item):
+        pass
+    
+    def sendFile(self,item):
+        #Biachself.parent()
         pass
                 
     def copyFile(self,item):

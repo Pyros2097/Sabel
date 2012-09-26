@@ -5,7 +5,7 @@ from globals import PY_VERSION,__version__,OS_NAME,Icons
 from datetime import datetime
 
 class DialogAndroid(QtGui.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         QtGui.QDialog.__init__(self, parent)
         self.resize(400, 420)
         self.horizontalLayoutWidget = QtGui.QWidget(self)
@@ -54,9 +54,13 @@ class DialogAndroid(QtGui.QDialog):
         self.radio2=QtGui.QRadioButton("Emulator", self.formLayoutWidget)
         self.radio1.clicked.connect(lambda:self.setDevice(1))
         self.radio2.clicked.connect(lambda:self.setDevice(0))
+        if(config.device() == 1):
+            self.radio1.setChecked(1)
+        else:
+            self.radio2.setChecked(1)
         self.formLayout.setWidget(9, QtGui.QFormLayout.SpanningRole,self.radio1)
         self.formLayout.setWidget(10, QtGui.QFormLayout.SpanningRole,self.radio2)
-        self.radio1.setChecked(1)
+        
         self.horizontalLayout.addWidget(self.tabWidget)
         
         self.buttonBox = QtGui.QDialogButtonBox(self)
@@ -88,6 +92,7 @@ class DialogAndroid(QtGui.QDialog):
             val.append(str(self.lineEdit_4.text()))
             val.append(str(self.lineEdit_5.text()))
             config.setAdb(val)
+            self.parent().adb.setAdbList()
             
     def update(self,btn):
         val = []
@@ -101,6 +106,7 @@ class DialogAndroid(QtGui.QDialog):
         
     def setDevice(self,val):
         config.setDevice(val)
+        self.parent().adb.setDevice()
         
 class DialogAnt(QtGui.QDialog):
     def __init__(self, parent=None):

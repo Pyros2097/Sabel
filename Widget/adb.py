@@ -10,19 +10,16 @@ class Adb(QWidget):
         self.parent = parent
         self.adb_thread = WorkThread()
         self.timer = QTimer()
-        self.device = config.device()
         self.adblist = config.adb()
+        self.device = ""
+        self.setDevice()
         #self.adb_thread = AdbThread()
         self.connect(self.adb_thread, SIGNAL("update"),self.update)
         self.connect(self.adb_thread, SIGNAL("fini"),self.newstart)
         #self.connect(self.timer , SIGNAL('timeout()') , self.onTimeout)
         #self.connect(self.adb_thread , SIGNAL('started()') , self.onThreadStarted)
         #self.connect(self.adb_thread , SIGNAL('finished()'), self.onThreadFinished)
-        self.cmd1 = "adb -d push "+self.adblist[0]
-        self.cmd2 = "adb -d shell am start -a android.intent.action.MAIN -n "+self.adblist[1]
-        self.cmd3 = "adb -d logcat -s "+self.adblist[2]
-        self.cmd4 = "adb -d shell pm disable com.emo_framework.examples"
-        self.cmd5 = "adb -d shell pm enable com.emo_framework.examples"
+        
         
     def onTimeout(self):
         print "timeout"
@@ -54,6 +51,25 @@ class Adb(QWidget):
         self.timer.stop()
         #self.enableButtons(True)
         #self.pbar.setValue(0)
+        
+    def setDevice(self):
+        if(config.device() == 1):
+            self.device = " -d "
+        else:
+            self.device = " -e "
+        self.cmd1 = "adb"+self.device+"push "+self.adblist[0]
+        self.cmd2 = "adb"+self.device+"shell am start -a android.intent.action.MAIN -n "+self.adblist[1]
+        self.cmd3 = "adb"+self.device+"logcat -s "+self.adblist[2]
+        self.cmd4 = "adb"+self.device+"shell pm disable com.emo_framework.examples"
+        self.cmd5 = "adb"+self.device+"shell pm enable com.emo_framework.examples"
+    
+    def setAdbList(self):
+        self.adblist = config.adb()
+        self.cmd1 = "adb"+self.device+"push "+self.adblist[0]
+        self.cmd2 = "adb"+self.device+"shell am start -a android.intent.action.MAIN -n "+self.adblist[1]
+        self.cmd3 = "adb"+self.device+"logcat -s "+self.adblist[2]
+        self.cmd4 = "adb"+self.device+"shell pm disable com.emo_framework.examples"
+        self.cmd5 = "adb"+self.device+"shell pm enable com.emo_framework.examples"
         
     def update(self,line):
         self.parent.textEdit.append(line)

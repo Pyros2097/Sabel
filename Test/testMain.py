@@ -7,8 +7,7 @@ import icons
 import sys
 import os
 from globals import config
-
-path = os.getcwd()
+path = os.getcwd()
 
 class TestMainWindow:
     def __init__(self):

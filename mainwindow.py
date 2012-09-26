@@ -89,7 +89,8 @@ class MainWindow(Window):
         text = ""
         try:
             infile = open(nfile, 'r')
-            text = infile.read()
+            text = unicode(infile.read())
+
             #infile.close()
             self.files.append(nfile)
             config.setFile(self.files) 
@@ -109,8 +110,9 @@ class MainWindow(Window):
             config.setFile(self.files)
             QMessageBox.about(self,"Can't Open","File is Being Used\n"+nfile)
             return False
-        #finally:
-        #    infile.close()
+        finally:
+            if(infile != None):
+                infile.close()
             
                
     def openImage(self,nfile):
@@ -198,9 +200,9 @@ class MainWindow(Window):
                 fname = self.files[index]
                 try:
                     fl = open(fname, 'w')
-                    tempText = self.tabWidget.widget(index).text()
+                    tempText = unicode(self.tabWidget.widget(index).text())
                     if tempText:
-                        fl.write(tempText)
+                        fl.write(tempText.encode("utf-8"))
                         fl.close()
                         self.clearDirty(index)
                     else:
@@ -217,9 +219,9 @@ class MainWindow(Window):
                 fname = self.files[index]
                 try:
                     fl = open(fname, 'w')
-                    tempText = self.tabWidget.widget(index).text()
+                    tempText = unicode(self.tabWidget.widget(index).text())
                     if tempText:
-                        fl.write(tempText)
+                        fl.write(tempText.encode("utf-8"))
                         fl.close()
                         self.clearDirty(index)
                     else:

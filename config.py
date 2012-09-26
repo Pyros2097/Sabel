@@ -31,12 +31,15 @@ class Config:
         
     def iconSize(self):
         return int(self.readSetting('iconsize'))
+    def setIconSize(self,val):
+        self.writeSetting('iconsize',val)
     
     def mode(self):
         return int(self.readSetting('mode'))
     def setMode(self,value):
         self.writeSetting("mode",value)
     
+    '''0 is emulator 1 is device'''
     def device(self):
         return int(self.readSetting('device'))
     def setDevice(self,value):

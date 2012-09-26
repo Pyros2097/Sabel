@@ -1,4 +1,4 @@
-from globals import (fontSize,fontName,ospathjoin,os_pixmap,apiDir,config
+from globals import (fontSize,ospathjoin,os_pixmap,apiDir,config
                      ,Auto,eol)
 from PyQt4.QtCore import SIGNAL,QString,QEvent
 from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor, QPalette,QWidget
@@ -15,7 +15,8 @@ class Editor(QsciScintilla):
         self.fontSize = fontSize
         self.colorStyle = colorStyle
         self.errorLines = []
-        self.setText(text)
+        self.setUtf8(True)
+        self.setText(QString(text))
         if(eol == 0):
             self.setEolMode(self.EolWindows)
         elif(eol == 1):
@@ -40,11 +41,11 @@ class Editor(QsciScintilla):
             self.setMarginWidth(0, QString("-------"))
         else:
             self.setMarginWidth(0, QString("---------"))   
-        #self.linesChanged.connect(self.changeMarginWidht())   
-                 
+        #self.linesChanged.connect(self.changeMarginWidht())           
         #Caret
         self.setCaretLineBackgroundColor(self.colorStyle.caret)
         self.setCaretLineVisible(True)
+        
         
         #Indicator
         #self.setIndicatorForegroundColor(self.colorStyle.color)
@@ -59,6 +60,7 @@ class Editor(QsciScintilla):
         self.registerImage(0,Auto.auto_class2)
         self.registerImage(1,Auto.auto_method)
         self.registerImage(2,Auto.auto_field)
+        self.registerImage(3,Auto.auto_package)
         self.setAutoCompletionThreshold(config.thresh())
         self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
         
@@ -71,7 +73,7 @@ class Editor(QsciScintilla):
         #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier')
         
         self.font = QFont()
-        self.font.setFamily(fontName)
+        self.font.setFamily(config.fontName())
         #self.font.setFixedPitch(True)
         self.font.setPointSize(self.fontSize)
         self.setFont(self.font)

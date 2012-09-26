@@ -1,5 +1,5 @@
 ADB:
-- C:/CODE/sabel.png /sdcard/
+- C:/CODE/assets/main.nut  /sdcard/
 - com.emo_framework.examples/com.emo_framework.EmoActivity
 - EmoFramework
 - com.emo_framework.examples
@@ -19,19 +19,19 @@ ClosedProject:
 - 0
 - 0
 - 0
+- 0
 File:
+- C:/CODE/assets/howtoscene.nut
 - C:/CODE/assets/creditscene.nut
-- C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/index.html
-- C:/Documents and Settings/Administrator/My Documents/www.mercyelectronic.com/style.css
-- C:/CODE/Sabel/Test/testMain.py
 PARAM:
 - Dude
 Project:
 - C:/CODE/assets/
 - C:/port/
+- C:/Android-Template/
 Recent: []
 Setting:
-  device: 1
+  device: 0
   fontname: Courier New
   fontsize: 10
   iconsize: 16

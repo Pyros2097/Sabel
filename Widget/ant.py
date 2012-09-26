@@ -102,7 +102,7 @@ class Ant(QWidget):
         self.showOutput()
         self.parent.textEdit.clear()
         self.parent.textEdit.append("Installing... "+prj.getPath())
-        self.ant_thread.setCmd("ant.bat install -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
+        self.ant_thread.setCmd("ant.bat installd -buildfile "+ospathjoin(prj.getPath(),"build.xml"))
         self.ant_thread.run()
         
     def close(self):

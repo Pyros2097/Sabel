@@ -439,7 +439,7 @@ class Window(QMainWindow):
             self.tabWidget.widget(i).zoomout()       
     def setFont(self):
         font = QFont()
-        font.setFamily(self.fontName)
+        font.setFamily(config.fontName())
         fdialog = QFontDialog(self)
         fdialog.show()
         fdialog.setCurrentFont(font)
@@ -447,10 +447,10 @@ class Window(QMainWindow):
     def setFontName(self,font):
         #print "accepted"
         #print font.family()
-        self.fontName = str(font.family())
-        config.setFontName(self.fontName)
+        fontName = str(font.family())
+        config.setFontName(fontName)
         for i in range(len(self.files)):
-            self.tabWidget.widget(i).setFontName(self.fontName)      
+            self.tabWidget.widget(i).setFontName(fontName)      
     def setThreshold(self,val):
         config.setThresh(val)
         for i in range(len(self.files)):

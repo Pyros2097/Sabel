@@ -64,7 +64,6 @@
 <file>Icons/auto_method.png</file>
 <file>Icons/warning.png</file>
 <file>Icons/fullscreen.png</file>
-<file>Icons/logosabel.png</file>
 <file>Icons/image.png</file>
 <file>Icons/android.png</file>
 <file>Icons/logosq.png</file>
@@ -83,5 +82,7 @@
 <file>Icons/ios.png</file>
 <file>Icons/emo.png</file>
 <file>Icons/ioss.png</file>
+<file>Icons/logosabel.xcf</file>
+<file>Icons/logosabel.png</file>
 </qresource>
 </RCC>
