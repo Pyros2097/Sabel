@@ -4,7 +4,7 @@ __license__ = "GPLv3"
 __copyright__ = 'Copyright (c) 2012, pyros2097'
 __credits__ = ['pyros2097', 'eclipse']
 __email__ = 'pyros2097@gmail.com'
-__version__ = "0.58"
+__version__ = "0.60"
 #TODO:
 #Must learn to destroy editor completely because memory keeps increasing
 #when close tab occurs

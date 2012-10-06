@@ -1,11 +1,14 @@
 ADB:
-- C:/CODE/assets/main.nut  /sdcard/
+- C:/Android-Template/assets/main.nut /sdcard/
 - com.emo_framework.examples/com.emo_framework.EmoActivity
 - EmoFramework
 - com.emo_framework.examples
 ANT:
-- android update project --target 5 --path .
-- ant debug install
+- android.bat update project -p
+- ant.bat debug -buildfile
+- ant.bat installd -buildfile
+- ant.bat debug install -buildfile
+- ant.bat clean -buildfile
 CMD:
 - CMD
 - PYTHON
@@ -19,24 +22,31 @@ ClosedProject:
 - 0
 - 0
 - 0
+- 0
 File:
-- C:/CODE/assets/howtoscene.nut
 - C:/CODE/assets/creditscene.nut
+- C:/CODE/assets/main.nut
+- C:/CODE/assets/howtoscene.nut
+- C:/CODE/assets/cll.nut
 PARAM:
 - Dude
+- '  C:/CODE/assets/cll.nut'
 Project:
 - C:/CODE/assets/
 - C:/port/
+- C:/Android-Template/
 Recent: []
 Setting:
   device: 1
   fontname: Courier New
-  fontsize: 10
+  fontsize: 9
   iconsize: 16
+  indent: 0
+  margin: 0
   mode: 0
   styleindex: 8
   tabwidth: 2
-  thresh: 2
+  thresh: 1
   workspace: C:/CODE/
 Style: 0
 TODO:
@@ -46,8 +56,7 @@ TODO:
 - Add Style Options
 - Add iOS support
 - Make Mac Build
-- Add Lua and Neko Lexers
 - Dude Thats it for now
 - Squirrel Parser
-- Lua Parser
 - Neko Parser
+- Desginer

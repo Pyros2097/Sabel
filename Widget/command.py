@@ -26,12 +26,12 @@ class Command(QWidget):
         self.run()
         
     def finished(self,no,cmd):
+        self.parent.progressStop()
+        self.parent.statusWriting()
         if(no == 0):
-            self.parent.textEdit.append("Finished")
-            self.parent.textEdit.append(cmd)
+            self.parent.textEdit.append("Finished: "+cmd)
         else:
-            self.parent.textEdit.append("Error Canceled")
-            self.parent.textEdit.append(cmd) 
+            self.parent.textEdit.append("Error: "+cmd)
         
     def update(self,line):
         self.parent.textEdit.append(line)
@@ -42,6 +42,8 @@ class Command(QWidget):
 
     def run(self):
         self.cmdThread.setCmd(self.cmd)
+        self.parent.progressStart()
+        self.parent.statusCommand()
         self.cmdThread.run()
         
     def close(self):

@@ -34,10 +34,14 @@ class Parser(QWidget):
     def run(self,nfile):
         if(nfile.endswith(".nut")):
             self.par_thread.setCmd(sqc+" "+nfile)
+            self.parent.statusParsing()
+            self.parent.progressStart()
             self.par_thread.run()
             
     def stop(self):
         self.par_thread.close_process()
+        self.parent.statusWriting()
+        self.parent.progressStop()
         
     def close(self):
         self.par_thread.kill_process()

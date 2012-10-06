@@ -38,6 +38,16 @@ class Config:
         return int(self.readSetting('mode'))
     def setMode(self,value):
         self.writeSetting("mode",value)
+        
+    def margin(self):
+        return int(self.readSetting('margin'))
+    def setMargin(self,value):
+        self.writeSetting("margin",value)
+        
+    def indent(self):
+        return int(self.readSetting('indent'))
+    def setIndent(self,value):
+        self.writeSetting("indent",value)
     
     '''0 is emulator 1 is device'''
     def device(self):
@@ -80,6 +90,12 @@ class Config:
         return self.read('ADB')
     def setAdb(self,val):
         self.data['ADB'] = val
+        self.write()
+        
+    def ant(self):
+        return self.read('ANT')
+    def setAnt(self,val):
+        self.data['ANT'] = val
         self.write()
         
     def cmds(self):

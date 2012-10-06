@@ -2,7 +2,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 from globals import config
 from globals import PY_VERSION,__version__,OS_NAME,Icons
-from datetime import datetime
+from tree import BrowseTree
 
 class DialogAndroid(QtGui.QDialog):
     def __init__(self, parent):
@@ -67,7 +67,6 @@ class DialogAndroid(QtGui.QDialog):
         self.buttonBox.setGeometry(QtCore.QRect(40, 370, 341, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName(("buttonBox"))
         self.tabWidget.setCurrentIndex(1)
         self.setWindowTitle("Tools")
         self.label_2.setText("Push Main File:")
@@ -79,13 +78,24 @@ class DialogAndroid(QtGui.QDialog):
         self.lineEdit_3.setText(config.adb()[1])
         self.lineEdit_4.setText(config.adb()[2])
         self.lineEdit_5.setText(config.adb()[3])
-        self.fileButton.clicked.connect(self.getFile)
+        self.fileButton.clicked.connect(self.showBrowse)
+        self.browsedialog = DialogBrowse(self)
+        self.browsedialog.tree.itemDoubleClicked.connect(self.getName)
         
+    def getName(self,item):
+        if(item.isFile()):
+            if(item.isDoc()):
+                self.browsedialog.accept()
+                self.getFile(item.getPath())
+    
+    def showBrowse(self):
+        self.browsedialog.show()
         
-    def getFile(self):
-        fname = str(QtGui.QFileDialog.getOpenFileName(self,"Open File", '.', "Files (*.*)"))
+    def getFile(self,fname = ""):
         if not (fname == ""):
-            val = []
+            val = [] 
+            fname = fname.replace("\\","/")
+            print fname
             self.lineEdit_2.setText(fname+" /sdcard/")
             val.append(str(self.lineEdit_2.text()))
             val.append(str(self.lineEdit_3.text()))
@@ -102,51 +112,94 @@ class DialogAndroid(QtGui.QDialog):
             val.append(str(self.lineEdit_4.text()))
             val.append(str(self.lineEdit_5.text()))
             config.setAdb(val)
+            self.parent().adb.setAdbList()
         self.close()
         
     def setDevice(self,val):
         config.setDevice(val)
         self.parent().adb.setDevice()
         
+class DialogBrowse(QtGui.QDialog):
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self, parent)
+        self.resize(400, 420)
+        self.horizontalLayoutWidget = QtGui.QWidget(self)
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 400, 400))
+        self.tree = BrowseTree()
+        self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
+        self.horizontalLayout.setMargin(0)
+        self.horizontalLayout.addWidget(self.tree)
+        self.tree.initProjects()
+        
 class DialogAnt(QtGui.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         QtGui.QDialog.__init__(self, parent)
         self.resize(400, 420)
         self.horizontalLayoutWidget = QtGui.QWidget(self)
         self.horizontalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 401, 361))
         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setMargin(0)
-        
         self.tabWidget = QtGui.QTabWidget(self.horizontalLayoutWidget)
         self.tab_4 = QtGui.QWidget()
-       
         self.formLayoutWidget = QtGui.QWidget(self.tab_4)
         self.formLayoutWidget.setGeometry(QtCore.QRect(10, 10, 361, 311))
-        
         self.formLayout = QtGui.QFormLayout(self.formLayoutWidget)
         self.formLayout.setMargin(0)
-        self.label_2 = QtGui.QLabel(self.formLayoutWidget)
-        self.formLayout.setWidget(0, QtGui.QFormLayout.SpanningRole, self.label_2)
+        
+        label_1 = QtGui.QLabel(self.formLayoutWidget)
+        self.lineEdit_1 = QtGui.QLineEdit(self.formLayoutWidget)
+        self.formLayout.setWidget(0, QtGui.QFormLayout.SpanningRole,label_1)
+        self.formLayout.setWidget(1, QtGui.QFormLayout.SpanningRole, self.lineEdit_1)
+        label_2 = QtGui.QLabel(self.formLayoutWidget)
         self.lineEdit_2 = QtGui.QLineEdit(self.formLayoutWidget)
-        self.lineEdit_2.setText((""))
-        self.formLayout.setWidget(1, QtGui.QFormLayout.SpanningRole, self.lineEdit_2)
+        
+        self.formLayout.setWidget(2, QtGui.QFormLayout.SpanningRole,label_2)
+        self.formLayout.setWidget(3, QtGui.QFormLayout.SpanningRole, self.lineEdit_2)
+        label_3 = QtGui.QLabel(self.formLayoutWidget)
         self.lineEdit_3 = QtGui.QLineEdit(self.formLayoutWidget)
-        self.lineEdit_3.setText((""))
-        self.formLayout.setWidget(3, QtGui.QFormLayout.SpanningRole, self.lineEdit_3)
-        self.label_3 = QtGui.QLabel(self.formLayoutWidget)
-        self.formLayout.setWidget(2, QtGui.QFormLayout.SpanningRole, self.label_3)
-        self.label_4 = QtGui.QLabel(self.formLayoutWidget)
-        self.formLayout.setWidget(5, QtGui.QFormLayout.SpanningRole, self.label_4)
+        self.formLayout.setWidget(4, QtGui.QFormLayout.SpanningRole,label_3)
+        self.formLayout.setWidget(5, QtGui.QFormLayout.SpanningRole, self.lineEdit_3)
+        label_4 = QtGui.QLabel(self.formLayoutWidget)
         self.lineEdit_4 = QtGui.QLineEdit(self.formLayoutWidget)
-        self.lineEdit_4.setText((""))
-        self.formLayout.setWidget(6, QtGui.QFormLayout.SpanningRole, self.lineEdit_4)
-        self.label_5 = QtGui.QLabel(self.formLayoutWidget)
-        self.formLayout.setWidget(7, QtGui.QFormLayout.SpanningRole, self.label_5)
+        self.formLayout.setWidget(6, QtGui.QFormLayout.SpanningRole,label_4)
+        self.formLayout.setWidget(7, QtGui.QFormLayout.SpanningRole, self.lineEdit_4)
+        label_5 = QtGui.QLabel(self.formLayoutWidget)
         self.lineEdit_5 = QtGui.QLineEdit(self.formLayoutWidget)
-        self.lineEdit_5.setText((""))
-        self.formLayout.setWidget(8, QtGui.QFormLayout.SpanningRole, self.lineEdit_5)
-        self.tabWidget.addTab(self.tab_4, (""))
+        self.formLayout.setWidget(8, QtGui.QFormLayout.SpanningRole,label_5)
+        self.formLayout.setWidget(9, QtGui.QFormLayout.SpanningRole, self.lineEdit_5)
+        
+        self.buttonBox = QtGui.QDialogButtonBox(self)
+        self.buttonBox.setGeometry(QtCore.QRect(40, 370, 341, 32))
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.clicked.connect(self.update)
+        
+        label_1.setText("Create Android Project")
+        label_2.setText("Build")
+        label_3.setText("Install")
+        label_4.setText("Build and Install")
+        label_5.setText("Clean")
+        self.lineEdit_1.setText(config.ant()[0])
+        self.lineEdit_2.setText(config.ant()[1])
+        self.lineEdit_3.setText(config.ant()[2])
+        self.lineEdit_4.setText(config.ant()[3])
+        self.lineEdit_5.setText(config.ant()[4])
+        
+        self.tabWidget.addTab(self.tab_4,"Ant")
+        self.setWindowTitle("Ant")
         self.horizontalLayout.addWidget(self.tabWidget)
+        
+    def update(self,btn):
+        val = []
+        if(btn.text() == "OK"):
+            val.append(str(self.lineEdit_1.text()))
+            val.append(str(self.lineEdit_2.text()))
+            val.append(str(self.lineEdit_3.text()))
+            val.append(str(self.lineEdit_4.text()))
+            val.append(str(self.lineEdit_5.text()))
+            config.setAnt(val)
+            self.parent().ant.setAntList()
+        self.close()
         
 class DialogSquirrel(QtGui.QDialog):
     def __init__(self, parent=None):
@@ -326,6 +379,7 @@ class DialogTodo(QtGui.QDialog):
         item = self.list.takeTopLevelItem(self.list.indexOfTopLevelItem(self.list.currentItem()))
         self.taskList.remove(item.text(0))
         config.setTodo(self.taskList)
+     
         
 class DialogAbout2(QtGui.QDialog):
     def __init__(self, parent=None):

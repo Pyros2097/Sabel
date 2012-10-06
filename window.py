@@ -1,12 +1,14 @@
 from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QHBoxLayout,QVBoxLayout,QTabWidget,QToolBar,QTextEdit,
                          QLineEdit,QPushButton,QToolButton,QSplitter,QStatusBar,
-                         QMainWindow,QPalette,QColor,QSlider,QFontDialog,QLabel,
-                         QFont,QComboBox,QFileDialog,QInputDialog,QProgressBar)      
-from PyQt4.QtCore import QSize,Qt,QStringList
+                         QMainWindow,QPalette,QColor,QSlider,QLabel,
+                         QFont,QComboBox,QFileDialog,QInputDialog,QProgressBar
+                         )      
+from PyQt4.QtCore import QSize,Qt,QStringList,SIGNAL,SLOT,QString
 from Widget import (EditorTab,Tiler,TreeTab,OutputTab,
                     ProjectTree,ErrorTree,OutlineTree,
-                    DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo)
+                    DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo,
+                    DialogBrowse)
 from Widget.style import Styles
 from stylesheet import *
 
@@ -44,6 +46,7 @@ class Window(QMainWindow):
         self.tiler = Tiler(self)
         self.tiler.setMinimumHeight(100) 
         self.tabWidget.tabBar().setStyleSheet(stletabb)
+        self.tabWidget.currentChanged.connect(self.fileChanged)
         self.tabWidget_2.currentChanged.connect(self.closeExplorer)
         self.tabWidget_3.currentChanged.connect(self.closeConsole)
         self.tabWidget.setTabsClosable(True)
@@ -58,20 +61,8 @@ class Window(QMainWindow):
         self.VerticalLayout_2 = QVBoxLayout(self.tab_5)#QHBoxLayout(self.tab_5)
         self.VerticalLayout_2.setMargin(0)
         self.treeWidget = ProjectTree(self.tab_5)
-        self.treeWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        self.treeWidget.horizontalScrollBar().show()
-        self.treebar = QToolBar()
-        action_Android = QAction(Icons.android,'Android', self)
-        action_Android.triggered.connect(self.android)
-        action_Ant = QAction(Icons.ant_view,'Ant', self)
-        action_Ant.triggered.connect(self.ant)
-        action_Squirrel = QAction(Icons.nut,'Squirrel', self)
-        action_Squirrel.triggered.connect(self.squirrel)
-        self.treebar.addAction(action_Android)
-        self.treebar.addAction(action_Ant)
-        self.treebar.addAction(action_Squirrel)
-        self.treebar.setIconSize(QSize(16,16))
-        self.VerticalLayout_2.addWidget(self.treebar)
+        #self.treeWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        #self.treeWidget.horizontalScrollBar().show()
         self.VerticalLayout_2.addWidget(self.treeWidget)
         
         #Outline
@@ -264,13 +255,24 @@ class Window(QMainWindow):
         self.zoomoutButton.setFlat(True)
         self.zoomoutButton.setIcon(Icons.zoomminus)
         self.zoomoutButton.clicked.connect(self.zoomout)
-        self.fontButton = QPushButton(self)
-        self.fontButton.setFlat(True)
-        self.fontButton.setIcon(Icons.font)
-        self.fontButton.clicked.connect(self.setFont)
+
+        '''Status Text, Progress Bar and Stop Button'''
+        self.statusText = QLabel("Writing")
+        self.statusText.setMargin(10)
         self.progressbar = QProgressBar()
         self.progressbar.setMinimum(0)
         self.progressbar.setMaximum(100)
+        self.stopButton = QPushButton(self)
+        self.stopButton.setFlat(True)
+        self.stopButton.setIcon(Icons.stop)
+        self.stopButton.clicked.connect(self.forceStop)
+        self.progressbar.hide()
+        self.stopButton.hide()
+        self.temp = False
+        self.progress = False
+        self.counter = 0
+        
+        '''Adding all widgets to Status Bar'''
         self.statusbar.addWidget(self.aboutButton)
         self.statusbar.addWidget(self.expButton)
         self.statusbar.addWidget(self.cmdButton)
@@ -278,19 +280,37 @@ class Window(QMainWindow):
         self.statusbar.addWidget(self.findButton)
         self.statusbar.addWidget(self.zoominButton)
         self.statusbar.addWidget(self.zoomoutButton)
-        self.statusbar.addWidget(self.fontButton)
-        #self.statusbar.addWidget(self.progressbar)
-        #self.progressbar.hide()
+        #self.statusbar.addWidget(self.fontButton)
+        self.statusbar.addWidget(self.statusText)
+        self.statusbar.addWidget(self.progressbar)
+        self.statusbar.addWidget(self.stopButton)
         #self.statusbar.setFixedHeight(18)
         
-        #Init colorstyling
+        ''''Initializing Coloring Style'''
         self.colorStyle = None
         self.initColorStyle()
-        #Init
+        
+        '''Adding Cental Widget and Status Bar'''
         self.setCentralWidget(self.centralwidget)
         self.setStatusBar(self.statusbar)
         self.textEdit.setReadOnly(True)
         #QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
+        
+    def build_project(self):
+        current_file = self.files[self.tabWidget.currentIndex()]
+        prj = self.treeWidget.getProject(current_file)
+        if(prj != None):
+            self.treeWidget.build(prj)
+            
+    def run_project(self):
+        current_file = self.files[self.tabWidget.currentIndex()]
+        prj = self.treeWidget.getProject(current_file)
+        if(prj != None):
+            self.treeWidget.run(prj)
+            
+    def forceStop(self):
+        self.ant.kill()
+        self.progressStop()
         
 #-----------------------------------------------------------------------------------#
 #   Menu Actions Functions                                                          #
@@ -347,7 +367,7 @@ class Window(QMainWindow):
         form = DialogAndroid(self)
         form.show()
     
-    def ant(self):
+    def antt(self):
         form = DialogAnt(self)
         form.show()
         
@@ -389,7 +409,8 @@ class Window(QMainWindow):
                 self.tiler.setCurrentIndex(1)
                 self.tiler.hide()
         '''
-        
+     
+    '''The current Changed idx of tabwidget_3 is passed to this a param'''   
     def closeConsole(self,no = 2):
         if(no == 2):
             if(self.tabWidget_3.isHidden()):
@@ -397,6 +418,8 @@ class Window(QMainWindow):
             else:
                 self.tabWidget_3.setCurrentIndex(1)
                 self.tabWidget_3.hide()
+                
+    '''The current Changed idx of tabwidget_2 is passed to this a param'''
     def closeExplorer(self,no = 2):
         if(no == 2):
             if(self.tabWidget_2.isHidden()):
@@ -404,9 +427,67 @@ class Window(QMainWindow):
             else:
                 self.tabWidget_2.setCurrentIndex(0)
                 self.tabWidget_2.hide()
+        elif(no == 1):
+            self.fileChanged(no)
                 
-    def updatePBar(self, val):
-         self.progressbar.setValue(val)
+    def fileChanged(self,no):
+        if(self.tabWidget_2.currentIndex() == 1):
+            edt = self.tabWidget.widget(self.tabWidget.currentIndex())
+            source = edt.text()
+            self.outlineWidget.parseText(source)
+           
+    def statusSaving(self):
+        self.statusText.setText("Saving")   
+    def statusParsing(self):
+        self.statusText.setText("Parsing")   
+    def statusWriting(self):
+        self.statusText.setText("Writing")  
+    def statusRunning(self):
+        self.statusText.setText("Running")   
+    def statusStopping(self):
+        self.statusText.setText("Stopping")
+    def statusCommand(self):
+        self.statusText.setText("Command")
+    def statusBuilding(self):
+        self.statusText.setText("Building")
+    def statusInstalling(self):
+        self.statusText.setText("Installing")
+    def statusCleaning(self):
+        self.statusText.setText("Cleaning")
+    def statusCreating(self):
+        self.statusText.setText("Creating")
+                
+    def progressStart(self):
+        self.progress == True
+        self.temp == True
+        if(self.progressbar.isHidden()):
+            self.progressbar.show()
+        if(self.stopButton.isHidden()):
+            self.stopButton.show()
+        self.progressbar.setValue(1)
+        
+    def progressStop(self):
+        self.progress == False
+        self.temp == False
+        self.progressbar.setValue(100)
+        if not(self.progressbar.isHidden()):
+            self.progressbar.hide()
+        if not(self.stopButton.isHidden()):
+            self.stopButton.hide()
+              
+    def progressUpdate(self):
+        if(self.progress == True):
+            if(self.temp == True):
+                self.counter += 1
+                self.progressbar.setValue(self.counter)
+                if(self.counter == 100):
+                    self.temp = False
+            if(self.temp == False):
+                self.counter -= 1
+                self.progressbar.setValue(self.counter)
+                if(self.counter == 0):
+                    self.temp = True
+            
                 
 #-----------------------------------------------------------------------------------#
 #   Editor Functions                                                                #
@@ -432,25 +513,53 @@ class Window(QMainWindow):
         edt.setLine(error.line)
     '''Font Functions'''       
     def zoomin(self):
-        for i in range(len(self.files)):
-            self.tabWidget.widget(i).zoomin()
+        pass
+        #for i in range(len(self.files)):
+        #    self.tabWidget.widget(i).zoomin()
     def zoomout(self):
-        for i in range(len(self.files)):
-            self.tabWidget.widget(i).zoomout()       
-    def setFont(self):
-        font = QFont()
-        font.setFamily(config.fontName())
-        fdialog = QFontDialog(self)
-        fdialog.show()
-        fdialog.setCurrentFont(font)
-        fdialog.accepted.connect(lambda:self.setFontName(fdialog.currentFont()))
-    def setFontName(self,font):
-        #print "accepted"
-        #print font.family()
-        fontName = str(font.family())
+        pass
+        #for i in range(len(self.files)):
+        #    self.tabWidget.widget(i).zoomout()
+            
+    def setFontName(self,idx):
+        fontName = str(self.toolBar.fontCombo.itemText(idx))
         config.setFontName(fontName)
         for i in range(len(self.files)):
-            self.tabWidget.widget(i).setFontName(fontName)      
+            self.tabWidget.widget(i).setFontName()
+            
+    def setFontSize(self,idx):
+        fontSize = idx+1
+        config.setFontSize(fontSize)
+        for i in range(len(self.files)):
+            self.tabWidget.widget(i).setFontSize() 
+            
+    def gotoLine(self,item):
+        edt = self.tabWidget.widget(self.tabWidget.currentIndex())
+        edt.setLine(item.line)
+            
+    def setMargin(self):
+        mar = config.margin()
+        if(mar == 0): 
+            config.setMargin(1)
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setMargin(1)
+        else:
+            config.setMargin(0)
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setMargin(0)
+                
+    def setIndent(self):
+        indent = config.indent()
+        if(indent == 0): 
+            config.setIndent(1)
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setIndent(1)
+        else:
+            config.setIndent(0)
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setIndent(0)
+        
+        
     def setThreshold(self,val):
         config.setThresh(val)
         for i in range(len(self.files)):
@@ -490,17 +599,22 @@ class Window(QMainWindow):
 #   Command Functions                                                               #
 #-----------------------------------------------------------------------------------#   
     def getFile(self):
-        fname = str(QFileDialog.getOpenFileName(self,"Open File", '.', "Files (*.*)"))
-        if not (fname == ""):
-            index = self.combo2.currentIndex()
-            text = str(self.combo2.itemText(index))+" "+fname
-            self.combo2.setItemText(index,text)
-            self.paramList.pop(index)
-            self.paramList.insert(index,text)
-            config.setParam(self.paramList)
+        self.browsedialog = DialogBrowse(self)
+        self.browsedialog.tree.itemDoubleClicked.connect(self.getName)
+        self.browsedialog.show()
             
-            
-            
+    def getName(self,item):
+        if(item.isFile()):
+                self.browsedialog.accept()
+                fname = item.getPath()
+                if not (fname == ""):
+                    index = self.combo2.currentIndex()
+                    text = str(self.combo2.itemText(index))+" "+fname
+                    self.combo2.setItemText(index,text)
+                    self.paramList.pop(index)
+                    self.paramList.insert(index,text)
+                    config.setParam(self.paramList)
+                 
     def addCmd(self,index):
         text, ok = QInputDialog.getText(self, 'Add Command', 'Command:')
         if(ok):

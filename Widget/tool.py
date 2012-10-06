@@ -1,4 +1,5 @@
-from PyQt4.QtGui import QToolBar, QMenu, QAction, QSlider, QWidgetAction
+from PyQt4.QtGui import (QToolBar, QMenu, QAction, QSlider, QWidgetAction, QFontDatabase,
+                         QFont, QComboBox, QLabel)
 from PyQt4.QtCore import SIGNAL, Qt, QSize
 from globals import config, Icons
 
@@ -24,8 +25,13 @@ class Tool(QToolBar):
         self.action_SaveAll.triggered.connect(self.parent.fileSaveAll)
         self.action_SaveAll.setToolTip("Save All Files")
         
-        self.action_Help = QAction(Icons.toc_open, 'Help', self)
-        self.action_Help.triggered.connect(self.parent.help)
+        
+        
+        self.action_Build = QAction(Icons.thread_view, 'Build', self)
+        self.action_Build.setShortcut('Ctrl+B')
+        self.action_Build.triggered.connect(self.parent.build_project)
+        self.action_Debug = QAction(Icons.debug_exec, 'Debug', self)
+        
         self.action_Run = QAction(Icons.run, 'Run', self)
         self.action_Run.setShortcut('Ctrl+R')
         self.action_Run.triggered.connect(self.parent.adb.run)
@@ -39,6 +45,8 @@ class Tool(QToolBar):
         self.action_Design.triggered.connect(self.parent.design)
         self.action_Todo = QAction(Icons.task_set, 'Todo', self)
         self.action_Todo.triggered.connect(self.parent.todo)
+        self.action_Help = QAction(Icons.toc_open, 'Help', self)
+        self.action_Help.triggered.connect(self.parent.help)
         
         men = QMenu()
         
@@ -70,11 +78,41 @@ class Tool(QToolBar):
         self.iconSlider.setOrientation(Qt.Horizontal)
         self.iconSlider.setValue(config.iconSize())
         self.iconSlider.setMinimum(16)
-        self.iconSlider.setMaximum(60)
+        self.iconSlider.setMaximum(32)
         self.iconSlider.setSingleStep(2)
         self.iconSlider.valueChanged.connect(self.setIcon)
         self.iconSliderAction = QWidgetAction(men)
         self.iconSliderAction.setDefaultWidget(self.iconSlider)
+        
+        '''Font Button'''
+        self.fontCombo = QComboBox()
+        #self.fontCombo.setStyleSheet("QPushButton {text-align:center;color:blue;text-decoration:underline;font-family:arial; background-color:#d4d0c8; }")
+        database = QFontDatabase()
+        idx = 0
+        for fam in database.families():
+            #font = QFont(fam)
+            #font.setFixedPitch(True)
+            #font.setPointSize(10)
+            #text = QLabel(fam)
+            #text.setFont(font)
+            self.fontCombo.addItem(Icons.font,fam)
+            if(fam == config.fontName()):
+               self.fontCombo.setCurrentIndex(idx)
+               #self.fontCombo.setFont(font)
+            idx+= 1
+        self.fontCombo.currentIndexChanged.connect(self.parent.setFontName)
+        self.fontComboMenu = QWidgetAction(men)
+        self.fontComboMenu.setDefaultWidget(self.fontCombo)
+        
+        '''Font Size'''
+        self.fontSizeCombo = QComboBox()
+        for size in range(0,40):
+            self.fontSizeCombo.addItem(str(size+1))
+            if(size == config.fontSize()):
+               self.fontSizeCombo.setCurrentIndex(size)
+        self.fontSizeCombo.currentIndexChanged.connect(self.parent.setFontSize)
+        self.fontSizeComboMenu = QWidgetAction(men)
+        self.fontSizeComboMenu.setDefaultWidget(self.fontSizeCombo)
         
         
         action_explorer = QAction("Show Explorer",self)
@@ -84,18 +122,39 @@ class Tool(QToolBar):
         action_designer = QAction("Show Designer",self)
         action_designer.triggered.connect(self.parent.design)
         action_Indentation = QAction("Indentation Guides",self)
+        action_Indentation.triggered.connect(self.parent.setIndent)
+        action_Margin = QAction("Line Numbers",self)
+        action_Margin.triggered.connect(self.parent.setMargin)
+        action_Android = QAction(Icons.android,'Android', self)
+        action_Android.triggered.connect(self.parent.android)
+        action_Ant = QAction(Icons.ant_view,'Ant', self)
+        action_Ant.triggered.connect(self.parent.antt)
+        action_Squirrel = QAction(Icons.nut,'Squirrel', self)
+        action_Squirrel.triggered.connect(self.parent.squirrel)
+        action_Ios1 = QAction(Icons.ios,'iOS', self)
+        men.addAction(action_Android)
+        men.addAction(action_Ant)
+        men.addAction(action_Squirrel)
+        men.addAction(action_Ios1)
+        men.addSeparator()
         men.addAction(action_explorer)
         men.addAction(action_console)
         men.addAction(action_designer)
         men.addAction(action_Indentation)
+        men.addAction(action_Margin)
+        men.addSeparator()
+        men.addAction(QAction("Font",self))
+        men.addAction(self.fontComboMenu)
+        men.addAction(QAction("Font Size",self))
+        men.addAction(self.fontSizeComboMenu)
         men.addSeparator()
         men.addAction(QAction("TabWidth",self))
         men.addAction(self.tabsSliderAction)
         men.addSeparator()
         men.addAction(QAction("Threshold",self))
         men.addAction(self.threshSliderAction)
-        men.addAction(QAction("Icon Size",self))
-        men.addAction(self.iconSliderAction)
+        #men.addAction(QAction("Icon Size",self))
+        #men.addAction(self.iconSliderAction)
         
         self.action_Options = QAction(Icons.emblem_system, 'Options', self)
         self.action_Options.setMenu(men)
@@ -111,7 +170,7 @@ class Tool(QToolBar):
         self.action_Emo = QAction(Icons.emo, 'Emo', self)
         self.action_Emo.setCheckable(True)
         self.action_Emo.triggered.connect(self.parent.emo)
-        self.action_Ios = QAction(Icons.ios, 'iOS', self)
+        self.action_Ios = QAction(Icons.ios, 'ios', self)
         self.action_Ios.setCheckable(True)
         self.action_Ios.triggered.connect(self.parent.ios)
 
@@ -172,9 +231,11 @@ class Tool(QToolBar):
         self.addAction(self.action_Save)
         self.addAction(self.action_SaveAll)
         self.addSeparator()
+        self.addAction(self.action_Build)
         self.addAction(self.action_Run)
         self.addAction(self.action_RunFile)
         self.addAction(self.action_Stop)
+        self.addAction(self.action_Debug)
         self.addSeparator()
         self.addAction(self.action_Design)
         self.addAction(self.action_Todo)
@@ -195,3 +256,6 @@ class Tool(QToolBar):
     def setIcon(self,val):
         config.setIconSize(val)
         self.setIconSize(QSize(val,val))
+        
+    def make_callback(self, param):
+        return lambda:self.parent.setFontName(param)

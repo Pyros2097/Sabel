@@ -4,7 +4,7 @@ from PyQt4.QtGui import QIcon,QPixmap,QApplication,QSplashScreen
 from send2trash import send2trash
 from config import Config
 
-__version__ = "0.58"
+__version__ = "0.60"
 #Python accesses local variables much more efficiently than global variables. 
 oslistdir = os.listdir
 ospathisdir = os.path.isdir
@@ -117,6 +117,9 @@ class Icons:
     zoomplus = os_icon('zoomplus')
     ios = os_icon('ioss')
     emo = os_icon('emo')
+    method = os_icon('auto_jmeth')
+    class1 = os_icon('auto_class')
+    field = os_icon('auto_field')
     
 class Auto:
     auto_activity = os_pixmap('auto_activity')

@@ -86,7 +86,6 @@ class Project(QTreeWidgetItem):
         self.Count += 1
         self.setExpanded(True)
         
-        
     
     def getPath(self):
         return self.path
@@ -193,6 +192,7 @@ class ProjectTree(QTreeWidget):
         if(self.closed[self.projects.index(startDir)] == 0):
             i = Project(self,startDir)
             self.addTopLevelItem(i)
+            self.setCurrentItem(i)
             self.readDir(i,startDir)
             self.readMainFiles(i,startDir)
         else:
@@ -215,6 +215,24 @@ class ProjectTree(QTreeWidget):
         self.projects.remove(itemPath)
         config.setProject(self.projects)
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
+        
+    '''Awesome GG working 1/10/12 5pm'''
+    def getProject(self,nfile):
+        current_item = self.currentItem()
+        if(current_item == None):
+            QMessageBox.about(self,"Please Select or Add a Project First")
+            return None
+        else: 
+            '''This is when a project is selected'''
+            if(current_item.parent() == None):
+                pass
+                #print current_item.getPath()  
+            else:
+                '''This is when a file or child is selected'''
+                while(current_item.parent() != None):
+                    current_item = self.currentItem().parent()
+                #print current_item.getPath()
+            return current_item
       
     def addItem(self,links):
         print links
@@ -304,15 +322,15 @@ class ProjectTree(QTreeWidget):
         action_DeleteProject = QAction(Icons.trash,'Delete', self)
         action_DeleteProject.triggered.connect(lambda:self.deleteProject(item))
         
-        action_CreateProject = QAction('Create', self)
+        action_CreateProject = QAction('Create Android', self)
         action_CreateProject.triggered.connect(lambda:self.create(item))
         action_BuildProject = QAction('Build', self)
         action_BuildProject.triggered.connect(lambda:self.build(item))
-        action_BuildRunProject = QAction('Build and Run', self)
+        action_BuildRunProject = QAction('Build and Install', self)
         action_BuildRunProject.triggered.connect(lambda:self.buildRun(item))
         action_CleanProject = QAction('Clean', self)
         action_CleanProject.triggered.connect(lambda:self.clean(item))
-        action_RunProject = QAction('Run', self)
+        action_RunProject = QAction('Install', self)
         action_RunProject.triggered.connect(lambda:self.run(item))
         if(item.isProject()):
             if not(item.isClosed()):
@@ -532,11 +550,73 @@ class ProjectTree(QTreeWidget):
             except:
                 QMessageBox.about(self,"Error","Could Not Delete The File")
                 
+class BrowseTree(QTreeWidget):
+    def __init__(self,parent = None):
+        QTreeWidget.__init__(self,parent)
+        self.setColumnCount(1)
+        self.setHeaderLabel("Explorer")
+        self.projects = []
+        self.header().setStretchLastSection(False)
+        self.header().setResizeMode(QHeaderView.ResizeToContents)
+        
+    def initProjects(self):
+        if(config.projects() != None):
+            if(len(config.projects()) != None):
+                for pro in config.projects():
+                    self.createProject(pro)
+            
+    def readDir(self,parent,path):
+        for d in oslistdir(path):
+            if  ospathisdir(ospathjoin(path,d)):
+                if not ospathjoin(d).startswith('.'):
+                    i = Dir(parent,d,path)
+                    self.readFiles(i,ospathjoin(path,d))
+                    
+    def readMainDir(self,parent,path):
+        for d in oslistdir(path):
+            if  ospathisdir(ospathjoin(path,d)):
+                if not ospathjoin(d).startswith('.'):
+                    i = Dir(parent,d,path)
+                    self.readMainFiles(i,ospathjoin(path,d))
+        
+    def readFiles(self,parent,path):
+        for f in oslistdir(path):
+            if ospathisdir(ospathjoin(path,f)):
+                d = Dir(parent,f,path)
+                self.readFiles(d,ospathjoin(path,f))    
+            else:
+                if not ospathjoin(f).startswith('.'):
+                        File(parent,f,path)
+                        
+                        
+    def readMainFiles(self,parent,path):
+        for f in oslistdir(path):
+            if not ospathisdir(ospathjoin(path,f)):
+                if not ospathjoin(f).startswith('.'):
+                        File(parent,f,path)
+                        
+    def createProject(self,startDir):
+        if(ospathexists(startDir)):
+            self.projects.append(startDir)
+            self.addProject(startDir)
+            return True
+        else:
+            QMessageBox.about(self,"Can't Open Project","Project Does Not Exist %s"%startDir)
+            return False
+               
+    def addProject(self,startDir):
+        i = Project(self,startDir)
+        self.addTopLevelItem(i)
+        self.setCurrentItem(i)
+        self.readDir(i,startDir)
+        self.readMainFiles(i,startDir)
+                
                 
 class Error(QTreeWidgetItem):
     def __init__(self,parent,line,text):
         QTreeWidgetItem.__init__(self,parent)
         self.setIcon(0,Icons.error)
+        self.line = line
         self.setText(0,"Line "+line+":      "+text)
         
 class ErrorFile(QTreeWidgetItem):
@@ -561,11 +641,83 @@ class ErrorTree(QTreeWidget):
     def reset(self):
         if(self.topLevelItemCount() != 0):
             self.clear()
+            
+class Field(QTreeWidgetItem):
+    def __init__(self,parent,name,line):
+        QTreeWidgetItem.__init__(self,parent)
+        self.line = line
+        self.name = name
+        self.setText (0, self.name)
+        self.setIcon(0,Icons.field)
+
+class Class(QTreeWidgetItem):
+    def __init__(self,parent,name,line):
+        QTreeWidgetItem.__init__(self,parent)
+        self.line = line
+        self.name = name
+        self.setText (0, self.name)
+        self.setIcon(0,Icons.class1)
+        
+class Method(QTreeWidgetItem):
+    def __init__(self,parent,name,line):
+       QTreeWidgetItem.__init__(self,parent)
+       self.line = line
+       self.name = name
+       self.setText (0, self.name)
+       self.setIcon(0,Icons.method)
         
 class OutlineTree(QTreeWidget):
     def __init__(self,parent = None):
         QTreeWidget.__init__(self,parent)
         self.setColumnCount(1)
         self.header().close()
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
- 
+        self.header().setStretchLastSection(False)
+        self.header().setResizeMode(QHeaderView.ResizeToContents)
+        self.mainClass = None
+        #item = Class(self,"Hero",50)
+        #self.addTopLevelItem(item)
+        #item2 = Method(item,"say(text)",50)
+        #item3 = Field(item,"hp",50)
+        
+    def parseText(self,source):
+        gg = source.split("\n")
+        idx = 0
+        self.reset()
+        for line in gg:
+            if line.contains("class"):
+                self.addClass(line,idx)
+            elif line.contains("function"):
+                self.addMethod(line,idx)
+            idx += 1
+       
+        
+    def addClass(self,text,lineno):
+        text.remove("{")
+        text.remove("class")
+        text.remove(" ")
+        self.mainClass = Class(self,text,lineno)
+        self.addTopLevelItem(self.mainClass)
+        self.expandAll()
+    
+    def addMethod(self,text,lineno):
+        text.remove("{")
+        text.remove("function")
+        text.remove(" ")
+        if(self.mainClass != None):
+            i = Method(self.mainClass,text,lineno)
+        else:
+            i = Method(self,text,lineno)
+            
+    def addField(self,text,lineno):
+        if(self.mainClass != None):
+            i = Field(self.mainClass,text,lineno)
+        else:
+            i = Field(self,text,lineno)
+            
+    def reset(self):
+        '''Important othewise old reference of mainClass is used''' 
+        self.mainClass = None
+        if(self.topLevelItemCount() != 0):
+            self.clear()
+        
+        

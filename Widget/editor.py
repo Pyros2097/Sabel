@@ -16,7 +16,7 @@ class Editor(QsciScintilla):
         self.colorStyle = colorStyle
         self.errorLines = []
         self.setUtf8(True)
-        self.setText(QString(text))
+        self.setText(text)
         if(eol == 0):
             self.setEolMode(self.EolWindows)
         elif(eol == 1):
@@ -30,17 +30,13 @@ class Editor(QsciScintilla):
         #Margin
         #print self.marginType(self.SymbolMargin)
         # Clickable margin 1 for showing markers
-        self.setMarginSensitivity(1, True)
-        self.setMarginsBackgroundColor(self.colorStyle.margin)
+        self.setMarginSensitivity(0, True)
+        #self.setMarginsBackgroundColor(self.colorStyle.margin)
         self.connect(self,SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),self.on_margin_clicked)
         # Margin 0 is used for line numbers
         #self.setMarginLineNumbers(0, True)
         #self.setMarginWidth(0, self.fontmetrics.width("0000") + 6)
-        self.setMarginLineNumbers(0, True)
-        if(self.lines()<1000):
-            self.setMarginWidth(0, QString("-------"))
-        else:
-            self.setMarginWidth(0, QString("---------"))   
+        self.setMargin(config.margin())
         #self.linesChanged.connect(self.changeMarginWidht())           
         #Caret
         self.setCaretLineBackgroundColor(self.colorStyle.caret)
@@ -91,7 +87,11 @@ class Editor(QsciScintilla):
         self.api.load(ospathjoin(apiDir,"emo.api"))
         self.api.prepare()
         self.lexer.setAPIs(self.api) #Very important do not change line otherwise gg
+        self.setAutoIndent(True)
+        self.setBackspaceUnindents(True)
+        self.setIndent(config.indent())
         self.setLexer(self.lexer) #Very important do not change line otherwise gg
+        
         
         
     def setColorStyle(self,colorStyle):
@@ -149,16 +149,41 @@ class Editor(QsciScintilla):
         self.lexer.setFont(self.font)
         self.setMarginsFont(self.font)
         
-    def setFontName(self,name):
-        self.font.setFamily(name)
+    def setFontName(self):
+        self.font.setFamily(config.fontName())
         self.lexer.setFont(self.font)
+        
+    def setFontSize(self):
+        self.font.setPointSize(config.fontSize())
+        self.lexer.setFont(self.font)
+        
+    def setMargin(self,mar):
+        if(mar == 1):
+            self.setMarginLineNumbers(1, True)
+            if(self.lines()<1000):
+                self.setMarginWidth(1, QString("-------"))
+            else:
+                self.setMarginWidth(1, QString("---------"))
+        else:
+            self.setMarginLineNumbers(1, False)
+            self.setMarginWidth(1, QString("---"))
+            
+    def setIndent(self,val):
+        if(val == 0):
+            self.setIndentationGuides(False)
+        else:
+            self.setIndentationGuides(True)
+        
         
     def setThreshold(self,val):
         self.setAutoCompletionThreshold(val)
         
     def setLine(self,lineno):
+        self.setFocus(True)
         self.setCursorPosition(int(lineno),0)
         self.setCaretLineVisible(True)
+       
+        
             
             
     """

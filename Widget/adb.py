@@ -9,7 +9,6 @@ class Adb(QWidget):
         QWidget.__init__(self,parent)
         self.parent = parent
         self.adb_thread = WorkThread()
-        self.timer = QTimer()
         self.adblist = config.adb()
         self.device = ""
         self.setDevice()
@@ -17,40 +16,6 @@ class Adb(QWidget):
         self.connect(self.adb_thread, SIGNAL("update"),self.update)
         self.connect(self.adb_thread, SIGNAL("fini"),self.newstart)
         #self.connect(self.timer , SIGNAL('timeout()') , self.onTimeout)
-        #self.connect(self.adb_thread , SIGNAL('started()') , self.onThreadStarted)
-        #self.connect(self.adb_thread , SIGNAL('finished()'), self.onThreadFinished)
-        
-        
-    def onTimeout(self):
-        print "timeout"
-        """
-        # Update the progress bar
-        value = self.pbar.value()
-        # Going forward or backwards?
-        if self.pbar.invertedAppearance():
-            if value-2 < self.pbar.minimum():
-                self.pbar.setValue(self.pbar.minimum())
-                self.pbar.setInvertedAppearance(False)
-            else:
-                self.pbar.setValue(value-2)
-        else:
-            if value+2 > self.pbar.maximum():
-                self.pbar.setValue(self.pbar.maximum())
-                self.pbar.setInvertedAppearance(True)
-            else:
-                self.pbar.setValue(value+2)
-        """
-        
-    def onThreadStarted(self):
-        print "Thread has been started"
-        self.timer.start(10)
-        #self.enableButtons(False)
- 
-    def onThreadFinished(self):
-        print "Thread has finished"
-        self.timer.stop()
-        #self.enableButtons(True)
-        #self.pbar.setValue(0)
         
     def setDevice(self):
         if(config.device() == 1):
@@ -75,25 +40,34 @@ class Adb(QWidget):
         self.parent.textEdit.append(line)
         
     def checkFinished(self,no,cmd):
+        self.parent.progressStop()
         if(no == 0):
-            self.parent.textEdit.append("Finshed: "+cmd)
+            self.parent.textEdit.append("Finished: "+cmd)
         else:
-            self.parent.textEdit.append("Error Canceled: "+cmd)
+            self.parent.textEdit.append("Error: "+cmd)
         
     def newstart(self,no,cmd):
         self.checkFinished(no, cmd)
+        self.parent.progressStart()
         if(cmd == self.cmd1):
             self.adb_thread.setCmd(self.cmd2)
             self.adb_thread.run()
         elif(cmd == self.cmd2):
             self.adb_thread.setCmd(self.cmd3)
+            self.parent.progressStop()
             self.adb_thread.run2()
         elif(cmd == self.cmd3):
             self.adb_thread.setCmd(self.cmd4)
             self.adb_thread.run()
         elif(cmd == self.cmd4):
             self.adb_thread.setCmd(self.cmd5)
-            self.adb_thread.run()   
+            self.adb_thread.run()
+        elif(cmd == self.cmd5):
+            if not(self.parent.tabWidget_3.isHidden()):
+                self.parent.tabWidget_3.hide()
+            self.parent.toolBar.action_Run.setEnabled(True)
+            self.parent.progressStop()
+            self.parent.statusWriting()
         
     def run(self):
         if self.isRunning == False:
@@ -106,17 +80,16 @@ class Adb(QWidget):
             self.parent.textEdit.clear()
         self.parent.textEdit.append("Pushing main.nut...\n")
         self.adb_thread.setCmd(self.cmd1)
-        self.adb_thread.run()
-        
+        self.parent.statusRunning()
+        self.parent.progressStart()
+        self.adb_thread.run()      
 
     def stop(self):
         if self.isRunning == True:
             self.isRunning = False
             self.parent.toolBar.action_Stop.setDisabled(True)
             self.parent.textEdit.append("Stopped.")
-            if not(self.parent.tabWidget_3.isHidden()):
-                self.parent.tabWidget_3.hide()
-            self.parent.toolBar.action_Run.setEnabled(True)
+            self.parent.statusStopping()
             self.adb_thread.close_process()
             #"adb -d shell ps | grep "+adblist[3]+" | awk '{print $2}' | xargs adbshell kill")
             #adb -d shell ps | grep com.emo_framework.examples | awk '{print $2}' | xargs adb shell kill

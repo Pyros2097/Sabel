@@ -29,6 +29,7 @@ class MainWindow(Window):
         self.connect(self.tabWidget,SIGNAL("dropped"), self.createTabs)
         self.tabWidget.tabCloseRequested.connect(self.closeTab)
         self.treeWidget.itemDoubleClicked.connect(self.treeItemClicked)
+        self.outlineWidget.itemDoubleClicked.connect(self.gotoLine)
         self.errorTree.itemDoubleClicked.connect(self.errorLine)
         self.connect(self.treeWidget,SIGNAL("openFileClicked"),self.treeItemClicked)
         self.connect(self.treeWidget,SIGNAL("create"), lambda x:self.ant.create(x))
@@ -54,7 +55,7 @@ class MainWindow(Window):
                 self.openImage(item.getPath())
             elif(item.isAudio()):
                 self.openAudio(item.getPath())
-
+        
     def initInterpreter(self):
         self.ipy = PyInterp(self)
         self.ipy.initInterpreter(locals())
@@ -89,7 +90,8 @@ class MainWindow(Window):
         text = ""
         try:
             infile = open(nfile, 'r')
-            text = unicode(infile.read())
+            tt = infile.read()
+            text = unicode(tt,"utf-8")#must add utf-8 for it to work
 
             #infile.close()
             self.files.append(nfile)
@@ -200,6 +202,8 @@ class MainWindow(Window):
                 fname = self.files[index]
                 try:
                     fl = open(fname, 'w')
+                    self.statusSaving()
+                    self.progressStart()
                     tempText = unicode(self.tabWidget.widget(index).text())
                     if tempText:
                         fl.write(tempText.encode("utf-8"))
@@ -209,6 +213,8 @@ class MainWindow(Window):
                         QMessageBox.about(self, "Can't Save","Failed to save ...")
                 except:
                     QMessageBox.about(self, "Can't Save","File is Locked")
+                self.statusWriting()
+                self.progressStop()
                 self.parser.run(self.files[index])
                 #must implement for all files
 
@@ -219,6 +225,8 @@ class MainWindow(Window):
                 fname = self.files[index]
                 try:
                     fl = open(fname, 'w')
+                    self.statusSaving()
+                    self.progressStart()
                     tempText = unicode(self.tabWidget.widget(index).text())
                     if tempText:
                         fl.write(tempText.encode("utf-8"))
@@ -226,6 +234,8 @@ class MainWindow(Window):
                         self.clearDirty(index)
                     else:
                         QMessageBox.about(self, "Can't Save","Failed to save ...")
+                    self.statusWriting()
+                    self.progressStop()
                 except:
                     QMessageBox.about(self, "Can't Save","File is Locked")
         if(self.files != None):
@@ -246,7 +256,7 @@ class MainWindow(Window):
                 notSaved = True
         if notSaved:
             reply = QMessageBox.question(self,
-                                             "Simple Editor - Unsaved Changes",
+                                             "Sabel - Unsaved Changes",
                                              "Save unsaved changes?",
                                              QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
             if reply == QMessageBox.Cancel:
@@ -264,7 +274,5 @@ class MainWindow(Window):
         elif nfile.endswith(".nut"):
             lang = 2
         elif nfile.endswith(".neko"):
-            lang = 2
-        elif nfile.endswith(".lua"):
             lang = 2
         return lang

@@ -33,6 +33,8 @@ class LexerSquirrel(QsciLexerPython):
         
     def __init__(self,colorStyle, parent = None):
         QsciLexerPython.__init__(self, parent)
+        self.setV2UnicodeAllowed(True)
+        #self.setHighlightSubidentifiers(True)
         #self.parent = parent
         #self.sci = self.parent
         #print self.FunctionMethodName
@@ -61,26 +63,23 @@ class LexerSquirrel(QsciLexerPython):
         } 
         """
         self.styles = [
-          #index description color paper font eol
+          #index description color paper font eol 
           QsciStyle(0, QString("base"), self.colorStyle.color, self.colorStyle.paper, self.plainFont, True),
-          QsciStyle(1, QString("comment"), QColor("#008000"), self.colorStyle.paper, self.plainFont, True),
-          QsciStyle(2, QString("number"), QColor("#008000"), self.colorStyle.paper, self.boldFont, False),
+          QsciStyle(1, QString("comment"), QColor("#3f7f5f"), self.colorStyle.paper, self.plainFont, True),
+          QsciStyle(2, QString("number"), QColor("#008000"), self.colorStyle.paper, self.plainFont, False),
           QsciStyle(3, QString("DoubleQuotedString"), QColor("#008000"), self.colorStyle.paper, self.plainFont, True),
           QsciStyle(4, QString("SingleQuotedString"), QColor("#008000"), self.colorStyle.paper, self.plainFont, True),
-          QsciStyle(5, QString("Keyword"), QColor("#00003f"), self.colorStyle.paper, self.boldFont, True),
+          QsciStyle(5, QString("Keyword"), QColor("#7f0055"), self.colorStyle.paper, self.boldFont, True),
           QsciStyle(6, QString("TripleSingleQuotedString"), QColor("#ffd0d0"),self.colorStyle.paper, self.plainFont, True),
           QsciStyle(7, QString("TripleDoubleQuotedString"),QColor("#001111"),self.colorStyle.paper, self.plainFont, False),
           QsciStyle(8, QString("ClassName"), QColor("#000000"), self.colorStyle.paper, self.plainFont, False),
           QsciStyle(9, QString("FunctionMethodName"), QColor("#000000"), self.colorStyle.paper, self.plainFont, False),
           QsciStyle(10, QString("Operator"), QColor("#ff00ff"), self.colorStyle.paper, self.plainFont, False),
           QsciStyle(11, QString("Identifier"), QColor("#000000"), self.colorStyle.paper, self.plainFont, False),
-          QsciStyle(12, QString("CommentBlock"), QColor("#000000"), self.colorStyle.paper, self.plainFont, False),
+          QsciStyle(12, QString("CommentBlock"), QColor("#3f5fbf"), self.colorStyle.paper, self.plainFont, False),
           QsciStyle(13, QString("UnclosedString"), QColor("#010101"), self.colorStyle.paper, self.plainFont, False),
           QsciStyle(14, QString("HighlightedIdentifier"), QColor("#0000ff"), self.colorStyle.paper, self.plainFont, False),
-          QsciStyle(15, QString("Decorator"), QColor("#ff00ff"), self.colorStyle.paper, self.plainFont, False)
-          #QsciStyle(7, QString("MultiComment_start"), QColor("#ff00ff"), QColor("#001111"), self.plainFont, False),
-          #QsciStyle(8, QString("MultiComment"), QColor("#ff00ff"), QColor("#001111"), self.plainFont, False),
-          #QsciStyle(9, QString("MultiComment_stop"), QColor("#ff00ff"), QColor("#001111"), self.plainFont, False)
+          QsciStyle(15, QString("Decorator"), QColor("#ff00ff"), self.colorStyle.paper, self.plainFont, False),
         ]
         self._foldcompact = True
         
@@ -167,21 +166,18 @@ class LexerSquirrel(QsciLexerPython):
             length = len(line)
             # We must take care of empty lines.This is done here.
             if length == 1:
-                if prevState == self.styles[8] or prevState == self.styles[7]:
-                    newState = self.styles[8]
-                else:
-                    newState = self.styles[0]
-            #if line.startswith('#'):
-            #    newState = self.styles[3]
-            #elif line.startswith('\t+') or line.startswith('    +'):
-            #    newState = self.styles[3]
+                return 
+            if line.startswith('@@'):
+                newState = self.styles[1]
+            elif line.startswith('\t+') or line.startswith('    +'):
+                newState = self.styles[3]
             #We work with a non empty line.
             else:
                 if line.startswith('@'):
-                    newState = self.styles[7]
+                    newState = self.styles[1]
                 elif line.startswith('@'):
-                    if prevState == self.styles[8] or prevState == self.styles[7]:
-                        newState = self.styles[9]
+                    if prevState == self.styles[1] or prevState == self.styles[1]:
+                        newState = self.styles[1]
                     else:
                         newState = self.styles[0]
                 #elif line.startswith('//'):
@@ -215,7 +211,7 @@ class LexerSquirrel(QsciLexerPython):
                                 newState = self.styles[2]
                                 wordLength = len('class')
                         elif line[i:].startswith('function'):
-                                newState = self.styles[3]
+                                newState = self.styles[5]
                                 wordLength = len('function')
                         elif line[i:].startswith(' if'):
                                 newState = self.styles[4]
@@ -224,13 +220,13 @@ class LexerSquirrel(QsciLexerPython):
                                 newState = self.styles[4]
                                 wordLength = length
                         elif line[i:].startswith('//'):
-                                newState = self.styles[4]
+                                newState = self.styles[1]
                                 wordLength = length
                         elif line[i:].startswith('/*'):
-                                newState = self.styles[4]
+                                newState = self.styles[1]
                                 wordLength = length
                         elif line[i:].startswith('*/'):
-                                newState = self.styles[4]
+                                newState = self.styles[1]
                                 wordLength = length
                         #else:
                             #newState = self.styles[0]

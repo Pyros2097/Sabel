@@ -21,7 +21,7 @@ exe = Executable(
 
 setup(
     name = "Sabel",
-    version ="0.58",
+    version ="0.60",
     description = "Sabel IDE",
     executables = [exe]
     )

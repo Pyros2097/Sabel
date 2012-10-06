@@ -107,6 +107,7 @@ class TreeTab(QTabWidget):
 class OutputTab(QTabWidget):
     def __init__(self,parent):
         QTabWidget.__init__(self,parent)
+        
 
         
 class Tiler(QTabWidget):
