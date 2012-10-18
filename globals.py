@@ -81,6 +81,7 @@ class Icons:
     logoemo = os_icon('logoemo')
     logosabel = os_icon('logosabel')
     logosq = os_icon('logosq')
+    music = os_icon('music')
     nattrib = os_icon('nattrib')
     nav_backward = os_icon('nav_backward')
     nav_forward = os_icon('nav_forward')

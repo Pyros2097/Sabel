@@ -2,13 +2,21 @@ from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QHBoxLayout,QVBoxLayout,QTabWidget,QToolBar,QTextEdit,
                          QLineEdit,QPushButton,QToolButton,QSplitter,QStatusBar,
                          QMainWindow,QPalette,QColor,QSlider,QLabel,
-                         QFont,QComboBox,QFileDialog,QInputDialog,QProgressBar
-                         )      
+                         QFont,QComboBox,QFileDialog,QInputDialog,QProgressBar,
+                         QFrame)      
 from PyQt4.QtCore import QSize,Qt,QStringList,SIGNAL,SLOT,QString
-from Widget import (EditorTab,Tiler,TreeTab,OutputTab,
-                    ProjectTree,ErrorTree,OutlineTree,
-                    DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo,
-                    DialogBrowse)
+
+
+
+from Widget import EditorTab, TreeTab, OutputTab
+from Widget import ProjectTree, ErrorTree, OutlineTree
+                    
+from Widget import DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo,DialogBrowse
+
+from design import Level
+from design import Screen
+
+
 from Widget.style import Styles
 from stylesheet import *
 
@@ -30,32 +38,93 @@ class Window(QMainWindow):
         self.paramList = config.params()
         self.mode = config.mode()
         
-        #TabWidgets
-        #This parent is for findbar and vetical layount do not remove
-        self.tab_1 = QWidget(self)
-        self.tab_1.setMinimumWidth(800)
+        '''A.Editor TabWidget'''
+        '''This parent is for findbar and vertical layout'''
+        self.editorLayoutWidget = QWidget(self)
+        self.editorLayoutWidget.setMinimumWidth(800)
         self.tabWidget = EditorTab(self)
-        self.VericalLayout = QVBoxLayout(self.tab_1)
-        self.VericalLayout.setMargin(0)
-        self.VericalLayout.addWidget(self.tabWidget)
+        self.editorLayout = QVBoxLayout(self.editorLayoutWidget)
+        self.editorLayout.setMargin(0)
+        self.editorLayout.addWidget(self.tabWidget)
         
-        self.tabWidget_2 = TreeTab(self)
-        #self.tabWidget_2.setMaximumWidth(200)
-        self.tabWidget_3 = OutputTab(self)
-        self.tabWidget_3.setMaximumHeight(200)#260
-        self.tiler = Tiler(self)
-        self.tiler.setMinimumHeight(100) 
-        self.tabWidget.tabBar().setStyleSheet(stletabb)
-        self.tabWidget.currentChanged.connect(self.fileChanged)
-        self.tabWidget_2.currentChanged.connect(self.closeExplorer)
-        self.tabWidget_3.currentChanged.connect(self.closeConsole)
-        self.tabWidget.setTabsClosable(True)
-        self.tabWidget.setTabShape(0)
-        #self.tiler.currentChanged.connect(self.closeDesigner)
-        self.tiler.setTabsClosable(True)
-        self.tiler.setTabShape(0)
-         
-        #Tree
+        "1.Find Layout"
+        self.findLayoutWidget = QFrame()
+        #self.findLayoutWidget.setLineWidth(2)
+        #self.findLayoutWidget.setStyleSheet("margin-top:1px;margin-bottom:1px;")
+        self.findLayoutWidget.setFrameShape(QFrame.StyledPanel)
+        self.findLayout = QHBoxLayout(self.findLayoutWidget)
+        self.lineEdit = QLineEdit(self.findLayoutWidget)
+        self.lineEdit_2 = QLineEdit(self.findLayoutWidget)
+        self.findClose = QPushButton(self.findLayoutWidget)
+        self.findClose.setIcon(Icons.close_view)
+        self.findClose.setFlat(True)
+        self.findClose.clicked.connect(self.findBarShow)
+        self.find = QPushButton(self.findLayoutWidget)
+        self.find.setText("Find")
+        self.find.clicked.connect(self.findCurrentText)
+        self.replacefind = QPushButton(self.findLayoutWidget)
+        self.replacefind.setText("Replace/Find")
+        self.replacefind.clicked.connect(self.replaceFindText)
+        self.replace = QPushButton(self.findLayoutWidget)
+        self.replace.setText("Replace")
+        self.replace.clicked.connect(self.replaceCurrentText)
+        self.replaceAll = QPushButton(self.findLayoutWidget)
+        self.replaceAll.setText("Replace All")
+        self.replaceAll.clicked.connect(self.replaceAllText)
+        self.caseSensitive = QToolButton(self.findLayoutWidget)
+        self.caseSensitive.setIcon(Icons.font)
+        self.caseSensitive.setCheckable(True)
+        self.wholeWord = QToolButton(self.findLayoutWidget)
+        self.wholeWord.setText("ww")
+        self.wholeWord.setCheckable(True)
+        self.regex = QToolButton(self.findLayoutWidget)
+        self.regex.setText("re")
+        self.regex.setCheckable(True)
+        self.backward = QToolButton(self.findLayoutWidget)
+        self.backward.setText("bk")
+        self.backward.setCheckable(True)
+        self.backward.setDisabled(True)
+        self.findLayout.addWidget(self.findClose)
+        self.findLayout.addWidget(self.find)
+        self.findLayout.addWidget(self.lineEdit)
+        self.findLayout.addWidget(self.lineEdit_2)
+        self.findLayout.addWidget(self.caseSensitive)
+        self.findLayout.addWidget(self.wholeWord)
+        self.findLayout.addWidget(self.regex)
+        self.findLayout.addWidget(self.backward)
+        self.findLayout.addWidget(self.replacefind)
+        self.findLayout.addWidget(self.replace)
+        self.findLayout.addWidget(self.replaceAll)
+        self.findLayout.setMargin(0)
+        self.findLayoutWidget.setMaximumHeight(25)
+        self.editorLayout.addWidget(self.findLayoutWidget)
+        self.findLayoutWidget.hide()
+        
+        
+        '''B.Designer'''
+        '''This parent is for widgetsbar and design layout'''
+        self.designerLayoutWidget = QWidget(self)
+        self.designerLayoutWidget.setMinimumWidth(800)
+        self.designerWidget = Screen(self)
+        self.designerLayoutWidget.hide()
+        self.designerLayout = QVBoxLayout(self.designerLayoutWidget)
+        self.designerLayout.setMargin(0)
+        self.designerLayout.addWidget(self.designerWidget)
+        
+        '''C.Level Editor'''
+        '''This parent is for spritesheets and level layout'''
+        self.levelLayoutWidget = QWidget(self)
+        self.levelLayoutWidget.setMinimumWidth(800)
+        self.levelWidget = Level(self)
+        self.levelLayoutWidget.hide()
+        self.levelLayout = QVBoxLayout(self.levelLayoutWidget)
+        self.levelLayout.setMargin(0)
+        self.levelLayout.addWidget(self.levelWidget)
+        
+        '''D.Explorer TabWidget'''
+        self.explorerTabWidget = TreeTab(self)
+        #self.explorerTabWidget.setMaximumWidth(200)
+        '''1.Project Tree'''
         self.tab_5 = QWidget()
         #self.tab_5.setMaximumWidth(200)
         self.VerticalLayout_2 = QVBoxLayout(self.tab_5)#QHBoxLayout(self.tab_5)
@@ -65,15 +134,26 @@ class Window(QMainWindow):
         #self.treeWidget.horizontalScrollBar().show()
         self.VerticalLayout_2.addWidget(self.treeWidget)
         
-        #Outline
+        '''2.Outline Tree'''
         self.tab_2 = QWidget()
         #self.tab_2.setMaximumWidth(200)
         self.VerticalLayout_3 = QVBoxLayout(self.tab_2)
         self.VerticalLayout_3.setMargin(0)
         self.outlineWidget = OutlineTree(self.tab_2)
+        self.outlineWidget.itemDoubleClicked.connect(self.gotoLine)
         self.VerticalLayout_3.addWidget(self.outlineWidget)
         
-        #Output
+        '''E.Output TabWidget'''
+        self.outputTabWidget = OutputTab(self)
+        self.outputTabWidget.setMaximumHeight(200)#260
+        self.tabWidget.tabBar().setStyleSheet(stletabb)
+        self.tabWidget.currentChanged.connect(self.fileChanged)
+        self.explorerTabWidget.currentChanged.connect(self.closeExplorer)
+        self.outputTabWidget.currentChanged.connect(self.closeConsole)
+        self.tabWidget.setTabsClosable(True)
+        self.tabWidget.setTabShape(0)
+            
+        '''1.Output layout'''
         #must check
         self.tab_6 = QWidget()
         self.horizontalLayout_2 = QVBoxLayout(self.tab_6)
@@ -131,98 +211,47 @@ class Window(QMainWindow):
         self.inputLayout.addWidget(self.runButton)
         self.horizontalLayout_2.addLayout(self.inputLayout)
         
-        #Error
+        '''2.Error Layout'''
         self.tab_7 = QWidget()
         self.horizontalLayout_4 = QHBoxLayout(self.tab_7)
         self.horizontalLayout_4.setMargin(0)
         self.errorTree = ErrorTree(self.tab_7)
+        self.errorTree.itemDoubleClicked.connect(self.errorLine)
         self.horizontalLayout_4.addWidget(self.errorTree)
         
-        #Tiler
-        #self.tab_11 = QWidget()
-        #self.horizontalLayout_11 = QHBoxLayout(self.tab_11)
-        #self.horizontalLayout_11.setMargin(0)
-        #self.horizontalLayout_11.addWidget(self.tiler)
+        '''TabWidgets tabs'''
+        #self.designerWidget.addTab(QWidget(self),"")
+        #self.designerWidget.setTabIcon(0,Icons.close_view)
+        #self.levelWidget.addTab(QWidget(self),"")
+        #self.levelWidget.setTabIcon(0,Icons.close_view)
         
-        #Find
-        self.tab_8 = QWidget()
-        self.tab_8.setObjectName("tab_8")
-        self.horizontalLayout_5 = QHBoxLayout(self.tab_8)
-        self.lineEdit = QLineEdit(self.tab_8)
-        self.lineEdit_2 = QLineEdit(self.tab_8)
-        self.findClose = QPushButton(self.tab_8)
-        self.findClose.setIcon(Icons.close_view)
-        self.findClose.setFlat(True)
-        self.findClose.clicked.connect(self.findBarShow)
-        self.find = QPushButton(self.tab_8)
-        self.find.setText("Find")
-        self.find.clicked.connect(self.findCurrentText)
-        self.replacefind = QPushButton(self.tab_8)
-        self.replacefind.setText("Replace/Find")
-        self.replacefind.clicked.connect(self.replaceFindText)
-        self.replace = QPushButton(self.tab_8)
-        self.replace.setText("Replace")
-        self.replace.clicked.connect(self.replaceCurrentText)
-        self.replaceAll = QPushButton(self.tab_8)
-        self.replaceAll.setText("Replace All")
-        self.replaceAll.clicked.connect(self.replaceAllText)
-        self.caseSensitive = QToolButton(self.tab_8)
-        self.caseSensitive.setIcon(Icons.font)
-        self.caseSensitive.setCheckable(True)
-        self.wholeWord = QToolButton(self.tab_8)
-        self.wholeWord.setText("ww")
-        self.wholeWord.setCheckable(True)
-        self.regex = QToolButton(self.tab_8)
-        self.regex.setText("re")
-        self.regex.setCheckable(True)
-        self.backward = QToolButton(self.tab_8)
-        self.backward.setText("bk")
-        self.backward.setCheckable(True)
-        self.backward.setDisabled(True)
-        self.horizontalLayout_5.addWidget(self.findClose)
-        self.horizontalLayout_5.addWidget(self.find)
-        self.horizontalLayout_5.addWidget(self.lineEdit)
-        self.horizontalLayout_5.addWidget(self.lineEdit_2)
-        self.horizontalLayout_5.addWidget(self.caseSensitive)
-        self.horizontalLayout_5.addWidget(self.wholeWord)
-        self.horizontalLayout_5.addWidget(self.regex)
-        self.horizontalLayout_5.addWidget(self.backward)
-        self.horizontalLayout_5.addWidget(self.replacefind)
-        self.horizontalLayout_5.addWidget(self.replace)
-        self.horizontalLayout_5.addWidget(self.replaceAll)
-        self.horizontalLayout_5.setMargin(0)
-        self.tab_8.setMaximumHeight(25)
-        self.VericalLayout.addWidget(self.tab_8)
-        self.tab_8.hide()
+        self.explorerTabWidget.addTab(self.tab_5,"Projects")
+        self.explorerTabWidget.addTab(self.tab_2,"Outline")
+        self.explorerTabWidget.addTab(QWidget(self),"")
+        self.explorerTabWidget.setTabIcon(2,Icons.close_view)
+        self.outputTabWidget.addTab(self.tab_7,"Error")
+        self.outputTabWidget.addTab(self.tab_6,"Output")
+        self.outputTabWidget.addTab(QWidget(self),"")
+        self.outputTabWidget.setTabIcon(0,Icons.error)
+        self.outputTabWidget.setTabIcon(1,Icons.console_view)
+        self.outputTabWidget.setTabIcon(2,Icons.close_view)
         
-        #Tabwidgets
-        self.tabWidget_2.addTab(self.tab_5,"Projects")
-        self.tabWidget_2.addTab(self.tab_2,"Outline")
-        self.tabWidget_2.addTab(QWidget(self),"")
-        self.tabWidget_2.setTabIcon(2,Icons.close_view)
-        self.tabWidget_3.addTab(self.tab_7,"Error")
-        self.tabWidget_3.addTab(self.tab_6,"Output")
-        self.tabWidget_3.addTab(QWidget(self),"")
-        self.tabWidget_3.setTabIcon(0,Icons.error)
-        self.tabWidget_3.setTabIcon(1,Icons.console_view)
-        self.tabWidget_3.setTabIcon(2,Icons.close_view)
-        
-        #Splitters
+        '''Splitters'''
         self.split1 = QSplitter(Qt.Horizontal)
-        self.split1.addWidget(self.tabWidget_2)
-        self.split1.addWidget(self.tab_1)
+        self.split1.addWidget(self.explorerTabWidget)
+        self.split1.addWidget(self.editorLayoutWidget)
+        self.split1.addWidget(self.designerLayoutWidget)
+        self.split1.addWidget(self.levelLayoutWidget)
         #self.split1.addWidget(self.tab_5)
         
         self.split2 = QSplitter(Qt.Vertical)
         self.split2.addWidget(self.split1)
-        self.split2.addWidget(self.tiler)
-        self.tiler.hide()
-        self.split2.addWidget(self.tabWidget_3)
-        self.tabWidget_3.hide()
+        self.split2.addWidget(self.outputTabWidget)
+        self.outputTabWidget.hide()
         self.horizontalLayout.addWidget(self.split2)
         
         
-        #Status
+        '''Status Bar'''
         self.statusbar = QStatusBar(self)
         self.aboutButton = QPushButton(self)
         self.aboutButton.setFlat(True)
@@ -256,9 +285,13 @@ class Window(QMainWindow):
         self.zoomoutButton.setIcon(Icons.zoomminus)
         self.zoomoutButton.clicked.connect(self.zoomout)
 
-        '''Status Text, Progress Bar and Stop Button'''
-        self.statusText = QLabel("Writing")
-        self.statusText.setMargin(10)
+        '''Status Text,Line Text, Progress Bar and Stop Button'''
+        self.statusText = QLabel("Writable")
+        #self.statusText.setAlignment(Qt.AlignCenter)
+        self.statusText.setFixedWidth(200)
+        self.lineText = QLabel("")
+        self.lineText.setFixedWidth(50)
+        
         self.progressbar = QProgressBar()
         self.progressbar.setMinimum(0)
         self.progressbar.setMaximum(100)
@@ -280,8 +313,8 @@ class Window(QMainWindow):
         self.statusbar.addWidget(self.findButton)
         self.statusbar.addWidget(self.zoominButton)
         self.statusbar.addWidget(self.zoomoutButton)
-        #self.statusbar.addWidget(self.fontButton)
         self.statusbar.addWidget(self.statusText)
+        self.statusbar.addWidget(self.lineText)
         self.statusbar.addWidget(self.progressbar)
         self.statusbar.addWidget(self.stopButton)
         #self.statusbar.setFixedHeight(18)
@@ -294,17 +327,16 @@ class Window(QMainWindow):
         self.setCentralWidget(self.centralwidget)
         self.setStatusBar(self.statusbar)
         self.textEdit.setReadOnly(True)
-        #QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         
     def build_project(self):
-        current_file = self.files[self.tabWidget.currentIndex()]
-        prj = self.treeWidget.getProject(current_file)
+        #current_file = self.files[self.tabWidget.currentIndex()]
+        prj = self.treeWidget.getProject()
         if(prj != None):
             self.treeWidget.build(prj)
             
     def run_project(self):
-        current_file = self.files[self.tabWidget.currentIndex()]
-        prj = self.treeWidget.getProject(current_file)
+        #current_file = self.files[self.tabWidget.currentIndex()]
+        prj = self.treeWidget.getProject()#current_file)
         if(prj != None):
             self.treeWidget.run(prj)
             
@@ -376,28 +408,46 @@ class Window(QMainWindow):
         form.show()
         
     def findBarShow(self):
-        if(self.tab_8.isHidden()):
-            self.tab_8.show()
+        if(self.findLayoutWidget.isHidden()):
+            self.findLayoutWidget.show()
         else:
-            self.tab_8.hide()
+            self.findLayoutWidget.hide()
             
     def exp(self):
-        if(self.tabWidget_2.isHidden()):
-            self.tabWidget_2.show()
+        if(self.explorerTabWidget.isHidden()):
+            self.explorerTabWidget.show()
         else:
-            self.tabWidget_2.hide()
+            self.explorerTabWidget.hide()
     
     def cmd(self):
-        if(self.tabWidget_3.isHidden()):
-            self.tabWidget_3.show()
+        if(self.outputTabWidget.isHidden()):
+            self.outputTabWidget.show()
         else:
-            self.tabWidget_3.hide()
+            self.outputTabWidget.hide()
+            
+    def editor(self):
+        if(self.editorLayoutWidget.isHidden()):
+            self.editorLayoutWidget.show()
+            self.levelLayoutWidget.hide()
+            self.designerLayoutWidget.hide()
             
     def design(self):
-        if(self.tiler.isHidden()):
-            self.tiler.show()
+        if(self.designerLayoutWidget.isHidden()):
+            self.designerLayoutWidget.show()
+            self.editorLayoutWidget.hide()
+            self.levelLayoutWidget.hide()
         else:
-            self.tiler.hide()
+            self.designerLayoutWidget.hide()
+            self.editorLayoutWidget.show()
+            
+    def level(self):
+        if(self.levelLayoutWidget.isHidden()):
+            self.levelLayoutWidget.show()
+            self.editorLayoutWidget.hide()
+            self.designerLayoutWidget.hide()
+        else:
+            self.levelLayoutWidget.hide()
+            self.editorLayoutWidget.show()
             
     def closeDesigner(self,no):
         pass
@@ -410,28 +460,38 @@ class Window(QMainWindow):
                 self.tiler.hide()
         '''
      
-    '''The current Changed idx of tabwidget_3 is passed to this a param'''   
+    '''The current Changed idx of outputTabWidget is passed to this a param'''   
     def closeConsole(self,no = 2):
         if(no == 2):
-            if(self.tabWidget_3.isHidden()):
-                self.tabWidget_3.show()
+            if(self.outputTabWidget.isHidden()):
+                self.outputTabWidget.show()
             else:
-                self.tabWidget_3.setCurrentIndex(1)
-                self.tabWidget_3.hide()
+                self.outputTabWidget.setCurrentIndex(1)
+                self.outputTabWidget.hide()
                 
-    '''The current Changed idx of tabwidget_2 is passed to this a param'''
+    def popOutput(self):
+        if(self.outputTabWidget.isHidden()):
+            self.outputTabWidget.show()
+        self.outputTabWidget.setCurrentIndex(1)
+    
+    def popError(self):
+        if(self.outputTabWidget.isHidden()):
+            self.outputTabWidget.show()
+        self.outputTabWidget.setCurrentIndex(0)
+        
+    '''The current Changed idx of explorerTabWidget is passed to this a param'''
     def closeExplorer(self,no = 2):
         if(no == 2):
-            if(self.tabWidget_2.isHidden()):
-                self.tabWidget_2.show()
+            if(self.explorerTabWidget.isHidden()):
+                self.explorerTabWidget.show()
             else:
-                self.tabWidget_2.setCurrentIndex(0)
-                self.tabWidget_2.hide()
+                self.explorerTabWidget.setCurrentIndex(0)
+                self.explorerTabWidget.hide()
         elif(no == 1):
             self.fileChanged(no)
                 
     def fileChanged(self,no):
-        if(self.tabWidget_2.currentIndex() == 1):
+        if(self.explorerTabWidget.currentIndex() == 1):
             edt = self.tabWidget.widget(self.tabWidget.currentIndex())
             source = edt.text()
             self.outlineWidget.parseText(source)
@@ -441,7 +501,7 @@ class Window(QMainWindow):
     def statusParsing(self):
         self.statusText.setText("Parsing")   
     def statusWriting(self):
-        self.statusText.setText("Writing")  
+        self.statusText.setText("Writable")  
     def statusRunning(self):
         self.statusText.setText("Running")   
     def statusStopping(self):
@@ -510,7 +570,10 @@ class Window(QMainWindow):
     def errorLine(self,error):
         index = self.tabWidget.currentIndex()
         edt = self.tabWidget.widget(index)
-        edt.setLine(error.line)
+        '''To prevent File item double clicking'''
+        if(error.isFile() == False):
+            edt.setLine(error.line)
+            
     '''Font Functions'''       
     def zoomin(self):
         pass
@@ -521,11 +584,10 @@ class Window(QMainWindow):
         #for i in range(len(self.files)):
         #    self.tabWidget.widget(i).zoomout()
             
-    def setFontName(self,idx):
-        fontName = str(self.toolBar.fontCombo.itemText(idx))
-        config.setFontName(fontName)
+    def setFont(self,font):
+        config.setFontName(font.family())
         for i in range(len(self.files)):
-            self.tabWidget.widget(i).setFontName()
+            self.tabWidget.widget(i).setNewFont(font)
             
     def setFontSize(self,idx):
         fontSize = idx+1
@@ -536,6 +598,9 @@ class Window(QMainWindow):
     def gotoLine(self,item):
         edt = self.tabWidget.widget(self.tabWidget.currentIndex())
         edt.setLine(item.line)
+        
+    def updateLine(self,no,col):
+        self.lineText.setText(str(no)+" : "+str(col))
             
     def setMargin(self):
         mar = config.margin()
@@ -573,13 +638,13 @@ class Window(QMainWindow):
     '''style Functions'''   
     def initColorStyle(self):
         self.colorStyle = Styles[self.styleIndex]                
-        pal = QPalette(self.tabWidget_2.palette())
+        pal = QPalette(self.explorerTabWidget.palette())
         #print pal.color(QPalette.Base).name()
         #print pal.color(QPalette.Window).name()
         pal.setColor(QPalette.Base,self.colorStyle.paper)
         pal.setColor(QPalette.Text,self.colorStyle.color)
-        self.tabWidget_2.setPalette(pal)
-        self.tabWidget_3.setPalette(pal)      
+        self.explorerTabWidget.setPalette(pal)
+        self.outputTabWidget.setPalette(pal)      
     def style_clicked(self,no):
         self.styleIndex = no -1
         #print self.styleIndex

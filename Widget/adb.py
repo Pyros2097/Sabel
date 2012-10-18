@@ -38,6 +38,7 @@ class Adb(QWidget):
         
     def update(self,line):
         self.parent.textEdit.append(line)
+        self.parent.popOutput()
         
     def checkFinished(self,no,cmd):
         self.parent.progressStop()
@@ -63,8 +64,8 @@ class Adb(QWidget):
             self.adb_thread.setCmd(self.cmd5)
             self.adb_thread.run()
         elif(cmd == self.cmd5):
-            if not(self.parent.tabWidget_3.isHidden()):
-                self.parent.tabWidget_3.hide()
+            if not(self.parent.outputTabWidget.isHidden()):
+                self.parent.outputTabWidget.hide()
             self.parent.toolBar.action_Run.setEnabled(True)
             self.parent.progressStop()
             self.parent.statusWriting()
@@ -74,9 +75,7 @@ class Adb(QWidget):
             self.isRunning = True
             self.parent.toolBar.action_Run.setDisabled(True)
             self.parent.toolBar.action_Stop.setEnabled(True)        
-            if(self.parent.tabWidget_3.isHidden()):
-                self.parent.tabWidget_3.show()
-                self.parent.tabWidget_3.setCurrentIndex(1)
+            self.parent.popOutput()
             self.parent.textEdit.clear()
         self.parent.textEdit.append("Pushing main.nut...\n")
         self.adb_thread.setCmd(self.cmd1)

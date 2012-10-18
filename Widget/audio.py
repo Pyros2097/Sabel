@@ -1,6 +1,6 @@
-import sys
 from PyQt4 import QtCore, QtGui
 from PyQt4.phonon import Phonon
+from globals import ospathbasename
 
 class Audio(QtGui.QDialog):
     def __init__(self,parent,nfile):
@@ -21,6 +21,7 @@ class Audio(QtGui.QDialog):
         self.finished.connect(self.stop)
         if nfile == "":
             return
+        self.title.setText("<b><big>"+ospathbasename(nfile)+"</big></b>")
         self.mediaObject.enqueue(Phonon.MediaSource(nfile))
         self.mediaObject.play()
         
@@ -91,7 +92,10 @@ class Audio(QtGui.QDialog):
                 QtGui.QSizePolicy.Maximum)
 
         volumeLabel = QtGui.QLabel()
-        volumeLabel.setPixmap(QtGui.QPixmap('images/volume.png'))
+        #volumeLabel.setPixmap(QtGui.QPixmap('images/volume.png'))
+        
+        self.title = QtGui.QLabel()
+        self.title.setAlignment(QtCore.Qt.AlignCenter)
 
         palette = QtGui.QPalette()
         palette.setBrush(QtGui.QPalette.Light, QtCore.Qt.darkGray)
@@ -100,8 +104,10 @@ class Audio(QtGui.QDialog):
         #self.timeLcd.setFixedSize(35,35)
         self.timeLcd.setPalette(palette)
 
-        seekerLayout = QtGui.QHBoxLayout()
+        seekerLayout = QtGui.QVBoxLayout()
+        seekerLayout.addWidget(self.title)
         seekerLayout.addWidget(self.seekSlider)
+        
         
 
         playbackLayout = QtGui.QHBoxLayout()
@@ -118,11 +124,4 @@ class Audio(QtGui.QDialog):
         widget = QtGui.QWidget()
         widget.setLayout(mainLayout)
         self.setLayout(mainLayout)
-        #self.setWindowTitle("Audio Player")
-
-
-if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
-    window = Audio()
-    window.show()
-    sys.exit(app.exec_())
+        self.setWindowTitle("Audio Player")

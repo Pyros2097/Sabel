@@ -35,9 +35,7 @@ class Command(QWidget):
         
     def update(self,line):
         self.parent.textEdit.append(line)
-        if(self.parent.tabWidget_3.isHidden()):
-            self.parent.tabWidget_3.show()
-        self.parent.tabWidget_3.setCurrentIndex(1)
+        self.parent.popOutput()
 
 
     def run(self):

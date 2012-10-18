@@ -18,6 +18,9 @@ CMD:
 - SQ
 - JAVA
 - GCC
+- NODE
+- NPM
+- NODEMON
 ClosedProject:
 - 0
 - 0
@@ -25,12 +28,17 @@ ClosedProject:
 - 0
 File:
 - C:/CODE/assets/creditscene.nut
-- C:/CODE/assets/main.nut
-- C:/CODE/assets/howtoscene.nut
 - C:/CODE/assets/cll.nut
+- C:/mysite/new/views/index.jade
+- C:/mysite/new/app.js
+- C:/mysite/new/routes/index.js
+- C:/CODE/assets/common.nut
+- C:/chaiscript-5/CMakeLists.txt
+- C:/sdk/samples/concurrent/source/main.cpp
 PARAM:
-- Dude
 - '  C:/CODE/assets/cll.nut'
+- ' '
+- C:/mysite/new/app.js 3000
 Project:
 - C:/CODE/assets/
 - C:/port/
@@ -42,7 +50,7 @@ Setting:
   fontsize: 9
   iconsize: 16
   indent: 0
-  margin: 0
+  margin: 1
   mode: 0
   styleindex: 8
   tabwidth: 2

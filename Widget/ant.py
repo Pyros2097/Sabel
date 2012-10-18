@@ -45,9 +45,7 @@ class Ant(QWidget):
         self.parent.statusWriting()
            
     def showOutput(self):
-        if(self.parent.tabWidget_3.isHidden()):
-            self.parent.tabWidget_3.show()
-            self.parent.tabWidget_3.setCurrentIndex(1)
+        self.parent.popOutput()
         
     def create(self,prj):
         if self.isRunning == False:

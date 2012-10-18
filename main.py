@@ -16,11 +16,25 @@ app = QApplication([])
 from globals import splash_pix
 from mainwindow import MainWindow
 
+'''
+#currently 
+list = QStyleFactory.keys()
+    for i in list:
+        print i
+        
+Windows
+WindowsXP
+Motif
+CDE
+Plastique
+Cleanlooks
+'''
 def main():
     splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
     app.processEvents()
+    #app.setStyle('Plastique')
     frame = MainWindow()
     frame.showMaximized()
     splash.finish(frame)

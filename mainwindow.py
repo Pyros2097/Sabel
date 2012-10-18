@@ -29,8 +29,6 @@ class MainWindow(Window):
         self.connect(self.tabWidget,SIGNAL("dropped"), self.createTabs)
         self.tabWidget.tabCloseRequested.connect(self.closeTab)
         self.treeWidget.itemDoubleClicked.connect(self.treeItemClicked)
-        self.outlineWidget.itemDoubleClicked.connect(self.gotoLine)
-        self.errorTree.itemDoubleClicked.connect(self.errorLine)
         self.connect(self.treeWidget,SIGNAL("openFileClicked"),self.treeItemClicked)
         self.connect(self.treeWidget,SIGNAL("create"), lambda x:self.ant.create(x))
         self.connect(self.treeWidget,SIGNAL("build"), lambda x:self.ant.build(x))
@@ -59,7 +57,7 @@ class MainWindow(Window):
     def initInterpreter(self):
         self.ipy = PyInterp(self)
         self.ipy.initInterpreter(locals())
-        self.tabWidget_3.addTab(self.ipy, "Python")
+        self.outputTabWidget.addTab(self.ipy, "Python")
 
     '''Must go through this only'''
     def createTab(self,nfile):

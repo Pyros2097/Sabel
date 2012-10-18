@@ -245,8 +245,8 @@ class DialogAbout(QtGui.QMessageBox):
     def __init__(self, parent=None):
         QtGui.QMessageBox.__init__(self, parent)
         text = """
-                <b>Credits</b>
                 <b>Sabel</b> v%s
+                <p><b>Credits</b>
                 <p>
                 All rights reserved in accordance with
                 GPL v3 or later.

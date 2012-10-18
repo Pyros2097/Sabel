@@ -33,6 +33,11 @@ class Config:
         return int(self.readSetting('iconsize'))
     def setIconSize(self,val):
         self.writeSetting('iconsize',val)
+        
+    def toolLabel(self):
+        int(self.readSetting('toollabel'))
+    def setToolLabel(self,bool):
+        self.writeSetting('toollabel',bool)
     
     def mode(self):
         return int(self.readSetting('mode'))

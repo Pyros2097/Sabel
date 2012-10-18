@@ -24,9 +24,9 @@ ClosedProject:
 - 0
 - 0
 File:
+- C:/CODE/assets/howtoscene.nut
 - C:/CODE/assets/creditscene.nut
 - C:/CODE/assets/main.nut
-- C:/CODE/assets/howtoscene.nut
 PARAM:
 - Dude C:/CODE/assets/creditscene.nut C:/CODE/assets/physics.nut
 Project:
@@ -36,8 +36,12 @@ Project:
 Recent: []
 Setting:
   device: 1
-  fontname: Courier New
-  fontsize: 9
+  fontname: !!python/object/apply:sip._unpickle_type
+  - PyQt4.QtCore
+  - QString
+  - !!python/tuple
+    - !!python/unicode 'Courier New'
+  fontsize: 10
   iconsize: 16
   indent: 0
   margin: 0
@@ -45,6 +49,7 @@ Setting:
   styleindex: 8
   tabwidth: 2
   thresh: 1
+  toollabel: 0
   workspace: C:/CODE/
 Style: 0
 TODO:
@@ -58,3 +63,5 @@ TODO:
 - Squirrel Parser
 - Neko Parser
 - Desginer
+- Level EDitor
+- Fix copy paste explorer options

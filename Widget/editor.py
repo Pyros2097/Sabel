@@ -32,7 +32,8 @@ class Editor(QsciScintilla):
         # Clickable margin 1 for showing markers
         self.setMarginSensitivity(0, True)
         #self.setMarginsBackgroundColor(self.colorStyle.margin)
-        self.connect(self,SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),self.on_margin_clicked)
+        #self.connect(self,SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),self.on_margin_clicked)
+        self.cursorPositionChanged.connect(self.parent.updateLine)
         # Margin 0 is used for line numbers
         #self.setMarginLineNumbers(0, True)
         #self.setMarginWidth(0, self.fontmetrics.width("0000") + 6)
@@ -68,10 +69,8 @@ class Editor(QsciScintilla):
         #self.setAutoCompletionSource(QsciScintilla.AcsAll)
         #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier')
         
-        self.font = QFont()
-        self.font.setFamily(config.fontName())
+        self.font = QFont(config.fontName(),config.fontSize())
         #self.font.setFixedPitch(True)
-        self.font.setPointSize(self.fontSize)
         self.setFont(self.font)
         self.fontmetrics = QFontMetrics(self.font)
         self.setMarginsFont(self.font)
@@ -149,9 +148,11 @@ class Editor(QsciScintilla):
         self.lexer.setFont(self.font)
         self.setMarginsFont(self.font)
         
-    def setFontName(self):
-        self.font.setFamily(config.fontName())
-        self.lexer.setFont(self.font)
+    def setNewFont(self,font):
+        self.setFont(font)
+        self.lexer.setFont(font)
+        
+        
         
     def setFontSize(self):
         self.font.setPointSize(config.fontSize())
@@ -180,8 +181,12 @@ class Editor(QsciScintilla):
         
     def setLine(self,lineno):
         self.setFocus(True)
-        self.setCursorPosition(int(lineno),0)
+        ''' lineno -1 is for parser which points to next line'''
+        self.setCursorPosition(int(lineno)-1,0)
         self.setCaretLineVisible(True)
+        
+    def getLine(self):
+        print self.getCursorPosition()
        
         
             

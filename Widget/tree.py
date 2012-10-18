@@ -1,7 +1,7 @@
 from PyQt4.QtGui import (QTreeWidgetItem,QTreeWidget,QMessageBox,
                          QIcon,QDrag,QMenu,QAction,QInputDialog,QCursor,QToolBar,
                          QHeaderView,QFileDialog)
-from PyQt4.QtCore import SIGNAL,Qt,QMimeData,QUrl,QPoint
+from PyQt4.QtCore import QPoint ,SIGNAL, Qt, QMimeData, QUrl, QPoint, QByteArray, QDataStream, QIODevice
 from globals import (oslistdir,ospathisdir,ospathsep,ospathjoin,ospathexists,
                      ospathbasename,os_icon,osremove,osrename,ospathdirname,
                      recycle,ospathnormpath,oswalk,Icons,config)
@@ -53,7 +53,7 @@ class File(QTreeWidgetItem):
             
     def Audio(self,name):
         if(name.endswith(".wav") or name.endswith(".mp3") or name.endswith(".ogg")):
-            self.setIcon(0,Icons.image)
+            self.setIcon(0,Icons.music)
             self.audio = True
         
     def getPath(self):
@@ -110,12 +110,54 @@ class ProjectTree(QTreeWidget):
         self.connect(self,SIGNAL("customContextMenuRequested(const QPoint &)"), self.doMenu)
         self.connect(self, SIGNAL("dropped"), self.addItem)
         self.projects = []
+        self.projectItems = []
         self.closed = config.closedProjects()
         if(self.closed == None):
             self.closed = []
         self.header().setStretchLastSection(False)
         self.header().setResizeMode(QHeaderView.ResizeToContents)
         #self.setColumnWidth(0,280)
+    
+    def mouseMoveEvent(self, event):
+        if not (event.buttons() and Qt.LeftButton):
+            return
+        currentItem = self.currentItem()
+        if(currentItem.isFile()):
+            if(currentItem.isPic()):
+                currentItemName = self.currentItem().getPath()
+                data = QByteArray()
+                stream = QDataStream(data, QIODevice.WriteOnly)
+                stream.writeQString(currentItemName)
+                
+                icon = Icons.image
+                pixmap = icon.pixmap(64, 64)
+ 
+                mimeData = QMimeData()
+                mimeData.setText(currentItemName)
+                mimeData.setData('application/x-item', data)
+ 
+                drag = QDrag(self)
+                drag.setPixmap(pixmap)
+                drag.setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2))  
+                drag.setMimeData(mimeData)
+                dropAction = drag.start(Qt.CopyAction)
+        
+    '''
+    def startDrag(self, dropAction):
+        print('tree start drag')
+
+        icon = Icons.image
+        pixmap = icon.pixmap(64, 64)
+
+        mime = QMimeData()
+        mime.setData('application/x-item', '???')
+
+        drag = QDrag(self)
+        drag.setMimeData(mime)        
+        #drag.setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2))
+        drag.setPixmap(pixmap)        
+        drag.start(Qt.CopyAction)
+    '''
         
     def initProjects(self):
         if(config.projects() != None):
@@ -191,18 +233,20 @@ class ProjectTree(QTreeWidget):
             self.closed.append(0)
         if(self.closed[self.projects.index(startDir)] == 0):
             i = Project(self,startDir)
+            self.projectItems.append(i)
             self.addTopLevelItem(i)
             self.setCurrentItem(i)
             self.readDir(i,startDir)
             self.readMainFiles(i,startDir)
         else:
             i = Project(self,startDir,True)
+            self.projectItems.append(i)
             self.addTopLevelItem(i)    
             
     def addClosedProject(self,startDir):
         if(ospathexists(startDir)):
             self.closed[self.projects.index(startDir)] = 1
-            i = Project(self,startDir,True) 
+            i = Project(self,startDir,True)
             self.addTopLevelItem(i)
             config.setClosedProjects(self.closed)
         else:
@@ -213,11 +257,12 @@ class ProjectTree(QTreeWidget):
         self.closed.pop(self.projects.index(itemPath))
         config.setClosedProjects(self.closed)
         self.projects.remove(itemPath)
+        self.projectItems.remove(item)
         config.setProject(self.projects)
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
         
     '''Awesome GG working 1/10/12 5pm'''
-    def getProject(self,nfile):
+    def getProject(self):
         current_item = self.currentItem()
         if(current_item == None):
             QMessageBox.about(self,"Please Select or Add a Project First")
@@ -396,16 +441,9 @@ class ProjectTree(QTreeWidget):
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
         self.addProject(itempath)
         
-    def refreshAllProjects(self):
-        for pro in self.projects:
-            ind = self.projects.index(pro)
-            #self.takeTopLevelItem(ind)
-            if(self.closed[ind]):
-                print ind+pro
-                self.addClosedProject(pro)
-            else:
-                print ind+pro
-                self.addProject(pro)
+    def refreshCurrentProject(self):
+        item = self.getProject()
+        self.refreshProject(item)
         
     
     def newFolder(self,item):
@@ -452,6 +490,7 @@ class ProjectTree(QTreeWidget):
     def pasteDir(self,item):
         pass
     
+    '''Signals are emitted because doesnt have access to Parent'''
     def create(self,item):
         self.emit(SIGNAL("create"),item)
     def build(self,item):
@@ -619,11 +658,17 @@ class Error(QTreeWidgetItem):
         self.line = line
         self.setText(0,"Line "+line+":      "+text)
         
+    def isFile(self):
+        return False
+        
 class ErrorFile(QTreeWidgetItem):
     def __init__(self,parent,name):
         QTreeWidgetItem.__init__(self,parent)
         self.setIcon(0,Icons.file_obj)
         self.setText(0,"File: "+name)
+        
+    def isFile(self):
+        return True
         
 class ErrorTree(QTreeWidget):
     def __init__(self,parent = None):
@@ -681,7 +726,9 @@ class OutlineTree(QTreeWidget):
         
     def parseText(self,source):
         gg = source.split("\n")
-        idx = 0
+        '''Because gotoLine in Window goes to Editor which subtracts line-1 for parser'''
+        '''otherwise idx will be 0'''
+        idx = 1
         self.reset()
         for line in gg:
             if line.contains("class"):

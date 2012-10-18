@@ -16,17 +16,13 @@ class Parser(QWidget):
         '''Solved problem by adding Success to sqc file'''
         self.parent.errorTree.reset() 
         if(text != "" and text != "Success"):
-            if(self.parent.tabWidget_3.isHidden()):
-                self.parent.tabWidget_3.show()
-                self.parent.tabWidget_3.setCurrentIndex(0)
+            self.parent.popError()
             errorlist = text.split(',')
             fileName = self.parent.files[self.parent.tabWidget.currentIndex()]
             self.parent.errorTree.addError(fileName,errorlist)
             self.parent.tabWidget.currentWidget().reset()
             self.parent.tabWidget.currentWidget().addError(int(errorlist[0]))
         else:
-            if not(self.parent.tabWidget_3.isHidden()):
-                self.parent.tabWidget_3.hide()
             self.parent.tabWidget.currentWidget().reset()
             self.parent.errorTree.reset()
                 
