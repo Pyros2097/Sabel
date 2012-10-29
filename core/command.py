@@ -25,6 +25,12 @@ class Command(QWidget):
         self.parent.textEdit.clear()
         self.run()
         
+    def setCmdText(self,text):
+        self.cmd = text
+        if self.cmd != "":
+            self.parent.textEdit.clear()
+            self.run()
+        
     def finished(self,no,cmd):
         self.parent.progressStop()
         self.parent.statusWriting()
