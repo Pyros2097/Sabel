@@ -7,4 +7,8 @@ def main(func):
         raise Exception, "Error: ", e
 
 if __name__ == "__main__":
+    #import uncompyle2
+    #import sys
+    #file = open("C:/gg.txt")
+    #uncompyle2.uncompyle_file("C:/update.pyc",sys.stdout)#,file)
     main("")

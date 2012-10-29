@@ -50,25 +50,25 @@ class Adb(QWidget):
     def newstart(self,no,cmd):
         self.checkFinished(no, cmd)
         self.parent.progressStart()
-        if(cmd == self.cmd1):
-            self.adb_thread.setCmd(self.cmd2)
+        if(cmd == self.cmd1): 
+            self.adb_thread.setCmd(self.cmd2) #start
             self.adb_thread.run()
-        elif(cmd == self.cmd2):
-            self.adb_thread.setCmd(self.cmd3)
+        elif(cmd == self.cmd2): 
+            self.adb_thread.setCmd(self.cmd3) #log
             self.parent.progressStop()
             self.adb_thread.run2()
-        elif(cmd == self.cmd3):
-            self.adb_thread.setCmd(self.cmd4)
+        elif(cmd == self.cmd3): 
+            self.adb_thread.setCmd(self.cmd4) #enable app
             self.adb_thread.run()
-        elif(cmd == self.cmd4):
-            self.adb_thread.setCmd(self.cmd5)
+        elif(cmd == self.cmd4):  
+            self.adb_thread.setCmd(self.cmd5)  #disable app
             self.adb_thread.run()
-        elif(cmd == self.cmd5):
+        elif(cmd == self.cmd5): 
             if not(self.parent.outputTabWidget.isHidden()):
                 self.parent.outputTabWidget.hide()
             self.parent.toolBar.action_Run.setEnabled(True)
-            self.parent.progressStop()
             self.parent.statusWriting()
+            #self.stop()
         
     def run(self):
         if self.isRunning == False:
@@ -77,11 +77,11 @@ class Adb(QWidget):
             self.parent.toolBar.action_Stop.setEnabled(True)        
             self.parent.popOutput()
             self.parent.textEdit.clear()
-        self.parent.textEdit.append("Pushing main.nut...\n")
-        self.adb_thread.setCmd(self.cmd1)
-        self.parent.statusRunning()
-        self.parent.progressStart()
-        self.adb_thread.run()      
+            self.parent.textEdit.append("Pushing main.nut...\n")
+            self.adb_thread.setCmd(self.cmd1)
+            self.parent.statusRunning()
+            self.parent.progressStart()
+            self.adb_thread.run()      
 
     def stop(self):
         if self.isRunning == True:

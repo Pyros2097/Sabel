@@ -8,7 +8,9 @@ class WorkThread(QThread):
         self.process.readyReadStandardOutput.connect(self.readOutput)
         self.process.readyReadStandardError.connect(self.readErrors)
         self.process.finished.connect(self.fini)
-        #self.procDone = QtCore.pyqtSignal(bool)
+        
+    def fini(self,no):
+        self.emit(SIGNAL("fini"),no,self.cmd)
               
     def setCmd(self,val):
         self.cmd = val
@@ -44,9 +46,6 @@ class WorkThread(QThread):
             self.process.start(self.cmd)
         self.exec_()
         #self.process.kill()
-        
-    def fini(self,no):
-        self.emit(SIGNAL("fini"),no,self.cmd)
         
     def readOutput(self):
         self.emit(SIGNAL("update"),str(self.process.readAllStandardOutput()))

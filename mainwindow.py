@@ -2,9 +2,11 @@ from PyQt4.QtGui import (QApplication,QPixmap,QSplashScreen,QMessageBox,
                          QIcon,QAction,QCheckBox,QFileDialog)
 from PyQt4.QtCore import SIGNAL,Qt,QStringList,QString
 from window import Window
-from Widget import Editor,PyInterp,Adb,Ant,Parser,Command,Audio,Image,Tool
+from Widget import Editor,Audio,Image,Tool
+from core import PyInterp,Adb,Ant,Parser,Command,update
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
-                     iconSize,iconDir,ospathexists,os_icon)
+                     iconSize,iconDir,ospathexists,os_icon, __version__)
+from globals import Encoding
 import sys
 
 class MainWindow(Window):
@@ -19,7 +21,12 @@ class MainWindow(Window):
         self.parser = Parser(self)
         self.command = Command(self)
         self.ant = Ant(self)
-
+        self.updater = update.Updater(self)
+        self.update()
+        
+    def update(self):
+        self.updater.start()
+                    
     def init(self):
         self.toolBar = Tool(self)
         self.addToolBar(self.toolBar)
@@ -30,6 +37,7 @@ class MainWindow(Window):
         self.tabWidget.tabCloseRequested.connect(self.closeTab)
         self.treeWidget.itemDoubleClicked.connect(self.treeItemClicked)
         self.connect(self.treeWidget,SIGNAL("openFileClicked"),self.treeItemClicked)
+        self.connect(self.treeWidget,SIGNAL("sendFileClicked"),self.sendFile)
         self.connect(self.treeWidget,SIGNAL("create"), lambda x:self.ant.create(x))
         self.connect(self.treeWidget,SIGNAL("build"), lambda x:self.ant.build(x))
         self.connect(self.treeWidget,SIGNAL("buildRun"), lambda x:self.ant.buildRun(x))
@@ -53,6 +61,12 @@ class MainWindow(Window):
                 self.openImage(item.getPath())
             elif(item.isAudio()):
                 self.openAudio(item.getPath())
+                
+    def sendFile(self,item):
+        if(item.isFile()):
+            self.command.setCmdText("adb push "+item.getPath()+" /sdcard/")
+                
+    
         
     def initInterpreter(self):
         self.ipy = PyInterp(self)
@@ -89,7 +103,10 @@ class MainWindow(Window):
         try:
             infile = open(nfile, 'r')
             tt = infile.read()
-            text = unicode(tt,"utf-8")#must add utf-8 for it to work
+            if(config.encoding() == Encoding.UNICODE):
+                text = unicode(tt,"utf-8")#must add utf-8 for it to work
+            else:
+                text = str(tt)
 
             #infile.close()
             self.files.append(nfile)
@@ -202,13 +219,15 @@ class MainWindow(Window):
                     fl = open(fname, 'w')
                     self.statusSaving()
                     self.progressStart()
-                    tempText = unicode(self.tabWidget.widget(index).text())
-                    if tempText:
+                    if(config.encoding() == Encoding.UNICODE):
+                        tempText = unicode(self.tabWidget.widget(index).text())
                         fl.write(tempText.encode("utf-8"))
                         fl.close()
-                        self.clearDirty(index)
                     else:
-                        QMessageBox.about(self, "Can't Save","Failed to save ...")
+                        tempText = str(self.tabWidget.widget(index).text())
+                        fl.write(tempText)
+                        fl.close()
+                    self.clearDirty(index)
                 except:
                     QMessageBox.about(self, "Can't Save","File is Locked")
                 self.statusWriting()
@@ -225,13 +244,15 @@ class MainWindow(Window):
                     fl = open(fname, 'w')
                     self.statusSaving()
                     self.progressStart()
-                    tempText = unicode(self.tabWidget.widget(index).text())
-                    if tempText:
+                    if(config.encoding() == Encoding.UNICODE):
+                        tempText = unicode(self.tabWidget.widget(index).text())
                         fl.write(tempText.encode("utf-8"))
                         fl.close()
-                        self.clearDirty(index)
                     else:
-                        QMessageBox.about(self, "Can't Save","Failed to save ...")
+                        tempText = str(self.tabWidget.widget(index).text())
+                        fl.write(tempText)
+                        fl.close()
+                    self.clearDirty(index)
                     self.statusWriting()
                     self.progressStop()
                 except:
@@ -243,7 +264,6 @@ class MainWindow(Window):
 
 
     def closeEvent(self, event):
-        #check this adb.exe process is always on
         self.adb.close()
         self.parser.close()
         self.command.close()
@@ -254,11 +274,11 @@ class MainWindow(Window):
                 notSaved = True
         if notSaved:
             reply = QMessageBox.question(self,
-                                             "Sabel - Unsaved Changes",
-                                             "Save unsaved changes?",
-                                             QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
+                                        "Sabel - Unsaved Changes",
+                                        "Save unsaved changes?",
+                                        QMessageBox.Yes|QMessageBox.No|QMessageBox.Cancel)
             if reply == QMessageBox.Cancel:
-                    pass
+                    return
             elif reply == QMessageBox.Yes:
                     self.fileSaveAll()
         sys.exit()

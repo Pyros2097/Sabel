@@ -1,16 +1,18 @@
 from PyQt4.QtGui import (QTreeWidgetItem,QTreeWidget,QMessageBox,
                          QIcon,QDrag,QMenu,QAction,QInputDialog,QCursor,QToolBar,
-                         QHeaderView,QFileDialog)
+                         QHeaderView,QFileDialog, QKeySequence, QShortcut)
 from PyQt4.QtCore import QPoint ,SIGNAL, Qt, QMimeData, QUrl, QPoint, QByteArray, QDataStream, QIODevice
 from globals import (oslistdir,ospathisdir,ospathsep,ospathjoin,ospathexists,
                      ospathbasename,os_icon,osremove,osrename,ospathdirname,
                      recycle,ospathnormpath,oswalk,Icons,config)
+import shutil
 
 
 class Dir(QTreeWidgetItem):
     def __init__(self,parent,name,path):
         QTreeWidgetItem.__init__(self,parent)
         self.path = ospathjoin(path,name)
+        self.name = name
         self.setText (0, name)
         self.setIcon(0,Icons.foldej)
     
@@ -22,12 +24,21 @@ class Dir(QTreeWidgetItem):
         return True
     def isFile(self):
         return False
+    def exists(self):
+        return ospathexists(self.path)
+    def hasItem(self,child):
+        #print self.indexOfChild(child)
+        if(self.indexOfChild(child) > -1):
+            return True
+        else:
+            return False
 
 class File(QTreeWidgetItem):
     ext = [".txt",".nut",".py",".cpp",".c",".h"]
     def __init__(self,parent,name,path):
         QTreeWidgetItem.__init__(self,parent)
         self.path = ospathjoin(path,name)
+        self.name = name
         self.setText (0, name)
         self.doc = False
         self.pic = False
@@ -70,6 +81,8 @@ class File(QTreeWidgetItem):
         return self.pic
     def isAudio(self):
         return self.audio
+    def exists(self):
+        return ospathexists(self.path)
         
 class Project(QTreeWidgetItem):
     Count = -1
@@ -98,10 +111,13 @@ class Project(QTreeWidgetItem):
         return False
     def isClosed(self):
         return self.closed
+    def exists(self):
+        return ospathexists(self.path)
         
 class ProjectTree(QTreeWidget):
     def __init__(self,parent = None):
         QTreeWidget.__init__(self,parent)
+        self.setSelectionMode(self.ExtendedSelection)
         self.setDragEnabled(True)
         self.setAcceptDrops(True)
         self.setColumnCount(1)
@@ -111,6 +127,7 @@ class ProjectTree(QTreeWidget):
         self.connect(self, SIGNAL("dropped"), self.addItem)
         self.projects = []
         self.projectItems = []
+        self.clipboard = []
         self.closed = config.closedProjects()
         if(self.closed == None):
             self.closed = []
@@ -141,6 +158,37 @@ class ProjectTree(QTreeWidget):
                 drag.setHotSpot(QPoint(pixmap.width()/2, pixmap.height()/2))  
                 drag.setMimeData(mimeData)
                 dropAction = drag.start(Qt.CopyAction)
+                
+    def addItem(self,links):
+        print links
+         
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls:
+            event.accept()
+        else:
+            event.ignore()    
+
+    def dropEvent(self, event): 
+        if event.mimeData().hasUrls:
+            event.acceptProposedAction()
+            event.setDropAction(Qt.CopyAction)
+            event.accept()
+            links = []
+            for url in event.mimeData().urls():
+                links.append(str(url.toLocalFile()))
+                #item = File(self)
+                #item.setText(0, ospathbasename(str(url.toLocalFile())))
+                #self.addTopLevelItem(item)
+            self.emit(SIGNAL("dropped"), links)      
+        else:
+            event.ignore()    
         
     '''
     def startDrag(self, dropAction):
@@ -278,46 +326,6 @@ class ProjectTree(QTreeWidget):
                     current_item = self.currentItem().parent()
                 #print current_item.getPath()
             return current_item
-      
-    def addItem(self,links):
-        print links
-                
-    def startDrag(self, dropAction):
-        # create mime data object
-        mime = QMimeData()
-        mime.setData('text/xml', '???')
-        # start drag 
-        drag = QDrag(self)
-        drag.setMimeData(mime)        
-        drag.start(Qt.CopyAction | Qt.CopyAction)
-
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.setDropAction(Qt.CopyAction)
-            event.accept()
-        else:
-            event.ignore()
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls:
-            event.accept()
-        else:
-            event.ignore()    
-
-    def dropEvent(self, event): 
-        if event.mimeData().hasUrls:
-            event.acceptProposedAction()
-            event.setDropAction(Qt.CopyAction)
-            event.accept()
-            links = []
-            for url in event.mimeData().urls():
-                links.append(str(url.toLocalFile()))
-                #item = File(self)
-                #item.setText(0, ospathbasename(str(url.toLocalFile())))
-                #self.addTopLevelItem(item)
-            self.emit(SIGNAL("dropped"), links)      
-        else:
-            event.ignore()    
                 
     def doMenu(self, pos):
         index = self.indexAt(pos)
@@ -342,14 +350,13 @@ class ProjectTree(QTreeWidget):
         action_RunFile.triggered.connect(lambda:self.runFile(item))
         action_SendFile = QAction(Icons.file_obj,'Send to SDcard', self)
         action_SendFile.triggered.connect(lambda:self.sendFile(item))
-        action_CopyFile = QAction(Icons.file_obj,'Copy', self)
-        action_CopyFile.triggered.connect(lambda:self.copyFile(item))
-        action_CopyDir = QAction(Icons.file_obj,'Copy', self)
-        action_CopyDir.triggered.connect(lambda:self.copyDir(item))
-        action_PasteFile = QAction(Icons.paste_edit,'Paste', self)
-        action_PasteFile.triggered.connect(lambda:self.pasteFile(item))
-        action_PasteDir = QAction(Icons.paste_edit,'Paste', self)
-        action_PasteDir.triggered.connect(lambda:self.pasteDir(item))
+        action_Copy = QAction(Icons.file_obj,'Copy', self)
+        action_Copy.triggered.connect(lambda:self.copy(item))
+        action_Paste = QAction(Icons.paste_edit,'Paste', self)
+        action_Paste.triggered.connect(lambda:self.paste(item))
+        if(self.clipboard == []):
+            action_Paste.setEnabled(False)
+            
         action_RefreshProject = QAction(Icons.refresh_tab,'Refresh', self)
         action_RefreshProject.triggered.connect(lambda:self.refreshProject(item))
         action_RemoveProject = QAction('Remove', self)
@@ -401,8 +408,8 @@ class ProjectTree(QTreeWidget):
                 menu.addAction(action_Folder)
                 menu.addAction(action_File)
                 menu.addSeparator()
-                menu.addAction(action_CopyDir)
-                menu.addAction(action_PasteDir)
+                #menu.addAction(action_Copy)
+                menu.addAction(action_Paste)
                 menu.addAction(action_RenameDir)
                 menu.addAction(action_DeleteDir)      
             else:
@@ -414,8 +421,9 @@ class ProjectTree(QTreeWidget):
                 menu.addSeparator()
                 menu.addAction(action_SendFile)
                 menu.addSeparator()
-                menu.addAction(action_CopyFile)
-                menu.addAction(action_PasteFile)
+                menu.addAction(action_Copy)
+                
+                menu.addAction(action_Paste)
                 menu.addAction(action_RenameFile)
                 menu.addAction(action_DeleteFile)
                 
@@ -455,6 +463,7 @@ class ProjectTree(QTreeWidget):
                 #osmkdir(fname+'/'+text,0755)
             except:
                 QMessageBox.about(self,"Error","Could Not Create The File")
+                
     def newFile(self,item):
         itempath = item.getPath()
         text,ok = QInputDialog.getText(self,"QInputDialog::getText()","Name:") 
@@ -475,20 +484,52 @@ class ProjectTree(QTreeWidget):
         pass
     
     def sendFile(self,item):
-        #Biachself.parent()
-        pass
+        self.emit(SIGNAL("sendFileClicked"),item)
                 
-    def copyFile(self,item):
-        pass
+    def copy(self,clickeditem = None):
+        items = self.selectedItems()
+        self.clipboard = []
+        if(items != None):
+            for item in items:
+                #print item.getPath()
+                self.clipboard.append(item)
     
-    def copyDir(self,item):
-        pass
     
-    def pasteFile(self,item):
-        pass
-    
-    def pasteDir(self,item):
-        pass
+    '''must test this'''
+    def paste(self,item):
+        '''First check if item is file then get its parent 
+            otherwise check if item is Dir'''
+        if(item.isFile()):
+            p = item.parent()
+        else:
+            p = item
+        if(self.clipboard != []):
+            for items in self.clipboard:
+                if(items.isFile()):
+                    itemspath = items.getPath()     
+                    '''Check if we are pasting files that alreadt exists using ospathjoin'''
+                    if not(ospathexists(ospathjoin(p.getPath(),items.name))): 
+                        try:
+                            shutil.copyfile(itemspath,ospathjoin(p.getPath(),items.name))
+                            newItem = File(p,items.name,ospathdirname(itemspath))
+                        except:
+                            QMessageBox.about(self,"Error","File Cannot be Pasted"+ospathjoin(p.getPath(),items.name))
+                    else:
+                        QMessageBox.about(self,"Error","File already Exists "+ospathjoin(p.getPath(),items.name))
+                        return
+                elif(items.isDir()):
+                    itemspath = items.getPath()     
+                    '''Check if we are pasting files that alreadt exists using ospathjoin'''
+                    if not(ospathexists(ospathjoin(p.getPath(),items.name))):
+                        try:
+                            shutil.copyfile(itemspath,ospathjoin(p.getPath(),items.name))
+                            newItem = File(p,items.name,ospathdirname(itemspath))
+                        except:
+                            QMessageBox.about(self,"Error","File Cannot be Pasted"+ospathjoin(p.getPath(),items.name))
+                    else:
+                        QMessageBox.about(self,"Error","File already Exists "+ospathjoin(p.getPath(),items.name))
+                        return
+                    
     
     '''Signals are emitted because doesnt have access to Parent'''
     def create(self,item):
@@ -541,7 +582,7 @@ class ProjectTree(QTreeWidget):
                 p = item.parent()
                 p.removeChild(item)
                 f = File(p,ospathbasename(newname),ospathdirname(newname))
-                p.addChild(f)
+                #p.addChild(f)
             except:
                 QMessageBox.about(self,"Error","Could Not Rename The File")
                 

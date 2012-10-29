@@ -10,6 +10,7 @@ from PyQt4.QtCore import QSize,Qt,QStringList,SIGNAL,SLOT,QString
 
 from Widget import EditorTab, TreeTab, OutputTab
 from Widget import ProjectTree, ErrorTree, OutlineTree
+from Widget import Popup
                     
 from Widget import DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo,DialogBrowse
 
@@ -18,7 +19,6 @@ from design import Screen
 
 
 from Widget.style import Styles
-from stylesheet import *
 
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
                      iconSize,iconDir,Icons)
@@ -26,7 +26,6 @@ from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpac
 class Window(QMainWindow):
     def __init__(self,parent = None):
         QMainWindow.__init__(self,parent)
-        self.setStyleSheet(mainstyl)
         self.resize(1024,768)
         self.setWindowTitle("Sabel")
         self.setWindowIcon(Icons.sabel)
@@ -36,7 +35,6 @@ class Window(QMainWindow):
         self.styleIndex = config.styleIndex()
         self.cmdList = config.cmds()
         self.paramList = config.params()
-        self.mode = config.mode()
         
         '''A.Editor TabWidget'''
         '''This parent is for findbar and vertical layout'''
@@ -47,10 +45,24 @@ class Window(QMainWindow):
         self.editorLayout.setMargin(0)
         self.editorLayout.addWidget(self.tabWidget)
         
+        "0.Style Layout"
+        
+        "0.Style Layout"
+        self.styleLayoutWidget = QFrame()
+        self.styleLayoutWidget.setFrameShape(QFrame.StyledPanel)
+        self.styleLayout = QHBoxLayout(self.styleLayoutWidget)
+        self.styleTest = QPushButton(self.styleLayoutWidget)
+        self.styleTest.setText("Change Styles")
+        self.styleTest.clicked.connect(self.changeStyleSheet)
+        self.popWidget = Popup(self.styleLayoutWidget)
+        self.styleLayout.addWidget(self.styleTest)
+        self.styleLayout.addWidget(self.popWidget)
+        self.styleLayout.setMargin(0)
+        self.editorLayout.addWidget(self.styleLayoutWidget)
+        self.styleLayoutWidget.hide()
+        
         "1.Find Layout"
         self.findLayoutWidget = QFrame()
-        #self.findLayoutWidget.setLineWidth(2)
-        #self.findLayoutWidget.setStyleSheet("margin-top:1px;margin-bottom:1px;")
         self.findLayoutWidget.setFrameShape(QFrame.StyledPanel)
         self.findLayout = QHBoxLayout(self.findLayoutWidget)
         self.lineEdit = QLineEdit(self.findLayoutWidget)
@@ -146,7 +158,6 @@ class Window(QMainWindow):
         '''E.Output TabWidget'''
         self.outputTabWidget = OutputTab(self)
         self.outputTabWidget.setMaximumHeight(200)#260
-        self.tabWidget.tabBar().setStyleSheet(stletabb)
         self.tabWidget.currentChanged.connect(self.fileChanged)
         self.explorerTabWidget.currentChanged.connect(self.closeExplorer)
         self.outputTabWidget.currentChanged.connect(self.closeConsole)
@@ -327,7 +338,32 @@ class Window(QMainWindow):
         self.setCentralWidget(self.centralwidget)
         self.setStatusBar(self.statusbar)
         self.textEdit.setReadOnly(True)
+        self.initStyleSheet()
         
+    def initStyleSheet(self):
+        import stylesheet
+        self.setStyleSheet(stylesheet.mainstyl)
+        self.tabWidget.tabBar().setStyleSheet(stylesheet.stletabb)
+        self.popWidget.setStyleSheet(stylesheet.popbg)
+        self.popWidget.hide()
+        
+        
+        #self.findLayoutWidget.setLineWidth(2)
+        #self.findLayoutWidget.setStyleSheet("margin-top:1px;margin-bottom:1px;")
+         
+    ''' This is only for testing dont know if it works for builds '''    
+    def changeStyleSheet(self):
+        ''' Dynamically load the changed stylesheet.py and load the modules and change 
+            the style at runtime saves countless deploys '''
+        import imp
+        foo = imp.load_source('stletabb', workDir+"/stylesheet.py")
+        #print foo.stletabb
+        #self.setStyleSheet(stylesheet.mainstyl)
+        self.tabWidget.tabBar().setStyleSheet(foo.stletabb)
+        self.popWidget.setStyleSheet(foo.popbg)
+        if(self.popWidget.isHidden()):
+            self.popWidget.showPopup()
+    
     def build_project(self):
         #current_file = self.files[self.tabWidget.currentIndex()]
         prj = self.treeWidget.getProject()
@@ -344,38 +380,38 @@ class Window(QMainWindow):
         self.ant.kill()
         self.progressStop()
         
+    def kill(self):
+        self.deleteLater()
+        
 #-----------------------------------------------------------------------------------#
 #   Menu Actions Functions                                                          #
 #-----------------------------------------------------------------------------------#
     def run(self):
-        if(self.mode == 0):
+        if(config.mode() == 0):
             self.sq.run()
-        elif(self.mode == 1):
+        elif(config.mode() == 1):
             self.adb.run()
-        elif(self.mode == 2):
+        elif(config.mode() == 2):
             self.ios.run()
-        elif(self.mode == 3):
+        elif(config.mode() == 3):
             self.c.run()
-        elif(self.mode == 4):
-            self.cpp.run()
             
-    def emo(self):
-        if(self.mode == 0):
-            self.mode = 1
-            self.toolBar.action_Squirrel.setChecked(False)
-        else:
-            self.toolBar.action_Squirrel.setChecked(True)
+    def setMode(self, action):
+        if(action.text() == "Squ"):
+            config.setMode(0)
+        elif(action.text() == "Emo"):
+            config.setMode(1)
+        elif(action.text() == "Android"):
+            config.setMode(2)
+        elif(action.text() == "ios"):
+            config.setMode(3)
             
-    def ios(self):
-        print "ios"
-        
-    
-    def sq(self):
-        if(self.mode == 1):
-            self.mode = 0
-            self.toolBar.action_Emo.setChecked(False)
-        else:
-            self.toolBar.action_Emo.setChecked(True)
+    def openCommand(self):
+        text, ok = QInputDialog.getText(self, 'Run Command', 'Command:')
+        cmd = str(text)
+        if ok and cmd != "":
+            import subprocess
+            subprocess.Popen(cmd)
      
     def about(self):
         form = DialogAbout(self)
@@ -585,7 +621,7 @@ class Window(QMainWindow):
         #    self.tabWidget.widget(i).zoomout()
             
     def setFont(self,font):
-        config.setFontName(font.family())
+        config.setFontName(str(font.family()))
         for i in range(len(self.files)):
             self.tabWidget.widget(i).setNewFont(font)
             
@@ -613,6 +649,7 @@ class Window(QMainWindow):
             for i in range(len(self.files)):
                 self.tabWidget.widget(i).setMargin(0)
                 
+    ''' Toggle '''
     def setIndent(self):
         indent = config.indent()
         if(indent == 0): 
@@ -623,7 +660,33 @@ class Window(QMainWindow):
             config.setIndent(0)
             for i in range(len(self.files)):
                 self.tabWidget.widget(i).setIndent(0)
-        
+    ''' Toggle '''         
+    def setWhiteSpace(self):
+        white = config.whiteSpace()
+        if(white == 0): 
+            config.setWhiteSpace(1)
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setWhitespaceVisibility(True)
+        else:
+            config.setWhiteSpace(0)
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setWhitespaceVisibility(False)
+    
+    ''' Toggle '''         
+    def setEndLine(self):
+        for i in range(len(self.files)):
+            edt = self.tabWidget.widget(i)
+            edt.setEolVisibility(not edt.eolVisibility())
+                
+    def setEncoding(self, action):
+        if(action.text() == "Ascii"):
+            config.setAscii()
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setUtf8(False)
+        elif(action.text() == "Unicode"):
+            config.setUnicode()
+            for i in range(len(self.files)):
+                self.tabWidget.widget(i).setUtf8(True)
         
     def setThreshold(self,val):
         config.setThresh(val)

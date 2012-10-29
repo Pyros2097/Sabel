@@ -1,7 +1,7 @@
-from PyQt4.QtGui import (QToolBar, QMenu, QAction, QSlider, QWidgetAction,
-                         QFont, QFontComboBox, QComboBox)
+from PyQt4.QtGui import (QToolBar, QMenu, QAction, QActionGroup ,QSlider, QWidgetAction,
+                         QFont, QFontComboBox, QComboBox, QLabel)
 from PyQt4.QtCore import SIGNAL, Qt, QSize
-from globals import config, Icons
+from globals import config, Icons, Encoding
     
 class Tool(QToolBar):
     def __init__(self,parent):
@@ -38,7 +38,7 @@ class Tool(QToolBar):
         self.action_Run.setShortcut('Ctrl+R')
         self.action_Run.triggered.connect(self.parent.adb.run)
         self.action_RunFile = QAction(Icons.go, 'Cmd', self)
-        self.action_RunFile.triggered.connect(self.parent.command.setCmd)
+        self.action_RunFile.triggered.connect(self.parent.openCommand)
         self.parent.runButton.clicked.connect(self.parent.command.setCmdLine)
         self.action_Stop = QAction(Icons.stop, 'Stop', self)
         self.action_Stop.setShortcut('Ctrl+Q')
@@ -113,6 +113,10 @@ class Tool(QToolBar):
         action_designer.triggered.connect(self.parent.design)
         action_Indentation = QAction("Indentation Guides",self)
         action_Indentation.triggered.connect(self.parent.setIndent)
+        action_WhiteSpace = QAction("Show WhiteSpace",self)
+        action_WhiteSpace.triggered.connect(self.parent.setWhiteSpace)
+        action_EndLine = QAction("Show End of Lines",self)
+        action_EndLine.triggered.connect(self.parent.setEndLine)
         action_Margin = QAction("Line Numbers",self)
         action_Margin.triggered.connect(self.parent.setMargin)
         action_ToolLabel = QAction("Tool Labels",self)
@@ -124,21 +128,49 @@ class Tool(QToolBar):
         action_Squirrel = QAction(Icons.nut,'Squirrel', self)
         action_Squirrel.triggered.connect(self.parent.squirrel)
         action_Ios1 = QAction(Icons.ios,'iOS', self)
+        action_Update = QAction("Update",self)
+        action_Update.triggered.connect(self.parent.update)
+        
+        
+        '''Encoding'''
+        encodingGroup = QActionGroup(self)
+        encodingGroup.setExclusive(True)
+        action_Ascii = QAction("Ascii",encodingGroup)
+        action_Ascii.setCheckable(True)
+        action_Unicode = QAction("Unicode",encodingGroup)
+        action_Unicode.setCheckable(True)
+        encodingGroup.addAction(action_Ascii)
+        encodingGroup.addAction(action_Unicode)
+        encodingGroup.selected.connect(self.parent.setEncoding)
+        if(config.encoding() == Encoding.ASCII):
+            action_Ascii.setChecked(True)
+        else:
+            action_Unicode.setChecked(True)
         men.addAction(action_Android)
         men.addAction(action_Ant)
         men.addAction(action_Squirrel)
         men.addAction(action_Ios1)
+        men.addAction(action_Update)
         men.addSeparator()
         men.addAction(action_explorer)
         men.addAction(action_console)
         men.addAction(action_designer)
         men.addAction(action_Indentation)
+        men.addAction(action_WhiteSpace)
+        men.addAction(action_EndLine)
         men.addAction(action_Margin)
         men.addAction(action_ToolLabel)
         men.addSeparator()
-        men.addAction(QAction("Font",self))
+        men.addActions(encodingGroup.actions())
+        men.addSeparator()
+        head_font = QLabel("Font---------------------")
+        fnt = head_font.font()
+        fnt.setBold(True)
+        head_font.setFont(fnt)
+        head_fontWidgetAction = QWidgetAction(men)
+        head_fontWidgetAction.setDefaultWidget(head_font)
+        men.addAction(head_fontWidgetAction)
         men.addAction(self.fontComboMenu)
-        men.addAction(QAction("Font Size",self))
         men.addAction(self.fontSizeComboMenu)
         men.addSeparator()
         men.addAction(QAction("TabWidth",self))
@@ -157,17 +189,21 @@ class Tool(QToolBar):
         self.action_Full.setShortcut('Shift+Enter')
         self.action_Full.triggered.connect(self.parent.full)
         
-        self.action_Squirrel = QAction(Icons.nut, 'Squ', self)
+        self.modeGroup = QActionGroup(self)
+        self.modeGroup.setExclusive(True)
+        self.modeGroup.selected.connect(self.parent.setMode)
+        self.action_Squirrel = QAction(Icons.nut, 'Squ', self.modeGroup)
         self.action_Squirrel.setCheckable(True)
-        self.action_Squirrel.triggered.connect(self.parent.sq)
-        self.action_Emo = QAction(Icons.emo, 'Emo', self)
+        self.action_Emo = QAction(Icons.emo, 'Emo', self.modeGroup)
         self.action_Emo.setCheckable(True)
-        self.action_And = QAction(Icons.android, 'Android', self)
+        self.action_And = QAction(Icons.android, 'Android', self.modeGroup)
         self.action_And.setCheckable(True)
-        self.action_Emo.triggered.connect(self.parent.emo)
-        self.action_Ios = QAction(Icons.ios, 'ios', self)
+        self.action_Ios = QAction(Icons.ios, 'ios', self.modeGroup)
         self.action_Ios.setCheckable(True)
-        self.action_Ios.triggered.connect(self.parent.ios)
+        self.modeGroup.addAction(self.action_Squirrel)
+        self.modeGroup.addAction(self.action_Emo)
+        self.modeGroup.addAction(self.action_And)
+        self.modeGroup.addAction(self.action_Ios)
 
         
         self.action_Style = QAction(Icons.style, 'Style', self)
@@ -213,9 +249,7 @@ class Tool(QToolBar):
         self.action_Style.setMenu(men1)
         self.styleslist[self.parent.styleIndex].setChecked(True)
 
-
         self.action_Stop.setDisabled(True)
-        
         self.setToolLabel()
         self.setAllowedAreas(Qt.AllToolBarAreas)
         #self.setFixedHeight(40)
@@ -242,14 +276,15 @@ class Tool(QToolBar):
         self.addAction(self.action_Help)
         self.addAction(self.action_Full)
         self.addSeparator()
-        self.addAction(self.action_Squirrel)
-        self.addAction(self.action_Emo)
-        self.addAction(self.action_And)
-        self.addAction(self.action_Ios)
+        self.addActions(self.modeGroup.actions())
         if(config.mode() == 0):
             self.action_Squirrel.setChecked(True)
-        else:
+        elif(config.mode() == 1):
             self.action_Emo.setChecked(True)
+        elif(config.mode() == 2):
+            self.action_And.setChecked(True)
+        elif(config.mode() == 3):
+            self.action_Ios.setChecked(True)
             
     def setIcon(self,val):
         config.setIconSize(val)

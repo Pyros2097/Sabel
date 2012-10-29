@@ -1,5 +1,6 @@
 from cx_Freeze import setup, Executable
-#excludes = ['curses', 'email', 'tcl','tk','Tkinter','Tkconstants','pywin.debugger']
+excludes = ['curses', 'email', 'tcl','tk','Tkinter','Tkconstants','pywin.debugger']
+includes = ["urllib2"]
 """
 excludes = ['_gtkagg', '_tkagg', 'bsddb', 'curses', 'email', 'pywin.debugger',
                'pywin.debugger.dbgcon', 'pywin.dialogs', 'tcl',
@@ -12,16 +13,23 @@ exe = Executable(
     base="Win32GUI",
     targetName = "Sabel.exe",
     initScript = None,
-    compress = True,
+    compress = False,
     copyDependentFiles = True,
-    appendScriptToExe = False,
+    appendScriptToExe = True,
     appendScriptToLibrary = False,
     icon = "C:\CODE\Sabel\Icons\sabel.ico"
     )
 
 setup(
     name = "Sabel",
-    version ="0.60",
+    version ="0.00",
     description = "Sabel IDE",
+    options = {"build_exe": {"includes": includes,
+                 "excludes": excludes,
+                 #"packages": packages
+                 #"path": path
+                 }
+           },
+
     executables = [exe]
     )

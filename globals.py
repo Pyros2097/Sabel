@@ -1,10 +1,17 @@
+#!/usr/bin/env python
+__author__ = "pyros2097"
+__license__ = "GPLv3"
+__copyright__ = 'Copyright (c) 2013, pyros2097'
+__credits__ = ['pyros2097', 'eclipse']
+__email__ = 'pyros2097@gmail.com'
+__version__ = "0.62"
+
 import os
 from platform import system,python_version
 from PyQt4.QtGui import QIcon,QPixmap,QApplication,QSplashScreen
 from send2trash import send2trash
 from config import Config
 
-__version__ = "0.60"
 #Python accesses local variables much more efficiently than global variables. 
 oslistdir = os.listdir
 ospathisdir = os.path.isdir
@@ -49,6 +56,10 @@ def os_icon(name):
 def os_pixmap(name):
         return QPixmap(":/{0}.png".format(ospathjoin(iconDir,name)))
 
+class Encoding:
+    ASCII = 0
+    UNICODE = 1
+    
 class Icons:
     add = os_icon('auto_add')
     alert_obj = os_icon('alert_obj')

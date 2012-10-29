@@ -18,43 +18,35 @@ CMD:
 - SQ
 - JAVA
 - GCC
-- NODE
-- NPM
-- NODEMON
 ClosedProject:
 - 0
 - 0
 - 0
 - 0
 File:
-- C:/CODE/assets/creditscene.nut
-- C:/CODE/assets/cll.nut
-- C:/mysite/new/views/index.jade
-- C:/mysite/new/app.js
-- C:/mysite/new/routes/index.js
 - C:/CODE/assets/common.nut
-- C:/chaiscript-5/CMakeLists.txt
-- C:/sdk/samples/concurrent/source/main.cpp
+- C:/CODE/assets/howtoscene.nut
+- C:/CODE/assets/logoscene.nut
+- C:/CODE/assets/creditscene.nut
 PARAM:
-- '  C:/CODE/assets/cll.nut'
-- ' '
-- C:/mysite/new/app.js 3000
+- Dude C:/CODE/assets/creditscene.nut C:/CODE/assets/physics.nut
 Project:
 - C:/CODE/assets/
-- C:/port/
-- C:/Android-Template/
 Recent: []
 Setting:
   device: 1
+  encoding: 1
   fontname: Courier New
-  fontsize: 9
+  fontsize: 10
   iconsize: 16
   indent: 0
-  margin: 1
+  margin: 0
   mode: 0
   styleindex: 8
   tabwidth: 2
   thresh: 1
+  toollabel: 0
+  whitespace: 0
   workspace: C:/CODE/
 Style: 0
 TODO:
@@ -64,7 +56,4 @@ TODO:
 - Add Style Options
 - Add iOS support
 - Make Mac Build
-- Dude Thats it for now
-- Squirrel Parser
-- Neko Parser
-- Desginer
+- Dude

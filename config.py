@@ -19,6 +19,13 @@ class Config:
     def workSpace(self):
         return self.readSetting("workspace")
     
+    def encoding(self):
+        return int(self.readSetting("encoding"))
+    def setAscii(self):
+        self.writeSetting('encoding',0)
+    def setUnicode(self):
+        self.writeSetting('encoding',1)
+    
     def fontSize(self):
         return int(self.readSetting('fontsize'))
     def setFontSize(self,val):
@@ -53,6 +60,11 @@ class Config:
         return int(self.readSetting('indent'))
     def setIndent(self,value):
         self.writeSetting("indent",value)
+        
+    def whiteSpace(self):
+        return int(self.readSetting('whitespace'))
+    def setWhiteSpace(self,value):
+        self.writeSetting("whitespace",value)
     
     '''0 is emulator 1 is device'''
     def device(self):

@@ -1,5 +1,5 @@
 from globals import (fontSize,ospathjoin,os_pixmap,apiDir,config
-                     ,Auto,eol)
+                     ,Auto,eol, Encoding)
 from PyQt4.QtCore import SIGNAL,QString,QEvent
 from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor, QPalette,QWidget
 from PyQt4.Qsci import QsciScintilla, QsciLexerPython ,QsciAPIs ,QsciLexerCPP
@@ -7,7 +7,6 @@ from lexersquirrel import LexerSquirrel
         
 class Editor(QsciScintilla):
     ARROW_MARKER_NUM = 8
-    #fontSize = fontSize
     def __init__(self,parent,text,lang,colorStyle):
         QsciScintilla.__init__(self,parent)
         self.parent = parent
@@ -15,8 +14,11 @@ class Editor(QsciScintilla):
         self.fontSize = fontSize
         self.colorStyle = colorStyle
         self.errorLines = []
-        self.setUtf8(True)
         self.setText(text)
+        #if(config.encoding() == Encoding.ASCII):
+        #    self.setUtf8(False)
+        #else:
+        self.setUtf8(True)
         if(eol == 0):
             self.setEolMode(self.EolWindows)
         elif(eol == 1):
