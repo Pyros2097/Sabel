@@ -6,12 +6,9 @@ from PyQt4.QtGui import (QAction,QIcon,QMessageBox,QWidgetAction,QMenu,QWidget,
                          QFrame)      
 from PyQt4.QtCore import QSize,Qt,QStringList,SIGNAL,SLOT,QString
 
-
-
 from Widget import EditorTab, TreeTab, OutputTab
 from Widget import ProjectTree, ErrorTree, OutlineTree
-from Widget import Popup
-                    
+from Widget import Popup         
 from Widget import DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo,DialogBrowse
 
 from design import Level
@@ -526,6 +523,7 @@ class Window(QMainWindow):
         elif(no == 1):
             self.fileChanged(no)
                 
+    ''' This is to refresh the outline widget'''
     def fileChanged(self,no):
         if(self.explorerTabWidget.currentIndex() == 1):
             edt = self.tabWidget.widget(self.tabWidget.currentIndex())

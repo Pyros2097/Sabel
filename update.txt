@@ -1,3 +1,4 @@
-0.62
-Added Updater
-Improved designer
+0.63
+Added new Squirrel Lexer
+Unicode broken
+Code Complete Broken

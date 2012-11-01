@@ -2,7 +2,8 @@ from PyQt4.QtGui import (QApplication,QPixmap,QSplashScreen,QMessageBox,
                          QIcon,QAction,QCheckBox,QFileDialog)
 from PyQt4.QtCore import SIGNAL,Qt,QStringList,QString
 from window import Window
-from Widget import Editor,Audio,Image,Tool
+from Widget import Audio,Image,Tool
+from editor import Editor
 from core import PyInterp,Adb,Ant,Parser,Command,update
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
                      iconSize,iconDir,ospathexists,os_icon, __version__)
