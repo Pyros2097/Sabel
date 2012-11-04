@@ -22,7 +22,7 @@ from PyQt4.QtGui import QApplication,QSplashScreen
 from PyQt4.QtCore import Qt
 import icons
 app = QApplication([])
-from globals import splash_pix
+from globals import splash_pix, info
 from mainwindow import MainWindow
 
 '''
@@ -39,6 +39,7 @@ Plastique
 Cleanlooks
 '''
 def main():
+    info("Started -------------------------------------------------")
     splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()

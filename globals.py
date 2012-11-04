@@ -4,14 +4,25 @@ __license__ = "GPLv3"
 __copyright__ = 'Copyright (c) 2013, pyros2097'
 __credits__ = ['pyros2097', 'eclipse']
 __email__ = 'pyros2097@gmail.com'
-__version__ = "0.63"
+__version__ = "0.64"
 
 import os
 from platform import system,python_version
 from PyQt4.QtGui import QIcon,QPixmap,QApplication,QSplashScreen
 from send2trash import send2trash
 from config import Config
+import logging
 
+logger = logging.getLogger('sabel')
+hdlr = logging.FileHandler('sabel.log')
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr) 
+logger.setLevel(logging.DEBUG) #only debug will show
+debug = logger.debug
+info = logger.info
+error = logger.error
+shutdown = logging.shutdown
 #Python accesses local variables much more efficiently than global variables. 
 oslistdir = os.listdir
 ospathisdir = os.path.isdir
@@ -47,8 +58,6 @@ PY_VERSION = python_version()
 #Config data
 config = Config()
 workSpace = config.workSpace()
-fontSize = config.fontSize()
-fontName = config.fontName()
 iconSize = config.iconSize()
 
 def os_icon(name):

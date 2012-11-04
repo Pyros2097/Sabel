@@ -66,7 +66,7 @@ class Updater(QWidget):
         if(text == []):
             self.retry()
             return
-        if(text[0] != __version__):
+        if(text[0] > __version__): #If the update version is greater than current
             self.parent.popWidget.setInfo(text)
             self.parent.popWidget.showPopup()
             self.parent.popWidget.showBtn()

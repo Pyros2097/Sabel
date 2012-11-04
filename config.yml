@@ -24,9 +24,7 @@ ClosedProject:
 - 0
 - 0
 File:
-- C:/CODE/assets/common.nut
 - C:/CODE/assets/creditscene.nut
-- C:/CODE/assets/logoscene.nut
 PARAM:
 - Dude C:/CODE/assets/creditscene.nut C:/CODE/assets/physics.nut
 Project:
@@ -41,13 +39,22 @@ Setting:
   indent: 0
   margin: 1
   mode: 0
-  styleindex: 8
   tabwidth: 4
   thresh: 1
   toollabel: 0
   whitespace: 1
   workspace: C:/CODE/
-Style: 0
+Style:
+  back: '#ffffff'
+  base: '#ffffff'
+  caret: '#e8f2fe'
+  comment: '#3f7f5f'
+  keyword: '#7f0055'
+  margin: '#ece9d8'
+  marker: '#ee1111'
+  number: '#0e8bff'
+  operator: '#000000'
+  string: '#7f0010'
 TODO:
 - Fix Closed Projects Bug
 - Add Build Options
@@ -56,3 +63,4 @@ TODO:
 - Add iOS support
 - Make Mac Build
 - Dude
+- Add AutoHide

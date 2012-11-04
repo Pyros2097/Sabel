@@ -14,9 +14,6 @@ from Widget import DialogAndroid,DialogAbout,DialogAnt,DialogSquirrel,DialogTodo
 from design import Level
 from design import Screen
 
-
-from Widget.style import Styles
-
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
                      iconSize,iconDir,Icons)
 
@@ -29,7 +26,6 @@ class Window(QMainWindow):
         self.centralwidget = QWidget(self)
         self.horizontalLayout = QHBoxLayout(self.centralwidget)
         self.horizontalLayout.setMargin(0)
-        self.styleIndex = config.styleIndex()
         self.cmdList = config.cmds()
         self.paramList = config.params()
         
@@ -41,8 +37,6 @@ class Window(QMainWindow):
         self.editorLayout = QVBoxLayout(self.editorLayoutWidget)
         self.editorLayout.setMargin(0)
         self.editorLayout.addWidget(self.tabWidget)
-        
-        "0.Style Layout"
         
         "0.Style Layout"
         self.styleLayoutWidget = QFrame()
@@ -234,8 +228,10 @@ class Window(QMainWindow):
         #self.levelWidget.setTabIcon(0,Icons.close_view)
         
         self.explorerTabWidget.addTab(self.tab_5,"Projects")
-        self.explorerTabWidget.addTab(self.tab_2,"Outline")
+        self.explorerTabWidget.addTab(self.tab_2,"Outline ")
         self.explorerTabWidget.addTab(QWidget(self),"")
+        self.explorerTabWidget.setTabIcon(0,Icons.cprj)
+        self.explorerTabWidget.setTabIcon(1,Icons.field)
         self.explorerTabWidget.setTabIcon(2,Icons.close_view)
         self.outputTabWidget.addTab(self.tab_7,"Error")
         self.outputTabWidget.addTab(self.tab_6,"Output")
@@ -328,25 +324,34 @@ class Window(QMainWindow):
         #self.statusbar.setFixedHeight(18)
         
         ''''Initializing Coloring Style'''
-        self.colorStyle = None
-        self.initColorStyle()
-        
+        self.initEditorStyle()
+        self.initStyleSheet()
         '''Adding Cental Widget and Status Bar'''
         self.setCentralWidget(self.centralwidget)
         self.setStatusBar(self.statusbar)
         self.textEdit.setReadOnly(True)
-        self.initStyleSheet()
+        
         
     def initStyleSheet(self):
         import stylesheet
         self.setStyleSheet(stylesheet.mainstyl)
         self.tabWidget.tabBar().setStyleSheet(stylesheet.stletabb)
+        self.explorerTabWidget.tabBar().setStyleSheet(stylesheet.stletabb)
+        self.outputTabWidget.tabBar().setStyleSheet(stylesheet.stletabb)
         self.popWidget.setStyleSheet(stylesheet.popbg)
         self.popWidget.hide()
         
-        
-        #self.findLayoutWidget.setLineWidth(2)
-        #self.findLayoutWidget.setStyleSheet("margin-top:1px;margin-bottom:1px;")
+    def initEditorStyle(self):
+        pass
+        #editStyle = config.readStyle()
+        #print editStyle
+        #pal = QPalette(self.explorerTabWidget.palette())
+        #print pal.color(QPalette.Base).name()
+        #print pal.color(QPalette.Window).name()
+        #pal.setColor(QPalette.Base,self.colorStyle.paper)
+        #pal.setColor(QPalette.Text,self.colorStyle.color)
+        #self.explorerTabWidget.setPalette(pal)
+        #self.outputTabWidget.setPalette(pal)
          
     ''' This is only for testing dont know if it works for builds '''    
     def changeStyleSheet(self):
@@ -696,31 +701,7 @@ class Window(QMainWindow):
         for i in range(len(self.files)):
             #print i
             self.tabWidget.widget(i).setTabWidth(val)
-    '''style Functions'''   
-    def initColorStyle(self):
-        self.colorStyle = Styles[self.styleIndex]                
-        pal = QPalette(self.explorerTabWidget.palette())
-        #print pal.color(QPalette.Base).name()
-        #print pal.color(QPalette.Window).name()
-        pal.setColor(QPalette.Base,self.colorStyle.paper)
-        pal.setColor(QPalette.Text,self.colorStyle.color)
-        self.explorerTabWidget.setPalette(pal)
-        self.outputTabWidget.setPalette(pal)      
-    def style_clicked(self,no):
-        self.styleIndex = no -1
-        #print self.styleIndex
-        for i in self.styleslist:
-            if self.styleslist.index(i) == self.styleIndex:
-                i.setChecked(True)
-            else:
-                i.setChecked(False)
-        config.setstyleIndex(self.styleIndex)
-        #self.initColorStyle()
-        for i in range(len(self.files)):
-            pass
-            #self.tabWidget.
-            #self.tabWidget.widget(i).setColorStyle(self.colorStyle)
-            
+    '''style Functions'''         
 #-----------------------------------------------------------------------------------#
 #   Command Functions                                                               #
 #-----------------------------------------------------------------------------------#   

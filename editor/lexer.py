@@ -1,9 +1,9 @@
 from PyQt4.Qsci import QsciLexerCPP,QsciStyle,QsciScintilla,QsciLexerPython, QsciLexerJavaScript
 from PyQt4.QtCore import QString
 from PyQt4.QtGui import QFont, QColor
-from globals import fontName, fontSize
+from globals import config
 
-class QsciLexerSquirrel(QsciLexerJavaScript):#QsciLexerPython
+class QsciLexerSquirrel(QsciLexerJavaScript):
     words1 = [
          'base','break','case','catch','class','clone',
          'continue','const','default','delete','else','enum',
@@ -31,40 +31,35 @@ class QsciLexerSquirrel(QsciLexerJavaScript):#QsciLexerPython
         'getattributes', 'getclass', 'getstatus', 'ref'
         ]
         
-    def __init__(self,parent,colorStyle):
-        #QsciLexerPython.__init__(self, parent)
+    def __init__(self,parent):
         QsciLexerJavaScript.__init__(self, parent)
         self.parent = parent
-        self.colorStyle = colorStyle
         self.plainFont = QFont()
-        self.plainFont.setFamily(fontName)
+        self.plainFont.setFamily(config.fontName())
         self.plainFont.setFixedPitch(True)
-        self.plainFont.setPointSize(fontSize)
+        self.plainFont.setPointSize(config.fontSize())
         self.boldFont = QFont(self.plainFont)
         self.boldFont.setBold(True)
         self.setFoldCompact(True)
         
+    def setColors(self):
+        editStyle = config.readStyle()
+        self.base = QColor(editStyle["base"]) #This is the font color
+        self.back = QColor(editStyle["back"]) #This is the bg color
+        self.comment = QColor(editStyle["comment"])
+        self.number = QColor(editStyle["number"])
+        self.keyword = QColor(editStyle["keyword"])
+        self.string =  QColor(editStyle["string"])
+        self.operator =  QColor(editStyle["operator"])
         self.styles = [
           #index description color paper font eol 
-          QsciStyle(0, QString("base"), self.colorStyle.color, self.colorStyle.paper, self.plainFont, True),
-          QsciStyle(1, QString("comment"), QColor("#3f7f5f"), self.colorStyle.paper, self.plainFont, True),
-          QsciStyle(4, QString("number"), QColor("#008000"), self.colorStyle.paper, self.plainFont, True),
-          QsciStyle(5, QString("Keyword"), QColor("#7f0055"), self.colorStyle.paper, self.boldFont, True),
-          QsciStyle(6, QString("String"), QColor("#7f0010"),self.colorStyle.paper, self.plainFont, True),
-          #QsciStyle(10, QString("Operator"), QColor("#ff0000"), self.colorStyle.paper, self.plainFont, False),
-          #QsciStyle(11, QString("Identifier"), QColor("#000000"), self.colorStyle.paper, self.plainFont, False),
-          #QsciStyle(12, QString("CommentBlock"), QColor("#3f5fbf"), self.colorStyle.paper, self.plainFont, False),
-          #QsciStyle(13, QString("UnclosedString"), QColor("#010101"), self.colorStyle.paper, self.plainFont, False),
-          #QsciStyle(14, QString("HighlightedIdentifier"), QColor("#0000ff"), self.colorStyle.paper, self.plainFont, False),
-          #QsciStyle(15, QString("Decorator"), QColor("#000000"), self.colorStyle.paper, self.plainFont, False),
+          QsciStyle(0, QString("base"), self.base, self.back, self.plainFont, True),
+          QsciStyle(1, QString("comment"), self.comment, self.back, self.plainFont, True),
+          QsciStyle(4, QString("number"), self.number, self.back, self.plainFont, True),
+          QsciStyle(5, QString("Keyword"), self.keyword, self.back, self.boldFont, True),
+          QsciStyle(6, QString("String"), self.string,self.back, self.plainFont, True),
+          QsciStyle(10, QString("Operator"), self.operator, self.back, self.plainFont, False)    
         ]
-        
-    def setColorStyle(self,cs):
-        self.colorStyle = cs
-        for i in self.styles:
-            i.setPaper(self.colorStyle.paper)
-        self.styles[0].setColor(self.colorStyle.color)
-        
         
     def language(self):
         return 'Squirrel'

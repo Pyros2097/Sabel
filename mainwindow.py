@@ -7,7 +7,7 @@ from editor import Editor
 from core import PyInterp,Adb,Ant,Parser,Command,update
 from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpace,
                      iconSize,iconDir,ospathexists,os_icon, __version__)
-from globals import Encoding
+from globals import Encoding, error , info, debug, shutdown
 import sys
 
 class MainWindow(Window):
@@ -105,23 +105,14 @@ class MainWindow(Window):
             infile = open(nfile, 'r')
             tt = infile.read()
             if(config.encoding() == Encoding.UNICODE):
+                print("unicode")
                 text = unicode(tt,"utf-8")#must add utf-8 for it to work
             else:
+                print("ascii")
                 text = str(tt)
-
-            #infile.close()
             self.files.append(nfile)
             config.setFile(self.files) 
             self.dirty.append(False)
-            #print len(self.files)
-            tab = Editor(self,text,self.syntax(nfile),self.colorStyle) 
-            self.tabWidget.addTab(tab,ospathbasename(nfile))
-            tab.textChanged.connect(lambda:self.setDirty(nfile))  
-            if(self.files != None):
-                if(len(self.files)) != 0:
-                    #This line sets the opened file to display first Important not checked
-                    self.tabWidget.setCurrentIndex(len(self.files)-1)
-            return True
         except:
             if(nfile in self.files):
                 self.files.remove(nfile)
@@ -131,7 +122,18 @@ class MainWindow(Window):
         finally:
             if(infile != None):
                 infile.close()
-            
+                tab = Editor(self,text,nfile) 
+                self.tabWidget.addTab(tab,ospathbasename(nfile))
+                #print len(self.files)
+                tab.textChanged.connect(lambda:self.setDirty(nfile))  
+                if(self.files != None):
+                    if(len(self.files)) != 0:
+                        self.tabWidget.setCurrentIndex(len(self.files)-1)
+                return True
+            return False
+                    #This line sets the opened file to display first Important not checked
+                        
+          
                
     def openImage(self,nfile):
         if(ospathexists(nfile)):
@@ -141,9 +143,6 @@ class MainWindow(Window):
         else:
             QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile)
             return False
-        #print nfile
-        #self.tiler.addImage(nfile)
-        #self.tiler.show()
         
     def openAudio(self,nfile):
         if(ospathexists(nfile)):
@@ -282,16 +281,7 @@ class MainWindow(Window):
                     return
             elif reply == QMessageBox.Yes:
                     self.fileSaveAll()
+        info("Exited --------------------------------------------------")
+        shutdown()
+        
         sys.exit()
-                    
-    def syntax(self,nfile):
-        lang = 0
-        if nfile.endswith(".py"):
-            lang = 0
-        elif (nfile.endswith(".cpp") or nfile.endswith(".h") or nfile.endswith(".c") or nfile.endswith(".hpp")):
-            lang = 1
-        elif nfile.endswith(".nut"):
-            lang = 2
-        elif nfile.endswith(".neko"):
-            lang = 2
-        return lang

@@ -15,6 +15,13 @@ class Config:
     def writeSetting(self,section,value):
         self.data["Setting"][section] = value
         self.write()
+        
+    def readStyle(self):
+        return self.data["Style"]
+    
+    def writeStyle(self,value):
+        self.data["Style"] = value
+        self.write()
     
     def workSpace(self):
         return self.readSetting("workspace")
@@ -128,14 +135,6 @@ class Config:
     def setParam(self,val):
         self.data['PARAM'] = val
         self.write()
-        
-    
-    def colorStyle(self):
-        return int(self.readSetting('colorstyle'))
-    def styleIndex(self):
-        return self.readSetting('styleindex')
-    def setstyleIndex(self,value):
-        self.writeSetting("styleindex",value)
         
     def todo(self):
         return self.read('TODO')

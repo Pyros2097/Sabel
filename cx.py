@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable
 excludes = ['curses', 'email', 'tcl','tk','Tkinter','Tkconstants','pywin.debugger']
-includes = ["urllib2"]
+includes = ["urllib2","logging"]
 """
 excludes = ['_gtkagg', '_tkagg', 'bsddb', 'curses', 'email', 'pywin.debugger',
                'pywin.debugger.dbgcon', 'pywin.dialogs', 'tcl',

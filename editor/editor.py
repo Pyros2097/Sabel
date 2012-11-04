@@ -1,5 +1,4 @@
-from globals import (fontSize,ospathjoin,os_pixmap,apiDir,config
-                     ,Auto,eol, Encoding)
+from globals import (ospathjoin,os_pixmap,apiDir,config,Auto,eol, Encoding)
 from PyQt4.QtCore import SIGNAL,QString,QEvent
 from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor, QPalette,QWidget
 from PyQt4.Qsci import QsciScintilla, QsciAbstractAPIs, QsciLexerPython ,QsciAPIs ,QsciLexerCPP, QsciLexerJavaScript
@@ -8,12 +7,9 @@ from lexer import QsciLexerSquirrel
         
 class Editor(QsciScintilla):
     ARROW_MARKER_NUM = 8
-    def __init__(self,parent,text,lang,colorStyle):
+    def __init__(self,parent,text,nfile):
         QsciScintilla.__init__(self,parent)
         self.parent = parent
-        self.lang = lang
-        self.fontSize = fontSize
-        self.colorStyle = colorStyle
         self.errorLines = []
         self.setText(text)
         #if(config.encoding() == Encoding.ASCII):
@@ -26,40 +22,25 @@ class Editor(QsciScintilla):
             self.setEolMode(self.EolUnix)
         else:
             self.setEolMode(self.EolMac)
-        self.init()
-        self.setTabWidth(config.tabwidth())
-        
-    def init(self):
-        #Margin
-        #print self.marginType(self.SymbolMargin)
-        # Clickable margin 1 for showing markers
-        self.setMarginSensitivity(0, True)
-        #self.setMarginsBackgroundColor(self.colorStyle.margin)
-        #self.connect(self,SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),self.on_margin_clicked)
+            
         self.cursorPositionChanged.connect(self.parent.updateLine)
-        # Margin 0 is used for line numbers
-        #self.setMarginLineNumbers(0, True)
-        #self.setMarginWidth(0, self.fontmetrics.width("0000") + 6)
-        self.setMargin(config.margin())
         #self.linesChanged.connect(self.changeMarginWidht())           
-        #Caret
-        self.setCaretLineBackgroundColor(self.colorStyle.caret)
-        self.setCaretLineVisible(True)
-        
         #Indicator
         #self.setIndicatorForegroundColor(self.colorStyle.color)
         #self.setIndicatorOutlineColor(self.colorStyle.paper)
-        
         #Marker
         self.markerDefine(QsciScintilla.RightArrow,self.ARROW_MARKER_NUM)
         self.markerDefine(Auto.auto_error,0)
-        self.setMarkerBackgroundColor(self.colorStyle.marker,self.ARROW_MARKER_NUM)
         self.font = QFont(config.fontName(),config.fontSize())
         #self.font.setFixedPitch(True)
         self.setFont(self.font)
         self.fontmetrics = QFontMetrics(self.font)
         self.setMarginsFont(self.font)
         
+        # Margin 0 is used for line numbers
+        self.setMarginSensitivity(0, True)
+        #self.connect(self,SIGNAL('marginClicked(int, int, Qt::KeyboardModifiers)'),self.on_margin_clicked)
+        self.setCaretLineVisible(True)
         #Code-Complete
         self.registerImage(0,Auto.auto_class2)
         self.registerImage(1,Auto.auto_method)
@@ -73,45 +54,56 @@ class Editor(QsciScintilla):
         self.setIndentationsUseTabs(True)
         self.setTabIndents(True)
         self.setAutoIndent(True)
+        self.setMargin(config.margin())
         self.setIndent(config.indent())
+        self.setTabWidth(config.tabwidth())
         #self.copyAvailable.connect(self.highlightWord)
         #self.indicatorClicked.connect(self.indicate)
-        self.setIndicatorOutlineColor(QColor("#FFFFFF"))
+        self.setIndicatorOutlineColor(QColor("#000000"))
         self.indicatorDefine(self.INDIC_BOX)
-        self.setFolding(QsciScintilla.BoxedTreeFoldStyle)
+        #self.setFolding(QsciScintilla.BoxedTreeFoldStyle)
         #self.setAutoCompletionSource(QsciScintilla.AcsAll)
         #self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier')
         #self.setIndentation(5,25)
         #self.setSelectionBackgroundColor()
         #self.setSelectionForegroundColor()
         #self.SendScintilla(QsciScintilla.SCI_MARKERSETBACK,11,QColor(220,220,220))
-        self.setLanguage()
-        self.lexer.setDefaultFont(self.font)
+        self.setLanguage(nfile)
+        self.setEditorStyle() #important must not change this position
         self.api = QsciAPIs(self.lexer)
         self.api.load(ospathjoin(apiDir,"emo.api"))
         self.api.prepare()
         self.lexer.setAPIs(self.api) #Very important do not change line otherwise gg
         self.setLexer(self.lexer) #Very important do not change line otherwise gg
+        editStyle = config.readStyle()
+        self.setMarginsBackgroundColor(QColor(editStyle["margin"]))
+        '''This is done cause the margin color is set only when lexer is set 
+            dont know maybe a bug'''
         
         
         
-    def setColorStyle(self,colorStyle):
-        self.colorStyle = colorStyle
-        self.setCaretLineBackgroundColor(self.colorStyle.caret)
-        self.setMarginsBackgroundColor(self.colorStyle.margin)
-        self.setMarkerBackgroundColor(self.colorStyle.marker,self.ARROW_MARKER_NUM)
-        if self.lang == 2:
-            self.lexer.setColorStyle(self.colorStyle)
-            #self.lexer.setColor(QColor("#008000"),0)
-            
-    def setLanguage(self):
-        if self.lang == 0:
+    def setEditorStyle(self):
+        ''' Bolldy some problem here the margin bg color is not set when init'ed '''
+        ''' But when i change it in the styles menu it changes sad'''
+        editStyle = config.readStyle()
+        self.setCaretLineBackgroundColor(QColor(editStyle["caret"]))
+        self.setMarginsBackgroundColor(QColor(editStyle["margin"]))
+        self.setMarkerBackgroundColor(QColor(editStyle["marker"]),self.ARROW_MARKER_NUM)
+        if(self.lexer.language() == "Squirrel"):
+            #print "setting lexer color"
+            self.lexer.setColors()
+        
+    def setLanguage(self,nfile):
+        if nfile.endswith(".py"):
             self.lexer = QsciLexerPython()
-        elif self.lang == 1:
-            self.lexer = QsciLexerCPP()
-        elif self.lang == 2:
-            self.lexer = QsciLexerSquirrel(self, self.colorStyle)
-            
+        elif (nfile.endswith(".cpp") or nfile.endswith(".h") or nfile.endswith(".c") or nfile.endswith(".hpp")):
+             self.lexer = QsciLexerCPP()
+        elif nfile.endswith(".nut"):
+            self.lexer = QsciLexerSquirrel(self)
+        elif nfile.endswith(".neko"):
+            self.lexer = QsciLexerSquirrel(self)
+        self.lexer.setDefaultFont(self.font)
+                     
     def highlightWord(self, bool):
         if(bool):
             print "yes"
@@ -162,11 +154,18 @@ class Editor(QsciScintilla):
         if(mar == 1):
             self.setMarginLineNumbers(1, True)
             if(self.lines()<1000):
-                self.setMarginWidth(1, QString("-------"))
+                self.setMarginWidth(1, QString("-----"))
             else:
                 self.setMarginWidth(1, QString("---------"))
         else:
             self.setMarginLineNumbers(1, False)
+            ''' Because of white margin color cant show it'''
+            self.setMarginWidth(1, QString("---"))
+            
+    def setMarginHide(self,bool):
+        if(bool):
+            self.setMarginWidth(1, QString(""))
+        else:
             self.setMarginWidth(1, QString("---"))
             
     def setIndent(self,val):
