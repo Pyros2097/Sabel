@@ -148,7 +148,6 @@ class Window(QMainWindow):
         
         '''E.Output TabWidget'''
         self.outputTabWidget = OutputTab(self)
-        self.outputTabWidget.setMaximumHeight(200)#260
         self.tabWidget.currentChanged.connect(self.fileChanged)
         self.explorerTabWidget.currentChanged.connect(self.closeExplorer)
         self.outputTabWidget.currentChanged.connect(self.closeConsole)
@@ -228,10 +227,10 @@ class Window(QMainWindow):
         #self.levelWidget.setTabIcon(0,Icons.close_view)
         
         self.explorerTabWidget.addTab(self.tab_5,"Projects")
-        self.explorerTabWidget.addTab(self.tab_2,"Outline ")
+        self.explorerTabWidget.addTab(self.tab_2,"Outline")
         self.explorerTabWidget.addTab(QWidget(self),"")
         self.explorerTabWidget.setTabIcon(0,Icons.cprj)
-        self.explorerTabWidget.setTabIcon(1,Icons.field)
+        self.explorerTabWidget.setTabIcon(1,Icons.envvar)
         self.explorerTabWidget.setTabIcon(2,Icons.close_view)
         self.outputTabWidget.addTab(self.tab_7,"Error")
         self.outputTabWidget.addTab(self.tab_6,"Output")
@@ -251,7 +250,6 @@ class Window(QMainWindow):
         self.split2 = QSplitter(Qt.Vertical)
         self.split2.addWidget(self.split1)
         self.split2.addWidget(self.outputTabWidget)
-        self.outputTabWidget.hide()
         self.horizontalLayout.addWidget(self.split2)
         
         
@@ -280,6 +278,7 @@ class Window(QMainWindow):
         self.findButton.setIcon(Icons.find)
         self.findButton.setShortcut("Ctrl+F")
         self.findButton.clicked.connect(self.findBarShow)
+        '''
         self.zoominButton = QPushButton(self)
         self.zoominButton.setFlat(True)
         self.zoominButton.setIcon(Icons.zoomplus)
@@ -288,6 +287,7 @@ class Window(QMainWindow):
         self.zoomoutButton.setFlat(True)
         self.zoomoutButton.setIcon(Icons.zoomminus)
         self.zoomoutButton.clicked.connect(self.zoomout)
+        '''
 
         '''Status Text,Line Text, Progress Bar and Stop Button'''
         self.statusText = QLabel("Writable")
@@ -315,8 +315,9 @@ class Window(QMainWindow):
         self.statusbar.addWidget(self.cmdButton)
         self.statusbar.addWidget(self.imgButton)
         self.statusbar.addWidget(self.findButton)
-        self.statusbar.addWidget(self.zoominButton)
-        self.statusbar.addWidget(self.zoomoutButton)
+        #self.statusbar.addWidget(QWidget(self))
+        #self.statusbar.addWidget(self.zoominButton)
+        #self.statusbar.addWidget(self.zoomoutButton)
         self.statusbar.addWidget(self.statusText)
         self.statusbar.addWidget(self.lineText)
         self.statusbar.addWidget(self.progressbar)
@@ -341,6 +342,8 @@ class Window(QMainWindow):
         self.popWidget.setStyleSheet(stylesheet.popbg)
         self.popWidget.hide()
         
+        
+        ''' This is for changing the palette/window colors to Theme '''
     def initEditorStyle(self):
         pass
         #editStyle = config.readStyle()
@@ -401,12 +404,20 @@ class Window(QMainWindow):
     def setMode(self, action):
         if(action.text() == "Squ"):
             config.setMode(0)
+            self.toolBar.action_Build.setEnabled(False)
+            self.toolBar.action_Run.setEnabled(False)
         elif(action.text() == "Emo"):
             config.setMode(1)
+            self.toolBar.action_Build.setEnabled(True)
+            self.toolBar.action_Run.setEnabled(True)
         elif(action.text() == "Android"):
             config.setMode(2)
+            self.toolBar.action_Build.setEnabled(True)
+            self.toolBar.action_Run.setEnabled(True)
         elif(action.text() == "ios"):
             config.setMode(3)
+            self.toolBar.action_Build.setEnabled(False)
+            self.toolBar.action_Run.setEnabled(False)
             
     def openCommand(self):
         text, ok = QInputDialog.getText(self, 'Run Command', 'Command:')
@@ -575,13 +586,13 @@ class Window(QMainWindow):
             self.stopButton.hide()
               
     def progressUpdate(self):
-        if(self.progress == True):
-            if(self.temp == True):
+        if(self.progress):
+            if(self.temp):
                 self.counter += 1
                 self.progressbar.setValue(self.counter)
                 if(self.counter == 100):
                     self.temp = False
-            if(self.temp == False):
+            else:
                 self.counter -= 1
                 self.progressbar.setValue(self.counter)
                 if(self.counter == 0):
@@ -623,6 +634,16 @@ class Window(QMainWindow):
         #for i in range(len(self.files)):
         #    self.tabWidget.widget(i).zoomout()
             
+    ''' Must implement Lexer '''
+    def setLexer(self, action):
+        pass
+        #print action.text()
+    
+    def setApi(self, action):
+        #print action.text()
+        for i in range(len(self.files)): #not QString
+            self.tabWidget.widget(i).setApi(str(action.text()))
+    
     def setFont(self,font):
         config.setFontName(str(font.family()))
         for i in range(len(self.files)):

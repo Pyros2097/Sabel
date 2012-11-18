@@ -60,7 +60,6 @@
 <file>Icons/auto_field.png</file>
 <file>Icons/auto_jmeth.png</file>
 <file>Icons/paste_edit.png</file>
-<file>Icons/Thumbs.db</file>
 <file>Icons/auto_method.png</file>
 <file>Icons/warning.png</file>
 <file>Icons/fullscreen.png</file>
@@ -85,5 +84,8 @@
 <file>Icons/logosabel.xcf</file>
 <file>Icons/logosabel.png</file>
 <file>Icons/music.png</file>
+<file>Icons/neko.png</file>
+<file>Icons/Thumbs.db</file>
+<file>Icons/update.png</file>
 </qresource>
 </RCC>

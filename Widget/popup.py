@@ -17,7 +17,6 @@ class Popup(QWidget):
             W ,H of the widget '''
         self.anim.setStartValue(QRect(r.right() - 290,r.bottom() - 230,300,50))
         self.anim.setEndValue(QRect(r.right() - 290,r.bottom() - 200,300,150))
-        #, 
         self.anim.setEasingCurve(QEasingCurve.InOutQuad)
         
         #self.layoutWidget = QWidget()

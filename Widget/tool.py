@@ -1,7 +1,8 @@
 from PyQt4.QtGui import (QWidget, QHBoxLayout, QPushButton, QColorDialog, QToolBar, QMenu, QAction, QActionGroup ,QSlider, QWidgetAction,
                          QFont, QFontComboBox, QComboBox, QLabel)
 from PyQt4.QtCore import SIGNAL, Qt, QSize
-from globals import config, Icons, Encoding
+from PyQt4 import Qsci
+from globals import config, Icons, Encoding, oslistdir, apiDir
 from styleWidget import StyleWidget
     
 class Tool(QToolBar):
@@ -50,9 +51,77 @@ class Tool(QToolBar):
         self.action_Level.triggered.connect(self.parent.level)
         self.action_Todo = QAction(Icons.task_set, 'Todo', self)
         self.action_Todo.triggered.connect(self.parent.todo)
+        
         self.action_Help = QAction(Icons.toc_open, 'Help', self)
         self.action_Help.triggered.connect(self.parent.help)
+        self.action_Full = QAction(Icons.fullscreen, 'Full', self)
+        self.action_Full.triggered.connect(self.parent.full)
+
+        self.action_Stop.setDisabled(True)
+        self.setToolLabel()
+        self.setAllowedAreas(Qt.AllToolBarAreas)
+        #self.setFixedHeight(40)
+        #self.setIconSize(QSize(config.iconSize(),config.iconSize()))
+
+        ''' Adding all Actions '''
+        self.addAction(self.action_NewProject)
+        self.addAction(self.action_Open)
+        self.addAction(self.action_Save)
+        self.addAction(self.action_SaveAll)
+        #self.addAction(self.action_Refresh)
+        self.addSeparator()
+        self.addAction(self.action_Build)
+        self.addAction(self.action_Run)
+        #self.addAction(self.action_RunFile)
+        self.addAction(self.action_Stop)
+        self.addAction(self.action_Debug)
+        self.addSeparator()
+        self.addAction(self.action_Design)
+        self.addAction(self.action_Level)
+        self.addAction(self.action_Todo)
+        self.initOptionsMenu()
+        self.addSeparator()
+        self.initStyleMenu()
+        self.initLexerMenu()
+        self.initApiMenu()
+        #self.addAction(self.action_Help)
+        #self.addAction(self.action_Full)
+        self.addSeparator()
+        self.initModeMenu()
+            
+    def colorChange(self, text, color):
+        #print "colorChange ",text,color
+        editStyle = config.readStyle()
+        editStyle[text] = color
+        config.writeStyle(editStyle)
+        for i in range(len(self.parent.files)):
+            self.parent.tabWidget.widget(i).setEditorStyle()
+            
+    def setColors(self,action):
+        print action.text()
         
+    def changeAll(self):
+        self.colorChange("base", "#ffffff")
+            
+    def setIcon(self,val):
+        config.setIconSize(val)
+        self.setIconSize(QSize(val,val))
+        
+        
+    def setToolLabel(self):
+        if (config.toolLabel()):
+            self.setToolButtonStyle(Qt.ToolButtonIconOnly)
+            self.setIconSize(QSize(24,24))
+        else:
+            self.setIconSize(QSize(16,16))
+            self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        
+    '''Important for multiple callbacks in for loop'''
+    def make_callback(self, text):
+        return lambda:self.colorChange(text)
+    
+    ''' Options Menu '''
+    def initOptionsMenu(self):
         men = QMenu()
         
         #Threshold Slider
@@ -106,22 +175,6 @@ class Tool(QToolBar):
         self.fontSizeComboMenu.setDefaultWidget(self.fontSizeCombo)
         
         
-        action_explorer = QAction("Explorer",self)
-        action_explorer.triggered.connect(self.parent.exp)
-        action_console = QAction("Console",self)
-        action_console.triggered.connect(self.parent.cmd)
-        action_designer = QAction("Designer",self)
-        action_designer.triggered.connect(self.parent.design)
-        action_Indentation = QAction("Indentation Guides",self)
-        action_Indentation.triggered.connect(self.parent.setIndent)
-        action_WhiteSpace = QAction("WhiteSpace",self)
-        action_WhiteSpace.triggered.connect(self.parent.setWhiteSpace)
-        action_EndLine = QAction("End of Lines",self)
-        action_EndLine.triggered.connect(self.parent.setEndLine)
-        action_Margin = QAction("Line Numbers",self)
-        action_Margin.triggered.connect(self.parent.setMargin)
-        action_ToolLabel = QAction("Tool Labels",self)
-        action_ToolLabel.triggered.connect(self.setToolLabel)
         action_Android = QAction(Icons.android,'Android', self)
         action_Android.triggered.connect(self.parent.android)
         action_Ant = QAction(Icons.ant_view,'Ant', self)
@@ -129,9 +182,38 @@ class Tool(QToolBar):
         action_Squirrel = QAction(Icons.nut,'Squirrel', self)
         action_Squirrel.triggered.connect(self.parent.squirrel)
         action_Ios1 = QAction(Icons.ios,'iOS', self)
-        action_Update = QAction("Update",self)
+        action_Update = QAction(Icons.update,"Update",self)
         action_Update.triggered.connect(self.parent.update)
         
+        action_explorer = QAction("Explorer",self)
+        action_explorer.triggered.connect(self.parent.exp)
+        action_explorer.setCheckable(True)
+        action_explorer.setChecked(True)
+        action_console = QAction("Console",self)
+        action_console.triggered.connect(self.parent.cmd)
+        action_console.setCheckable(True)
+        action_console.setChecked(False)
+        #action_designer = QAction("Designer",self)
+        #action_designer.triggered.connect(self.parent.design)
+        action_Indentation = QAction("Indentation Guides",self)
+        action_Indentation.triggered.connect(self.parent.setIndent)
+        action_Indentation.setCheckable(True)
+        action_Indentation.setChecked(config.indent())
+        action_WhiteSpace = QAction("WhiteSpace",self)
+        action_WhiteSpace.triggered.connect(self.parent.setWhiteSpace)
+        action_WhiteSpace.setCheckable(True)
+        action_WhiteSpace.setChecked(config.whiteSpace())
+        action_EndLine = QAction("End of Lines",self)
+        action_EndLine.triggered.connect(self.parent.setEndLine)
+        action_EndLine.setCheckable(True)
+        action_Margin = QAction("Line Numbers",self)
+        action_Margin.triggered.connect(self.parent.setMargin)
+        action_Margin.setCheckable(True)
+        action_Margin.setChecked(config.margin())
+        action_ToolLabel = QAction("Tool Labels",self)
+        action_ToolLabel.triggered.connect(self.setToolLabel)
+        action_ToolLabel.setCheckable(True)
+        #action_ToolLabel.setChecked(config.toolLabel())
         
         '''Encoding'''
         encodingGroup = QActionGroup(self)
@@ -147,15 +229,19 @@ class Tool(QToolBar):
             action_Ascii.setChecked(True)
         else:
             action_Unicode.setChecked(True)
+        men.addAction(action_Update)
+        men.addAction(self.action_Help)
+        men.addAction(self.action_Full)
+        men.addSeparator()
         men.addAction(action_Android)
         men.addAction(action_Ant)
         men.addAction(action_Squirrel)
         men.addAction(action_Ios1)
-        men.addAction(action_Update)
+        
         men.addSeparator()
         men.addAction(action_explorer)
         men.addAction(action_console)
-        men.addAction(action_designer)
+        #men.addAction(action_designer)
         men.addSeparator()
         men.addAction(action_Indentation)
         men.addAction(action_WhiteSpace)
@@ -185,12 +271,10 @@ class Tool(QToolBar):
         
         self.action_Options = QAction(Icons.emblem_system, 'Options', self)
         self.action_Options.setMenu(men)
-        
-        
-        self.action_Full = QAction(Icons.fullscreen, 'Full', self)
-        self.action_Full.setShortcut('Shift+Enter')
-        self.action_Full.triggered.connect(self.parent.full)
-        
+        self.addAction(self.action_Options)
+    
+    ''' Mode Menu '''
+    def initModeMenu(self):
         self.modeGroup = QActionGroup(self)
         self.modeGroup.setExclusive(True)
         self.modeGroup.selected.connect(self.parent.setMode)
@@ -206,11 +290,30 @@ class Tool(QToolBar):
         self.modeGroup.addAction(self.action_Emo)
         self.modeGroup.addAction(self.action_And)
         self.modeGroup.addAction(self.action_Ios)
-
+        self.addActions(self.modeGroup.actions())
+        if(config.mode() == 0):
+            self.action_Squirrel.setChecked(True)
+            self.action_Build.setEnabled(False)
+            self.action_Run.setEnabled(False)
+        elif(config.mode() == 1):
+            self.action_Emo.setChecked(True)
+            self.action_Build.setEnabled(True)
+            self.action_Run.setEnabled(True)
+        elif(config.mode() == 2):
+            self.action_And.setChecked(True)
+            self.action_Build.setEnabled(True)
+            self.action_Run.setEnabled(True)
+        elif(config.mode() == 3):
+            self.action_Ios.setChecked(True)
+            self.action_Build.setEnabled(False)
+            self.action_Run.setEnabled(False)
         
-        '''Style Menu'''
+    
+    ''' Style Menu '''
+    def initStyleMenu(self):
         editStyle = config.readStyle()
-        self.action_Style = QAction(Icons.style, 'Style', self)
+        self.action_Style = QAction(Icons.style, 'Style', self) 
+        men = QMenu(self)
         men1 = QMenu()
         self.base = StyleWidget(self,"base",editStyle["base"])
         self.back = StyleWidget(self,"back",editStyle["back"])
@@ -298,72 +401,60 @@ class Tool(QToolBar):
         men2.addActions(self.styleGroup.actions())
         men1.addMenu(men2)
         self.action_Style.setMenu(men1)
-
-        self.action_Stop.setDisabled(True)
-        self.setToolLabel()
-        self.setAllowedAreas(Qt.AllToolBarAreas)
-        #self.setFixedHeight(40)
-        #self.setIconSize(QSize(config.iconSize(),config.iconSize()))
-
-        ''' Adding all Actions '''
-        self.addAction(self.action_NewProject)
-        self.addAction(self.action_Open)
-        self.addAction(self.action_Save)
-        self.addAction(self.action_SaveAll)
-        #self.addAction(self.action_Refresh)
-        self.addSeparator()
-        self.addAction(self.action_Build)
-        self.addAction(self.action_Run)
-        self.addAction(self.action_RunFile)
-        self.addAction(self.action_Stop)
-        self.addAction(self.action_Debug)
-        self.addSeparator()
-        self.addAction(self.action_Design)
-        self.addAction(self.action_Level)
-        self.addAction(self.action_Todo)
-        self.addAction(self.action_Options)
         self.addAction(self.action_Style)
-        self.addSeparator()
-        self.addAction(self.action_Help)
-        self.addAction(self.action_Full)
-        self.addSeparator()
-        self.addActions(self.modeGroup.actions())
-        if(config.mode() == 0):
-            self.action_Squirrel.setChecked(True)
-        elif(config.mode() == 1):
-            self.action_Emo.setChecked(True)
-        elif(config.mode() == 2):
-            self.action_And.setChecked(True)
-        elif(config.mode() == 3):
-            self.action_Ios.setChecked(True)
-            
-    def colorChange(self, text, color):
-        #print "colorChange ",text,color
-        editStyle = config.readStyle()
-        editStyle[text] = color
-        config.writeStyle(editStyle)
-        for i in range(len(self.parent.files)):
-            self.parent.tabWidget.widget(i).setEditorStyle()
-            
-    def setColors(self,action):
-        print action.text()
+       
+    ''' Lexer Menu'''
+    def make_action_lex(self, text):
+        action = QAction(text, self.lexGroup)
+        action.setCheckable(True)
+        return action
+   
+    def initLexerMenu(self):
+        self.action_Lexer = QAction(Icons.file_obj, 'Lexer', self)
+        men = QMenu()
+        self.lexGroup = QActionGroup(self)
+        self.lexGroup.setExclusive(True)
+        self.lexGroup.selected.connect(self.parent.setLexer)
+        #langs = [i for i in dir(Qsci) if i.startswith('QsciLexer')]
+        langs = ['Bash', 'Batch', 'CMake', 'CPP', 'CSS', 'C#','HTML','Java', 'JavaScript', 'Lua', 'Makefile','Python', 'SQL', 'XML', 'YAML']
+        for l in langs:
+            act = self.make_action_lex(l)
+            self.lexGroup.addAction(act)
+            if(langs.index(l) == 8): #For javascript
+                act.setChecked(True)
+            #print l[9:] # we don't need to print "QsciLexer" before each name
+        men.addActions(self.lexGroup.actions())
+        self.action_Lexer.setMenu(men)
+        self.addAction(self.action_Lexer)
         
-    def changeAll(self):
-        self.colorChange("base", "#ffffff")
-            
-    def setIcon(self,val):
-        config.setIconSize(val)
-        self.setIconSize(QSize(val,val))
+    
+        
+    ''' Api Menu '''
+    def make_action_api(self, text):
+        action = QAction(text, self.apiGroup)
+        action.setCheckable(True)
+        return action
+    
+    def initApiMenu(self):
+        self.action_Api = QAction(Icons.lib, 'Api', self)
+        men = QMenu()
+        self.apiGroup = QActionGroup(self)
+        self.apiGroup.setExclusive(True)
+        self.apiGroup.selected.connect(self.parent.setApi)
+        list = oslistdir(apiDir)
+        apis = []
+        if(list != None):
+            for i in list:
+                if i.endswith("api"):
+                    apis.append(i.replace(".api", ""))
+        if(apis != None):
+            for i in apis:
+                act = self.make_action_api(i)
+                self.apiGroup.addAction(act)
+                if(i == "emo"): #For emo
+                    act.setChecked(True)
+        men.addActions(self.apiGroup.actions())
+        self.action_Api.setMenu(men)
+        self.addAction(self.action_Api)
         
         
-    def setToolLabel(self):
-        if (config.toolLabel()):
-            self.setToolButtonStyle(Qt.ToolButtonIconOnly)
-            self.setIconSize(QSize(24,24))
-        else:
-            self.setIconSize(QSize(16,16))
-            self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
-        
-    '''Important for multiple callbacks in for loop'''
-    def make_callback(self, text):
-        return lambda:self.colorChange(text)

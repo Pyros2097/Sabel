@@ -2,3 +2,14 @@
 2012-11-04 16:47:04,937 INFO Started -------------------------------------------------
 2012-11-04 16:49:20,765 INFO Started -------------------------------------------------
 2012-11-04 16:50:26,108 INFO Exited --------------------------------------------------
+2012-11-07 10:56:00,092 INFO Started -------------------------------------------------
+2012-11-07 11:25:46,812 INFO Exited --------------------------------------------------
+2012-11-09 14:51:39,703 INFO Started -------------------------------------------------
+2012-11-09 14:57:57,250 INFO Exited --------------------------------------------------
+2012-11-10 07:12:51,421 INFO Started -------------------------------------------------
+2012-11-10 07:15:56,717 INFO Exited --------------------------------------------------
+2012-11-12 16:18:00,265 INFO Started -------------------------------------------------
+2012-11-12 17:43:59,421 ERROR Opening: File Does Not Exist C:/Documents and Settings/Administrator/Desktop/OCC/ooc/INSTALL
+2012-11-12 17:43:59,921 ERROR Opening: File Does Not Exist C:/ooc/bin/example1.ooc
+2012-11-12 17:45:41,717 ERROR Opening: File is Being Used C:/emo-framework-experiment/Emo-Android/jni/sqlite/sqlite3.c
+2012-11-12 17:45:47,342 ERROR Opening: File is Being Used C:/emo-framework-experiment/Emo-Android/jni/sqlite/sqlite3.c

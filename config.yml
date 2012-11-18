@@ -18,35 +18,41 @@ CMD:
 - SQ
 - JAVA
 - GCC
+- MOON
 ClosedProject:
 - 0
-- 0
-- 0
-- 0
 File:
-- C:/CODE/assets/creditscene.nut
+- C:/CODE/assets/common.nut
+- C:/gg.moon
+- C:/CODE/assets/Engine.h
+- C:/CODE/assets/howtoscene.nut
+- C:/CODE/assets/titlescene.nut
 PARAM:
 - Dude C:/CODE/assets/creditscene.nut C:/CODE/assets/physics.nut
+- C:/gg.moon
+- ' C:/gg.moon'
 Project:
 - C:/CODE/assets/
 Recent: []
 Setting:
+  api: emo
   device: 1
   encoding: 1
   fontname: Courier New
   fontsize: 10
+  hide: 1
   iconsize: 16
   indent: 0
   margin: 1
-  mode: 0
+  mode: 1
   tabwidth: 4
   thresh: 1
   toollabel: 0
-  whitespace: 1
+  whitespace: 0
   workspace: C:/CODE/
 Style:
   back: '#ffffff'
-  base: '#ffffff'
+  base: '#ff030f'
   caret: '#e8f2fe'
   comment: '#3f7f5f'
   keyword: '#7f0055'
@@ -56,11 +62,8 @@ Style:
   operator: '#000000'
   string: '#7f0010'
 TODO:
-- Fix Closed Projects Bug
-- Add Build Options
 - Add OS support
-- Add Style Options
 - Add iOS support
 - Make Mac Build
-- Dude
 - Add AutoHide
+- Must implement Lexer

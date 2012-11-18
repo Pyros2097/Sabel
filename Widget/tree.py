@@ -277,7 +277,8 @@ class ProjectTree(QTreeWidget):
                 
                 
     def addProject(self,startDir):
-        if(len(self.closed) == len(self.projects)):
+        #Incase we add a new project so the len of closed will be lesser
+        if(len(self.closed) < len(self.projects)):
             self.closed.append(0)
         if(self.closed[self.projects.index(startDir)] == 0):
             i = Project(self,startDir)
@@ -289,7 +290,8 @@ class ProjectTree(QTreeWidget):
         else:
             i = Project(self,startDir,True)
             self.projectItems.append(i)
-            self.addTopLevelItem(i)    
+            self.addTopLevelItem(i)
+            config.setClosedProjects(self.closed) 
             
     def addClosedProject(self,startDir):
         if(ospathexists(startDir)):
@@ -436,6 +438,7 @@ class ProjectTree(QTreeWidget):
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
         self.addProject(itempath)
         
+        ''' Removes the item then adds it as closed project '''
     def closeProject(self,item):
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
         self.addClosedProject(item.getPath())
@@ -443,12 +446,14 @@ class ProjectTree(QTreeWidget):
         #self.closed[self.indexOfTopLevelItem(item)] = 1
         #config.addClosedProjects(self.closed)
     
+        ''' Removes the item then adds it as a project '''
     def refreshProject(self,item):
         #must check this
         itempath = item.getPath()
         self.takeTopLevelItem(self.indexOfTopLevelItem(item))
         self.addProject(itempath)
         
+        ''' Removes the current item then adds it as a project '''
     def refreshCurrentProject(self):
         item = self.getProject()
         self.refreshProject(item)

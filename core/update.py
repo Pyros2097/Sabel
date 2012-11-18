@@ -1,7 +1,7 @@
 import urllib2
 from PyQt4.QtGui import QLabel, QMessageBox, QWidget, QDialog, QProgressBar, QPushButton, QVBoxLayout, QHBoxLayout
 from PyQt4.QtCore import SIGNAL, QThread, QString, QTimer
-from globals import Icons, __version__, osrename, ospathdirname ,ospathjoin, ospathexists, recycle
+from globals import error, Icons, __version__, osrename, ospathdirname ,ospathjoin, ospathexists, recycle
 from subprocess import Popen, STARTUPINFO, SW_HIDE
 
 """
@@ -84,14 +84,19 @@ class Updater(QWidget):
         
     def retry(self):
         QMessageBox.about(self,"Error",'Cant Read repository Retry')
+        error('Update: Cant Read repository Retry')
     def net(self):
         QMessageBox.about(self,"Error",'Net Connection Not Found')
+        error('Update: Net Connection Not Found')
     def timed(self):
         QMessageBox.about(self,"Error",'Connection Timed Out')
+        error('Update: Timed out')
     def cant(self):
         QMessageBox.about(self,"Error",'File Cant be downloaded')
+        error('Update: File Cant be downloaded')
     def stop(self):
         QMessageBox.about(self,"Error",'Stopped / Net Connection Lost')
+        error('Update: Stopped / Net Connection Lost')
         
     def show_prog(self):
         self.prog.exec_()

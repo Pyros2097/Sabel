@@ -1,9 +1,9 @@
-from PyQt4.Qsci import QsciLexerCPP,QsciStyle,QsciScintilla,QsciLexerPython, QsciLexerJavaScript
+from PyQt4.Qsci import QsciLexerCPP,QsciStyle,QsciScintilla, QsciLexerJavaScript
 from PyQt4.QtCore import QString
 from PyQt4.QtGui import QFont, QColor
 from globals import config
 
-class QsciLexerSquirrel(QsciLexerJavaScript):
+class Squirrel(QsciLexerJavaScript):
     words1 = [
          'base','break','case','catch','class','clone',
          'continue','const','default','delete','else','enum',
@@ -42,8 +42,7 @@ class QsciLexerSquirrel(QsciLexerJavaScript):
         self.boldFont.setBold(True)
         self.setFoldCompact(True)
         
-    def setColors(self):
-        editStyle = config.readStyle()
+    def setColors(self, editStyle):
         self.base = QColor(editStyle["base"]) #This is the font color
         self.back = QColor(editStyle["back"]) #This is the bg color
         self.comment = QColor(editStyle["comment"])

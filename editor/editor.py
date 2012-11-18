@@ -1,10 +1,24 @@
 from globals import (ospathjoin,os_pixmap,apiDir,config,Auto,eol, Encoding)
 from PyQt4.QtCore import SIGNAL,QString,QEvent
 from PyQt4.QtGui import QFontMetrics, QFont, QPixmap, QColor, QPalette,QWidget
-from PyQt4.Qsci import QsciScintilla, QsciAbstractAPIs, QsciLexerPython ,QsciAPIs ,QsciLexerCPP, QsciLexerJavaScript
-from lexer import QsciLexerSquirrel
+from PyQt4.Qsci import (QsciScintilla, QsciAbstractAPIs, QsciLexerPython ,QsciAPIs ,
+                        QsciLexerCPP, QsciLexerJavaScript)
+from format import Format
 
-        
+from cpp import CPP
+from csharp import CSharp
+from css import CSS
+from html import HTML
+from java import Java
+from javascript import JavaScript
+from lua import Lua
+from neko import Neko
+from python import Python
+from sql import SQL
+from squirrel import Squirrel
+from xml import XML
+from yaml import YAML
+
 class Editor(QsciScintilla):
     ARROW_MARKER_NUM = 8
     def __init__(self,parent,text,nfile):
@@ -12,16 +26,20 @@ class Editor(QsciScintilla):
         self.parent = parent
         self.errorLines = []
         self.setText(text)
-        #if(config.encoding() == Encoding.ASCII):
-        #    self.setUtf8(False)
-        #else:
-        self.setUtf8(True)
+        if(config.encoding() == Encoding.ASCII):
+            self.setUtf8(False)
+            #print "ascii set"
+        else:
+            self.setUtf8(True)
+            #print "unicode set"
         if(eol == 0):
             self.setEolMode(self.EolWindows)
         elif(eol == 1):
             self.setEolMode(self.EolUnix)
         else:
             self.setEolMode(self.EolMac)
+        if(config.whiteSpace()):
+            self.setWhitespaceVisibility(True)
             
         self.cursorPositionChanged.connect(self.parent.updateLine)
         #self.linesChanged.connect(self.changeMarginWidht())           
@@ -70,8 +88,11 @@ class Editor(QsciScintilla):
         #self.SendScintilla(QsciScintilla.SCI_MARKERSETBACK,11,QColor(220,220,220))
         self.setLanguage(nfile)
         self.setEditorStyle() #important must not change this position
+        self.setApi("emo")
+        
+    def setApi(self, text):
         self.api = QsciAPIs(self.lexer)
-        self.api.load(ospathjoin(apiDir,"emo.api"))
+        self.api.load(ospathjoin(apiDir,text+".api"))
         self.api.prepare()
         self.lexer.setAPIs(self.api) #Very important do not change line otherwise gg
         self.setLexer(self.lexer) #Very important do not change line otherwise gg
@@ -82,6 +103,7 @@ class Editor(QsciScintilla):
         
         
         
+        
     def setEditorStyle(self):
         ''' Bolldy some problem here the margin bg color is not set when init'ed '''
         ''' But when i change it in the styles menu it changes sad'''
@@ -89,20 +111,40 @@ class Editor(QsciScintilla):
         self.setCaretLineBackgroundColor(QColor(editStyle["caret"]))
         self.setMarginsBackgroundColor(QColor(editStyle["margin"]))
         self.setMarkerBackgroundColor(QColor(editStyle["marker"]),self.ARROW_MARKER_NUM)
-        if(self.lexer.language() == "Squirrel"):
-            #print "setting lexer color"
-            self.lexer.setColors()
+        self.lexer.setColors(editStyle)
         
     def setLanguage(self,nfile):
-        if nfile.endswith(".py"):
-            self.lexer = QsciLexerPython()
-        elif (nfile.endswith(".cpp") or nfile.endswith(".h") or nfile.endswith(".c") or nfile.endswith(".hpp")):
-             self.lexer = QsciLexerCPP()
-        elif nfile.endswith(".nut"):
-            self.lexer = QsciLexerSquirrel(self)
-        elif nfile.endswith(".neko"):
-            self.lexer = QsciLexerSquirrel(self)
+        ext = Format.get(nfile)
+        if ext == 0:
+           self.lexer = CPP(self)
+        elif ext == 1:
+             self.lexer = CSharp(self)    
+        elif ext == 2:
+            self.lexer = CSS(self)
+        elif ext == 3:
+            self.lexer = HTML(self)
+        elif ext == 4:
+            self.lexer = Java(self)
+        elif ext == 5:
+            self.lexer = JavaScript(self)
+        elif ext == 6:
+            self.lexer = Lua(self)
+        elif ext == 7:
+            self.lexer = Neko(self)
+        elif ext == 8:
+            self.lexer = Python(self)
+        elif ext == 9:
+            self.lexer = SQL(self)
+        elif ext == 10:
+            self.lexer = Squirrel(self)
+        elif ext == 11:
+            self.lexer = XML(self)
+        elif ext == 12:
+            self.lexer = YAML(self)
+        else:
+            self.lexer = Squirrel(self)
         self.lexer.setDefaultFont(self.font)
+        
                      
     def highlightWord(self, bool):
         if(bool):

@@ -1,10 +1,22 @@
 import yaml
-import os
 from PyQt4.QtGui import QMessageBox
+
+'''Cant call globals from here because of cyclic referencing'''
 class Config:
     def __init__(self):     
         self.configfile = 'config.yml'
-        self.data = yaml.load(open(self.configfile).read())
+        self.data = {}
+        try:
+            cfile = open(self.configfile)
+            self.data = yaml.load(cfile.read())
+            #print self.data
+        except:
+            QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile)
+            ''' This is default settings incase they loose their config file'''
+            self.data = {'ANT': ['android.bat update project -p', 'ant.bat debug -buildfile', 'ant.bat installd -buildfile', 'ant.bat debug install -buildfile', 'ant.bat clean -buildfile'], 'Style': {'caret': '#e8f2fe', 'comment': '#3f7f5f', 'string': '#7f0010', 'keyword': '#7f0055', 'back': '#ffffff', 'number': '#0e8bff', 'marker': '#ee1111', 'base': '#ffff00', 'operator': '#000000', 'margin': '#ece9d8'}, 'ClosedProject': [], 'CMD': ['CMD', 'PYTHON', 'ADB', 'G++', 'Make', 'SQ', 'JAVA', 'GCC'], 'PARAM': [], 'Project': [], 'Setting': {'fontname': 'Courier New', 'indent': 0, 'whitespace': 1, 'encoding': 1, 'iconsize': 16, 'tabwidth': 4, 'fontsize': 10, 'mode': 0, 'workspace': 'C:/CODE/', 'device': 1, 'toollabel': 0, 'margin': 1, 'thresh': 1}, 'ADB': ['C:/Android-Template/assets/main.nut /sdcard/', 'com.emo_framework.examples/com.emo_framework.EmoActivity', 'EmoFramework', 'com.emo_framework.examples'], 'File': [], 'TODO': [], 'Recent': []}
+        finally:
+            if(cfile != None):
+                cfile.close()
         
     def read(self,section):
         return self.data[section]
@@ -26,6 +38,11 @@ class Config:
     def workSpace(self):
         return self.readSetting("workspace")
     
+    def hide(self):
+        return self.readSetting("hide")
+    def setHide(self, val):
+        self.writeSetting('hide',val)
+        
     def encoding(self):
         return int(self.readSetting("encoding"))
     def setAscii(self):
@@ -146,4 +163,4 @@ class Config:
         try:
             yaml.dump(self.data,open(self.configfile,'w'),default_flow_style=False)
         except:
-            QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile) 
+            QMessageBox.about(self,"Can't Open","cannot open config file\n"+self.configfile)

@@ -2,10 +2,6 @@ from PyQt4.QtGui import (QWidget, QHBoxLayout, QPushButton, QColorDialog, QLabel
 from globals import config
 from PyQt4.QtCore import Qt, SIGNAL
 
-'''
-2 connections for btn one is to self set btnColor 
-another is to change config and lexer'''
-
 class StyleWidget(QWidget):
     def __init__(self,parent,text,color):
         QWidget.__init__(self, parent)
@@ -13,9 +9,6 @@ class StyleWidget(QWidget):
         self.hb = QHBoxLayout()
         self.color = color
         self.text = text
-        #self.hb.setMargin(8)
-        #self.hb.setSpacing(0)
-        #self.setStyleSheet(popbg)
         '''
         QLabel{
             /*background: qlineargradient(x1: 0, y1: 1, x2: 0.08, y2: 0.05,stop: 0.2 #e8f2fe, stop: 0.9 #d8f2dd);*/
@@ -61,9 +54,6 @@ class StyleWidget(QWidget):
     def setColor(self):
         colorDialog = QColorDialog(self)
         colorDialog.setOption(QColorDialog.ShowAlphaChannel)
-        #list = QColor().colorNames()
-        #for i in list:
-        #    print(i)
         self.color = colorDialog.getColor()
         self.color = self.color.name()
         self.label.setText(self.text+":"+self.color)

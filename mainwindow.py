@@ -90,7 +90,8 @@ class MainWindow(Window):
                     if(nfile in self.files):
                         self.files.remove(nfile)
                     config.setFile(self.files)
-                    QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile) 
+                    QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile)
+                    error("Opening: File Does Not Exist "+nfile) 
                     return False
                            
     def createTabs(self,links):
@@ -105,10 +106,10 @@ class MainWindow(Window):
             infile = open(nfile, 'r')
             tt = infile.read()
             if(config.encoding() == Encoding.UNICODE):
-                print("unicode")
-                text = unicode(tt,"utf-8")#must add utf-8 for it to work
+                #print("unicode")
+                text = tt.encode('utf-8')#unicode(tt,"utf-8")#must add utf-8 for it to work
             else:
-                print("ascii")
+                #print("ascii")
                 text = str(tt)
             self.files.append(nfile)
             config.setFile(self.files) 
@@ -118,6 +119,7 @@ class MainWindow(Window):
                 self.files.remove(nfile)
             config.setFile(self.files)
             QMessageBox.about(self,"Can't Open","File is Being Used\n"+nfile)
+            error("Opening: File is Being Used "+nfile)
             return False
         finally:
             if(infile != None):
@@ -142,6 +144,7 @@ class MainWindow(Window):
             return True
         else:
             QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile)
+            error("Opening: File Does Not Exist "+nfile)
             return False
         
     def openAudio(self,nfile):
@@ -151,6 +154,7 @@ class MainWindow(Window):
             return True
         else:
             QMessageBox.about(self,"Can't Open","File Does Not Exist\n"+nfile)
+            error("Opening: File Does Not Exist "+nfile)
             return False
             
     def closeTab(self,index):
@@ -230,6 +234,7 @@ class MainWindow(Window):
                     self.clearDirty(index)
                 except:
                     QMessageBox.about(self, "Can't Save","File is Locked")
+                    error("Saving:","File is Locked")
                 self.statusWriting()
                 self.progressStop()
                 self.parser.run(self.files[index])
@@ -257,6 +262,7 @@ class MainWindow(Window):
                     self.progressStop()
                 except:
                     QMessageBox.about(self, "Can't Save","File is Locked")
+                    error("Saving:","File is Locked "+fname)
         if(self.files != None):
             if len(self.files) != 0:
                 for file in self.files:
@@ -281,7 +287,5 @@ class MainWindow(Window):
                     return
             elif reply == QMessageBox.Yes:
                     self.fileSaveAll()
-        info("Exited --------------------------------------------------")
-        shutdown()
-        
+        shutdown()     
         sys.exit()

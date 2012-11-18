@@ -39,7 +39,6 @@ Plastique
 Cleanlooks
 '''
 def main():
-    info("Started -------------------------------------------------")
     splash = QSplashScreen(splash_pix, Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()

@@ -4,7 +4,7 @@ __license__ = "GPLv3"
 __copyright__ = 'Copyright (c) 2013, pyros2097'
 __credits__ = ['pyros2097', 'eclipse']
 __email__ = 'pyros2097@gmail.com'
-__version__ = "0.64"
+__version__ = "0.65"
 
 import os
 from platform import system,python_version
@@ -70,6 +70,7 @@ class Encoding:
     UNICODE = 1
     
 class Icons:
+    envvar = os_icon('auto_envvar')
     add = os_icon('auto_add')
     alert_obj = os_icon('alert_obj')
     anchor = os_icon('anchor')
@@ -132,6 +133,7 @@ class Icons:
     toc_open = os_icon('toc_open')
     trash = os_icon('trash')
     undo_edit = os_icon('undo_edit')
+    update = os_icon('update')
     warning = os_icon('warning')
     x = os_icon('x')
     zoomminus = os_icon('zoomminus')
