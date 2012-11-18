@@ -31,7 +31,7 @@ Check out [Emo](http://www.emo-framework.com)
 - Add iOS support  
 - Make Mac Build  
 - Squirrel Parser  
-- Cocos2dx Support 
+- Cocos2dx Support  
 - Must implement Lexer  
 - Must finish Eclipse Styles  
 - New Ideas  
