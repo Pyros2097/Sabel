@@ -1,4 +1,4 @@
-## Sabel v0.65
+## Sabel v0.67
 
 Sabel is an IDE for programming squirrel and EmoFramework.  
 Can be used to Create games for android and ios.  

@@ -1,4 +1,4 @@
-0.65
-Fixed Closed projects bug
-Fixed Unicode bug
-Fixed Autocomplete bug
+0.67
+Disabled Unicode Bug
+Sorry for the Problem 
+maybe fixed in Future

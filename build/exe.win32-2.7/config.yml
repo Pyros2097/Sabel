@@ -4,7 +4,7 @@ ADB:
 - EmoFramework
 - com.emo_framework.examples
 ANT:
-- android.bat update project -p
+- 'android.bat update project --target 10 -p '
 - ant.bat debug -buildfile
 - ant.bat installd -buildfile
 - ant.bat debug install -buildfile
@@ -19,29 +19,38 @@ CMD:
 - JAVA
 - GCC
 - MOON
+- COBRA
+- ' '
 ClosedProject:
 - 0
+- 0
 File:
-- C:/CODE/assets/common.nut
-- C:/gg.moon
-- C:/ooc/examples/opengl-tests/glut.ooc
-- C:/SkeletonCocos2dxApp/jni/Classes/HelloWorldBisScene.cpp
+- C:/CODE/cobraIDE/tool.cobra
+- C:/CODE/cobraIDE/explorer.cobra
+- C:/CODE/cobraIDE/editor.cobra
+- C:/CODE/cobraIDE/srcfiles.txt
+- C:/CODE/cobraIDE/note.cobra
 PARAM:
-- Dude C:/CODE/assets/creditscene.nut C:/CODE/assets/physics.nut
+- Dude C:/CODE/assets/creditscene.nut C:/CODE/assets/physics.nut C:/CODE/wxCobra/size.cobra
+  C:/CODE/cobraIDE/build.bat
 - C:/gg.moon
 - ' C:/gg.moon'
+- '- o butt.exe butt.c'
+- C:/butt.c -o C:/butt.exe
+- '  C:/CODE/wxCobra/simple_menu.cobra'
+- '  C:/CODE/cobraIDE/build.bat'
 Project:
-- C:/CODE/assets/
+- C:/CODE/cobraIDE/
 Recent: []
 Setting:
   api: emo
   device: 1
-  encoding: 1
+  encoding: 0
   fontname: Courier New
   fontsize: 10
   hide: 1
   iconsize: 16
-  indent: 0
+  indent: 1
   margin: 1
   mode: 2
   tabwidth: 4
@@ -51,13 +60,13 @@ Setting:
   workspace: C:/CODE/
 Style:
   back: '#ffffff'
-  base: '#1c0cff'
+  base: '#000000'
   caret: '#e8f2fe'
   comment: '#3f7f5f'
   keyword: '#7f0055'
   margin: '#ece9d8'
   marker: '#ee1111'
-  number: '#0e8bff'
+  number: '#ff0004'
   operator: '#000000'
   string: '#7f0010'
 TODO:

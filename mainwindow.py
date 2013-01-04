@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf8 -*- 
 from PyQt4.QtGui import (QApplication,QPixmap,QSplashScreen,QMessageBox,
                          QIcon,QAction,QCheckBox,QFileDialog)
 from PyQt4.QtCore import SIGNAL,Qt,QStringList,QString
@@ -9,6 +11,7 @@ from globals import (ospathsep,ospathjoin,ospathbasename,workDir,config,workSpac
                      iconSize,iconDir,ospathexists,os_icon, __version__)
 from globals import Encoding, error , info, debug, shutdown
 import sys
+import codecs
 
 class MainWindow(Window):
     def __init__(self, parent = None):
@@ -22,6 +25,7 @@ class MainWindow(Window):
         self.parser = Parser(self)
         self.command = Command(self)
         self.ant = Ant(self)
+        config.setAscii() #Added to reprimand Unicode
         self.updater = update.Updater(self)
         self.update()
         
@@ -44,7 +48,6 @@ class MainWindow(Window):
         self.connect(self.treeWidget,SIGNAL("buildRun"), lambda x:self.ant.buildRun(x))
         self.connect(self.treeWidget,SIGNAL("clean"), lambda x:self.ant.clean(x))
         self.connect(self.treeWidget,SIGNAL("run"), lambda x:self.ant.run(x))
-        #self.initInterpreter()
 
     def initConfig(self): 
         self.recent = config.recent()
@@ -66,13 +69,6 @@ class MainWindow(Window):
     def sendFile(self,item):
         if(item.isFile()):
             self.command.setCmdText("adb push "+item.getPath()+" /sdcard/")
-                
-    
-        
-    def initInterpreter(self):
-        self.ipy = PyInterp(self)
-        self.ipy.initInterpreter(locals())
-        self.outputTabWidget.addTab(self.ipy, "Python")
 
     '''Must go through this only'''
     def createTab(self,nfile):
@@ -102,18 +98,20 @@ class MainWindow(Window):
             
     def openEditor(self,nfile):
         text = ""
+        infile = open(nfile, 'r')
+        tt = infile.read()
         try:
-            infile = open(nfile, 'r')
-            tt = infile.read()
-            if(config.encoding() == Encoding.UNICODE):
-                #print("unicode")
-                text = tt.encode('utf-8')#unicode(tt,"utf-8")#must add utf-8 for it to work
-            else:
-                #print("ascii")
-                text = str(tt)
+            text = str(tt)
             self.files.append(nfile)
             config.setFile(self.files) 
             self.dirty.append(False)
+            tab = Editor(self,text,nfile) 
+            self.tabWidget.addTab(tab,ospathbasename(nfile))
+            #print len(self.files)
+            tab.textChanged.connect(lambda:self.setDirty(nfile))  
+            if(self.files != None):
+                if(len(self.files)) != 0:
+                    self.tabWidget.setCurrentIndex(len(self.files)-1)
         except:
             if(nfile in self.files):
                 self.files.remove(nfile)
@@ -123,14 +121,7 @@ class MainWindow(Window):
             return False
         finally:
             if(infile != None):
-                infile.close()
-                tab = Editor(self,text,nfile) 
-                self.tabWidget.addTab(tab,ospathbasename(nfile))
-                #print len(self.files)
-                tab.textChanged.connect(lambda:self.setDirty(nfile))  
-                if(self.files != None):
-                    if(len(self.files)) != 0:
-                        self.tabWidget.setCurrentIndex(len(self.files)-1)
+                infile.close() 
                 return True
             return False
                     #This line sets the opened file to display first Important not checked
@@ -224,8 +215,9 @@ class MainWindow(Window):
                     self.statusSaving()
                     self.progressStart()
                     if(config.encoding() == Encoding.UNICODE):
-                        tempText = unicode(self.tabWidget.widget(index).text())
-                        fl.write(tempText.encode("utf-8"))
+                        tempText = str(self.tabWidget.widget(index).text())
+                        #tempText = codecs.encode(tempText,"utf-8")
+                        fl.write(tempText)
                         fl.close()
                     else:
                         tempText = str(self.tabWidget.widget(index).text())
@@ -250,8 +242,8 @@ class MainWindow(Window):
                     self.statusSaving()
                     self.progressStart()
                     if(config.encoding() == Encoding.UNICODE):
-                        tempText = unicode(self.tabWidget.widget(index).text())
-                        fl.write(tempText.encode("utf-8"))
+                        tempText = str(self.tabWidget.widget(index).text())
+                        #fl.write(tempText.encode("utf-8"))
                         fl.close()
                     else:
                         tempText = str(self.tabWidget.widget(index).text())

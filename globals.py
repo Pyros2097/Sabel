@@ -4,7 +4,7 @@ __license__ = "GPLv3"
 __copyright__ = 'Copyright (c) 2013, pyros2097'
 __credits__ = ['pyros2097', 'eclipse']
 __email__ = 'pyros2097@gmail.com'
-__version__ = "0.65"
+__version__ = "0.67"
 
 import os
 from platform import system,python_version

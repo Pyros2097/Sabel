@@ -221,7 +221,7 @@ class Tool(QToolBar):
         action_Ascii = QAction("Ascii",encodingGroup)
         action_Ascii.setCheckable(True)
         action_Unicode = QAction("Unicode",encodingGroup)
-        action_Unicode.setCheckable(True)
+        action_Unicode.setCheckable(False)
         encodingGroup.addAction(action_Ascii)
         encodingGroup.addAction(action_Unicode)
         encodingGroup.selected.connect(self.parent.setEncoding)

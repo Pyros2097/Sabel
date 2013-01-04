@@ -1,15 +1,26 @@
-2012-11-04 16:45:42,015 INFO Started -------------------------------------------------
-2012-11-04 16:47:04,937 INFO Started -------------------------------------------------
-2012-11-04 16:49:20,765 INFO Started -------------------------------------------------
-2012-11-04 16:50:26,108 INFO Exited --------------------------------------------------
-2012-11-07 10:56:00,092 INFO Started -------------------------------------------------
-2012-11-07 11:25:46,812 INFO Exited --------------------------------------------------
-2012-11-09 14:51:39,703 INFO Started -------------------------------------------------
-2012-11-09 14:57:57,250 INFO Exited --------------------------------------------------
-2012-11-10 07:12:51,421 INFO Started -------------------------------------------------
-2012-11-10 07:15:56,717 INFO Exited --------------------------------------------------
-2012-11-12 16:18:00,265 INFO Started -------------------------------------------------
-2012-11-12 17:43:59,421 ERROR Opening: File Does Not Exist C:/Documents and Settings/Administrator/Desktop/OCC/ooc/INSTALL
-2012-11-12 17:43:59,921 ERROR Opening: File Does Not Exist C:/ooc/bin/example1.ooc
-2012-11-12 17:45:41,717 ERROR Opening: File is Being Used C:/emo-framework-experiment/Emo-Android/jni/sqlite/sqlite3.c
-2012-11-12 17:45:47,342 ERROR Opening: File is Being Used C:/emo-framework-experiment/Emo-Android/jni/sqlite/sqlite3.c
+2012-11-20 14:05:43,390 ERROR Opening: File is Being Used C:/CODE/assets/common.nut
+2012-11-20 14:06:02,483 ERROR Opening: File is Being Used C:/CODE/assets/logoscene.nut
+2012-11-20 14:32:19,640 ERROR Update: Net Connection Not Found
+2012-11-20 14:32:52,717 ERROR Update: Net Connection Not Found
+2012-11-20 14:34:17,796 ERROR Update: Net Connection Not Found
+2012-11-20 14:34:58,233 ERROR Update: Net Connection Not Found
+2012-11-20 14:36:38,655 ERROR Update: Net Connection Not Found
+2012-11-21 06:31:04,905 ERROR Update: Net Connection Not Found
+2012-11-21 06:31:34,858 ERROR Update: Net Connection Not Found
+2012-11-22 16:14:16,671 ERROR Update: Net Connection Not Found
+2012-11-22 16:23:42,750 ERROR Update: Net Connection Not Found
+2012-11-23 15:42:44,905 ERROR Update: Net Connection Not Found
+2012-11-26 15:54:13,812 ERROR Update: Net Connection Not Found
+2012-11-27 16:31:34,390 ERROR Update: Cant Read repository Retry
+2012-11-28 17:27:17,062 ERROR Update: Net Connection Not Found
+2012-11-28 17:37:00,342 ERROR Update: Net Connection Not Found
+2012-11-29 16:29:37,562 ERROR Update: Net Connection Not Found
+2012-11-29 18:16:49,546 ERROR Update: Net Connection Not Found
+2012-11-29 18:35:17,562 ERROR Update: Net Connection Not Found
+2012-12-05 06:37:34,453 ERROR Opening: File Does Not Exist C:/MonoDevelop/AddIns/MonoDevelop.CobraBinding/README.md
+2012-12-20 10:18:51,983 ERROR Opening: File Does Not Exist C:/C# mono/xna.cobra
+2012-12-26 07:06:24,250 ERROR Update: Net Connection Not Found
+2012-12-29 14:36:28,483 ERROR Update: Net Connection Not Found
+2012-12-30 06:29:58,875 ERROR Opening: File Does Not Exist C:/CODE/chibiIDE/config.cobra
+2013-01-03 08:32:53,608 ERROR Opening: File Does Not Exist C:/tree.cs
+2013-01-04 10:26:10,217 ERROR Opening: File Does Not Exist C:/CODE/cobraIDE/cobraIDE.cobra
